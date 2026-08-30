@@ -39,6 +39,10 @@ border-bottom:1px dotted var(--lynn-blue);}
 .act:hover{color:var(--lynn-dark);}
 .act.quiz{color:#2d7d46;border-color:#2d7d46;}
 .anote{font-size:.75em;color:#8b949e;font-style:italic;}
+.subs{display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 2px;}
+.sub{font-size:.8em;font-weight:600;color:#fff;background:var(--lynn);border-radius:9px;
+padding:3px 11px;text-decoration:none;}
+.sub:hover{background:var(--lynn-dark);}
 .edges{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
 .edge{font-size:.72em;color:#5a6270;background:var(--gray-50);border:1px solid var(--gray-200);
 border-radius:9px;padding:1px 8px;text-decoration:none;}
@@ -66,11 +70,11 @@ material — everything else stands on it.</p>
 </div><div class="node" id="n-prob">
 <div class="nhead"><span class="day">Reviewed W1 Mon</span><h3>Probability</h3><span class="slo">SLO 7.2</span></div>
 <div class="acts"><a class="act" target="_blank" href="BUS322_G_Stats_Review.html#mod-06">read the review section</a><a class="act quiz" target="_blank" href="https://ironplanet.github.io/stats-practice/#topic=t03">practice quiz</a></div>
-<div class="edges"><a class="edge e-leads-to" href="#n-dist">leads to → Distributions</a><a class="edge e-prerequisite" href="#n-risk">needs → Risk Modeling & Expected Value</a><a class="edge e-prerequisite" href="#n-sens">needs → Sensitivity & Specificity</a></div>
+<div class="edges"><a class="edge e-leads-to" href="#n-dist">leads to → Distributions — the deep-dive suite</a><a class="edge e-prerequisite" href="#n-risk">needs → Risk Modeling & Expected Value</a><a class="edge e-prerequisite" href="#n-sens">needs → Sensitivity & Specificity</a></div>
 </div><div class="node" id="n-dist">
-<div class="nhead"><span class="day">Reviewed W1 Mon</span><h3>Distributions</h3><span class="slo">SLO 7.2</span></div>
+<div class="nhead"><span class="day">Reviewed W1 Mon</span><h3>Distributions — the deep-dive suite</h3><span class="slo">SLO 7.2</span></div>
 <div class="acts"><a class="act" target="_blank" href="concepts/dist_chooser.html">open the concept page</a><a class="act quiz" target="_blank" href="https://ironplanet.github.io/stats-practice/#topic=t10">practice quiz</a></div>
-<div class="edges"><a class="edge e-leads-to" href="#n-samp">leads to → Sampling & Sample Distributions</a><a class="edge e-prerequisite" href="#n-norm">needs → Normality Testing & Test Selection</a></div>
+<div class="subs"><a class="sub" target="_blank" href="concepts/dist_chooser.html">🧭 Chooser</a><a class="sub" target="_blank" href="concepts/dist_normal.html">Normal</a><a class="sub" target="_blank" href="concepts/dist_poisson.html">Poisson</a><a class="sub" target="_blank" href="concepts/dist_binomial.html">Binomial</a><a class="sub" target="_blank" href="concepts/dist_t.html">t</a><a class="sub" target="_blank" href="concepts/dist_exponential.html">Exponential</a><a class="sub" target="_blank" href="concepts/dist_referees.html">χ² & F (the referees)</a></div><div class="edges"><a class="edge e-leads-to" href="#n-samp">leads to → Sampling & Sample Distributions</a><a class="edge e-prerequisite" href="#n-norm">needs → Normality Testing & Test Selection</a></div>
 </div></details><details class="branch b-wk1"><summary><b>Week 1 — Frame the Problem</b><span class="blurb">Workflows, clean data, and how samples speak for populations.</span><span class="bn">3</span></summary><div class="node" id="n-dddm">
 <div class="nhead"><span class="day">W1 Tue</span><h3>Decision Workflows (DDDM)</h3><span class="slo">SLO 7.1</span></div>
 <div class="acts"><a class="act" target="_blank" href="BUS322_G_Stats_Review.html#mod-05">read the review section</a><a class="act quiz" target="_blank" href="https://ironplanet.github.io/stats-practice/#topic=t11">practice quiz</a><span class="anote">closest current material — DDDM page coming</span></div>
@@ -102,7 +106,7 @@ material — everything else stands on it.</p>
 </div></details><details class="branch b-wk3"><summary><b>Week 3 — Test Claims</b><span class="blurb">Choosing the right test and defending a conclusion.</span><span class="bn">4</span></summary><div class="node" id="n-norm">
 <div class="nhead"><span class="day">W3 Mon</span><h3>Normality Testing & Test Selection</h3><span class="slo">SLO 7.3</span></div>
 <div class="acts"><a class="act" target="_blank" href="BUS322_G_Stats_Review.html#mod-07">read the review section</a><a class="act quiz" target="_blank" href="https://ironplanet.github.io/stats-practice/#topic=t10">practice quiz</a><span class="anote">closest current material — Test-Selection page coming</span></div>
-<div class="edges"><a class="edge e-leads-to" href="#n-hyp">leads to → Hypothesis Testing</a><a class="edge e-related" href="#n-nonpar">related → Non-Parametric Methods</a><a class="edge e-prerequisite" href="#n-dist">builds on ← Distributions</a></div>
+<div class="subs"><a class="sub" target="_blank" href="concepts/dist_chooser.html">🧭 Distribution chooser</a><a class="sub" target="_blank" href="concepts/dist_referees.html">χ² & F (the referees)</a></div><div class="edges"><a class="edge e-leads-to" href="#n-hyp">leads to → Hypothesis Testing</a><a class="edge e-related" href="#n-nonpar">related → Non-Parametric Methods</a><a class="edge e-prerequisite" href="#n-dist">builds on ← Distributions — the deep-dive suite</a></div>
 </div><div class="node" id="n-hyp">
 <div class="nhead"><span class="day">W3 Tue</span><h3>Hypothesis Testing</h3><span class="slo">SLO 7.3</span></div>
 <div class="acts"><a class="act" target="_blank" href="BUS322_G_Stats_Review.html#mod-09">read the review section</a><a class="act quiz" target="_blank" href="https://ironplanet.github.io/stats-practice/#topic=t04">practice quiz</a></div>
