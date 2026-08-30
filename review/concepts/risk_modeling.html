@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>BUS 322 — Risk Modeling & Expected Value</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--lynn:#003DA5;--lynnd:#002a73;--lynnl:#e8f0fa;--accent:#ffba08;
+--g50:#f8f9fb;--g200:#e1e4e8;--g800:#24292f;--good:#2d7d46;--text:#1a1f27;}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+color:var(--text);background:var(--g50);margin:0;line-height:1.6}
+.wrap{max-width:840px;margin:0 auto;padding:0 16px 64px}
+.hero{background:linear-gradient(135deg,var(--lynn),var(--lynnd));color:#fff;
+padding:30px 26px;border-radius:0 0 14px 14px;margin-bottom:8px}
+.hero h1{margin:0 0 4px;font-size:1.6em}
+.hero .crumb{font-size:.85em}.hero .crumb a{color:var(--accent);text-decoration:none}
+.hero p{margin:6px 0 0;color:rgba(255,255,255,.88);font-size:.95em;max-width:44rem}
+h2{color:var(--lynnd);font-size:1.25em;margin:34px 0 10px;border-bottom:2px solid var(--lynnl);padding-bottom:4px}
+.story{background:#fff;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;
+padding:14px 18px;margin:10px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.story p{margin:8px 0}
+.eq{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:18px;
+margin:12px 0;text-align:center;font-size:1.25em;overflow-x:auto}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center}
+.eq .frac span{display:block;padding:0 6px}
+.eq .frac span:first-child{border-bottom:1.5px solid var(--text)}
+.eq sup,.eq sub{font-size:.68em}
+.vars{background:var(--lynnl);border-radius:10px;padding:12px 18px;margin:10px 0;font-size:.94em}
+.vars b{color:var(--lynnd)}
+.sig{background:#fff;border:1px dashed var(--good);border-radius:10px;padding:10px 16px;
+margin:10px 0;font-size:.95em}
+.sig b{color:var(--good)}
+.panel{background:#fff;border:1px solid var(--g200);border-radius:12px;padding:16px;margin:12px 0}
+canvas{width:100%;height:auto;display:block}
+.controls{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0;font-size:.9em}
+.controls label{display:flex;flex-direction:column;gap:2px;min-width:150px;flex:1}
+.controls input[type=range]{accent-color:var(--lynn)}
+.livebox{background:var(--g800);color:#7ee787;font-family:ui-monospace,Consolas,monospace;
+border-radius:8px;padding:10px 14px;margin-top:8px;font-size:.95em;overflow-x:auto}
+.livebox .lab{color:#8b949e}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:.92em;background:#fff}
+th{background:var(--lynnl);color:var(--lynnd);text-align:left;padding:7px 10px;border:1px solid var(--g200)}
+td{padding:7px 10px;border:1px solid var(--g200)}
+td code,li code,p code{background:var(--lynnl);padding:1px 6px;border-radius:5px;
+font-family:ui-monospace,Consolas,monospace;font-size:.92em}
+.ans{color:var(--good);font-weight:700;font-family:ui-monospace,Consolas,monospace}
+.tip{background:var(--lynnl);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:.92em}
+.nav2{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.nav2 a{color:var(--lynn);text-decoration:none;font-weight:600;font-size:.9em;
+border:1px solid var(--g200);background:#fff;border-radius:9px;padding:7px 13px}
+.nav2 a:hover{border-color:var(--lynn)}
+.fitnote{font-size:.9em;color:#5a6270;margin-top:6px}
+
+.qcard{border-top:1px solid var(--g200);padding:12px 4px}
+.qcard:first-child{border-top:none}
+.qs{margin:4px 0 8px}
+.qopts{display:grid;gap:6px}
+.qopt{text-align:left;background:var(--g50);border:1px solid var(--g200);border-radius:8px;
+padding:8px 12px;font-size:.92em;cursor:pointer;font-family:inherit}
+.qopt:hover{border-color:var(--lynn)}
+.qopt.right{background:#e7f3ea;border-color:var(--good);font-weight:600}
+.qopt.wrong{background:#fdeceb;border-color:#dc2f02}
+.qwhy{display:none;background:var(--lynnl);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:.88em}
+.qwhy.show{display:block}
+</style></head><body>
+<div class="hero"><div class="wrap" style="padding:0">
+<div class="crumb"><a href="../BUS322_A_Review_Hub.html">← Review Hub</a> · Week 2 · Thursday</div>
+<h1>Risk Modeling & Expected Value</h1><p>Wald's bombers, von Neumann's games, Raiffa's tables — refusing to pretend there's only one future, and pricing the ones there are.</p></div></div>
+<div class="wrap">
+
+<h2>1 · Where it came from</h2>
+<div class="story">
+<p>WWII. The US military studied bullet holes on bombers returning from missions — dense
+clusters on fuselage, wings, tail — and planned to armor those spots. <b>Abraham Wald</b>,
+a Hungarian mathematician at Columbia&rsquo;s Statistical Research Group, said the opposite:
+<b>armor where there are NO holes</b> — engines, cockpit, fuel. The planes hit there never
+came back to be counted. That&rsquo;s <b>survivorship bias</b>: the data you can&rsquo;t see is
+often more important than the data you can. (Every &ldquo;here&rsquo;s what successful
+companies did&rdquo; article makes the military&rsquo;s mistake.)</p>
+<p>The same war produced the toolkit: <b>von Neumann &amp; Morgenstern&rsquo;s</b> 1944
+<em>Theory of Games and Economic Behavior</em> gave decisions-under-uncertainty their
+mathematics, and <b>Howard Raiffa</b> carried it into business schools — payoff tables,
+decision trees, and the discipline of pricing futures you can&rsquo;t predict.</p>
+</div>
+
+<h2>2 · The mathematics</h2>
+<div class="eq">EMV(decision) &nbsp;=&nbsp; Σ&nbsp; p<sub>j</sub> · V<sub>j</sub></div>
+<div class="vars"><b>p<sub>j</sub></b> — probability of state-of-the-world j (must sum to 1) ·
+<b>V<sub>j</sub></b> — the payoff of this decision if state j happens ·
+read it as: <em>&ldquo;if I made this call 1,000 times, what would I average?&rdquo;</em></div>
+<div class="sig"><b>Three readings of one payoff table:</b>
+<b>EMV</b> — weight by probabilities, pick the highest (the repeat-player&rsquo;s rule) ·
+<b>Maximin</b> — compare worst cases, protect the downside (the survival rule) ·
+<b>Maximax</b> — compare best cases (the optimist&rsquo;s rule). They disagree exactly when
+the decision is genuinely hard — and the disagreement is information.</div>
+<div class="sig"><b>EVPI</b> — the Expected Value of Perfect Information: what a crystal ball
+would be worth. It caps what you should ever pay for research, forecasts, or consultants.</div>
+
+<h2>3 · The payoff laboratory — drag the probabilities</h2>
+<div class="panel">
+<div class="controls">
+<label>P(hot market) = <b id="rph">0.30</b><input type="range" id="rphs" min="0" max="1" step="0.05" value="0.3"></label>
+<label>P(warm) = <b id="rpw">0.50</b><input type="range" id="rpws" min="0" max="1" step="0.05" value="0.5"></label>
+<span style="font-size:.85em;align-self:center">P(cold) = <b id="rpc">0.20</b> (auto: 1 − hot − warm)</span>
+</div>
+<table>
+<tr><th></th><th>Hot</th><th>Warm</th><th>Cold</th><th>EMV</th><th>worst case</th></tr>
+<tr><td><b>Expand big</b></td><td>+$60k</td><td>+$40k</td><td>−$20k</td><td class="ans" id="re1">34.0</td><td>−$20k</td></tr>
+<tr><td><b>Expand small</b></td><td>+$30k</td><td>+$25k</td><td>+$10k</td><td class="ans" id="re2">23.5</td><td>+$10k</td></tr>
+<tr><td><b>Don&rsquo;t expand</b></td><td>$0</td><td>$0</td><td>$0</td><td class="ans" id="re3">0.0</td><td>$0</td></tr>
+</table>
+<div class="livebox"><span class="lab">EMV winner: </span><b id="rwin">Expand big</b>
+<span class="lab"> · maximin winner: </span><b>Expand small (worst case +10)</b>
+<span class="lab"> · agreement: </span><b id="ragree">NO — risk attitude decides</b></div>
+<div class="fitnote">Drag P(hot) down and find the flip point where the EMV winner changes.
+If a 10-point probability shift flips the recommendation — say that out loud in the memo.
+That&rsquo;s sensitivity analysis, and it&rsquo;s the honest analyst&rsquo;s signature.</div>
+</div>
+
+<h2>4 · Excel — run it in class</h2>
+<p><b>Scenario (Brightline-Boca / Cheeca style):</b> probabilities in B1:D1 (0.3, 0.5, 0.2);
+payoffs for the three options in rows 2–4:</p>
+<table>
+<tr><th>cell</th><th>type this</th><th>meaning</th><th>you should see</th></tr>
+<tr><td>B1:D1</td><td><code>0.3, 0.5, 0.2</code></td><td>state probabilities (check: <code>=SUM(B1:D1)</code> = 1)</td><td>1</td></tr>
+<tr><td>B2:D2</td><td><code>60, 40, -20</code></td><td>Expand big payoffs ($k)</td><td>—</td></tr>
+<tr><td>B3:D3</td><td><code>30, 25, 10</code></td><td>Expand small</td><td>—</td></tr>
+<tr><td>B4:D4</td><td><code>0, 0, 0</code></td><td>Don&rsquo;t expand</td><td>—</td></tr>
+<tr><td>F2</td><td><code>=SUMPRODUCT($B$1:$D$1,B2:D2)</code> (fill down)</td><td>EMV per option</td><td class="ans">34 · 23.5 · 0</td></tr>
+<tr><td>G2</td><td><code>=MIN(B2:D2)</code> (fill down)</td><td>worst case per option</td><td class="ans">−20 · 10 · 0</td></tr>
+<tr><td>B6:D6</td><td><code>=MAX(B2:B4)</code> (fill right)</td><td>best payoff per state — the crystal-ball row</td><td class="ans">60 · 40 · 10</td></tr>
+<tr><td>F6</td><td><code>=SUMPRODUCT(B1:D1,B6:D6)</code></td><td>EV with perfect information</td><td class="ans">40</td></tr>
+<tr><td>F7</td><td><code>=F6-MAX(F2:F4)</code></td><td>EVPI — the crystal-ball cap</td><td class="ans">6</td></tr>
+</table>
+<div class="tip"><b>The class argument this table starts:</b> EMV says Expand big (34) —
+but its worst case is −20, while Expand small never loses. A repeat-player chain takes the
+34; a founder whose company dies at −20 takes the 23.5. <em>The analyst presents EMV AND
+the spread AND the worst case; the decision-maker chooses the appetite.</em></div>
+<div class="tip"><b>EVPI read:</b> a perfect forecast is worth 40 − 34 = $6k. Any consultant
+charging more than $6k for market certainty is charging more than certainty is worth.</div>
+
+<h2>5 · When to reach for it — and when not</h2>
+<table>
+<tr><th>Model the risk when…</th><th>Hold off when…</th></tr>
+<tr><td>Outcomes and rough probabilities can be listed (repeatable decisions: pricing, stocking, insuring)</td>
+<td>Probabilities are pure invention — garbage p&rsquo;s make confident garbage EMVs</td></tr>
+<tr><td>The decision recurs — long-run averaging applies</td><td>One-shot, bet-the-company calls — survival beats averages; weight maximin</td></tr>
+<tr><td>You&rsquo;ll show sensitivity (flip points) alongside the answer</td><td>The table is being used to END an argument instead of INFORM it</td></tr>
+</table>
+<h2>✅ Self-check — no internet needed</h2><div class="panel"><div class="qcard"><p class="qs"><b>Q1.</b> Option A: EMV $34k, worst case −$20k. Option B: EMV $23.5k, worst case +$10k. A cash-strapped startup should notice that:</p><div class="qopts"><button class="qopt" data-q="0" data-ok="1">A. EMV assumes repeat play — a one-shot player who can't survive −20 may rationally take B</button><button class="qopt" data-q="0" data-ok="0">B. A is simply correct — EMV is higher</button><button class="qopt" data-q="0" data-ok="0">C. B is simply correct — never accept a possible loss</button><button class="qopt" data-q="0" data-ok="0">D. The options are equivalent</button></div><div class="qwhy" id="qwhy0">EMV is a long-run average; a player who can't survive the worst case can't reach the long run. Risk attitude is a business judgment, not math.</div></div><div class="qcard"><p class="qs"><b>Q2.</b> Perfect information is worth EV-with-crystal-ball ($40k) minus best EMV ($34k) = $6k. A $15k market study promising certainty is:</p><div class="qopts"><button class="qopt" data-q="1" data-ok="1">A. Overpriced — it costs more than perfect information is worth</button><button class="qopt" data-q="1" data-ok="0">B. A bargain — information is priceless</button><button class="qopt" data-q="1" data-ok="0">C. Worth it if the consultants are good</button><button class="qopt" data-q="1" data-ok="0">D. Impossible to evaluate</button></div><div class="qwhy" id="qwhy1">EVPI caps what ANY information can be worth; $15k > $6k fails the cap before you even ask how good the study is.</div></div><div class="qcard"><p class="qs"><b>Q3.</b> Studying only successful franchise owners to learn 'what works' repeats which famous error?</p><div class="qopts"><button class="qopt" data-q="2" data-ok="1">A. Wald's bombers — survivorship bias: the failures aren't in your dataset</button><button class="qopt" data-q="2" data-ok="0">B. Anscombe's quartet</button><button class="qopt" data-q="2" data-ok="0">C. The gambler's fallacy</button><button class="qopt" data-q="2" data-ok="0">D. Truncating the y-axis</button></div><div class="qwhy" id="qwhy2">The owners who did the same things and failed are the planes that didn't come back — invisible, and decisive.</div></div></div><p class="fitnote">These questions are new (pending Prof. review for the class bank).</p>
+<div class="nav2">
+<a href="../BUS322_A_Review_Hub.html">🗺 Review Hub</a>
+<a href="eda.html">EDA</a><a href="data_mining.html">Data Mining</a>
+<a href="data_visualization.html">Data Viz</a><a href="risk_modeling.html">Risk & EV</a>
+<a href="dist_chooser.html">🧭 Distribution chooser</a>
+</div></div>
+<script>
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+return s*y}
+function nCdf(x,m,s){return 0.5*(1+erf((x-m)/(s*Math.SQRT2)))}
+function nPdf(x,m,s){return Math.exp(-0.5*((x-m)/s)**2)/(s*Math.sqrt(2*Math.PI))}
+function lgamma(z){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,
+-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let x=z,y=z,
+tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015;
+for(let j=0;j<6;j++){ser+=c[j]/++y}return -tmp+Math.log(2.5066282746310005*ser/x)}
+function poisPmf(k,l){return Math.exp(-l+k*Math.log(l)-lgamma(k+1))}
+function poisCdf(k,l){let s=0;for(let i=0;i<=k;i++)s+=poisPmf(i,l);return s}
+function binomPmf(k,n,p){if(k<0||k>n)return 0;
+return Math.exp(lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p))}
+function binomCdf(k,n,p){let s=0;for(let i=0;i<=k;i++)s+=binomPmf(i,n,p);return s}
+function drawAxes(ctx,W,H,pad){ctx.strokeStyle="#8b949e";ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(pad,8);ctx.lineTo(pad,H-pad);ctx.lineTo(W-8,H-pad);ctx.stroke()}
+
+function updR(){
+ let ph=+rphs.value, pw=+rpws.value;
+ if(ph+pw>1){pw=Math.max(0,1-ph);rpws.value=pw}
+ const pc=Math.max(0,1-ph-pw);
+ rph.textContent=ph.toFixed(2);rpw.textContent=pw.toFixed(2);rpc.textContent=pc.toFixed(2);
+ const e1=60*ph+40*pw-20*pc, e2=30*ph+25*pw+10*pc, e3=0;
+ re1.textContent=e1.toFixed(1);re2.textContent=e2.toFixed(1);re3.textContent=e3.toFixed(1);
+ const w=e1>=e2&&e1>=e3?"Expand big":(e2>=e3?"Expand small":"Don't expand");
+ rwin.textContent=w;
+ ragree.textContent=(w==="Expand small")?"YES — both rules agree":"NO — risk attitude decides";
+ ragree.style.color=(w==="Expand small")?"#7ee787":"#e3b341";
+}
+[rphs,rpws].forEach(e=>e.addEventListener("input",updR));updR();
+
+document.querySelectorAll(".qopt").forEach(b=>b.addEventListener("click",()=>{
+ const q=b.dataset.q;
+ b.parentElement.querySelectorAll(".qopt").forEach(o=>{
+  o.classList.remove("right","wrong");
+  if(o.dataset.ok==="1")o.classList.add("right")});
+ if(b.dataset.ok!=="1")b.classList.add("wrong");
+ document.getElementById("qwhy"+q).classList.add("show")}));
+</script>
+</body></html>
