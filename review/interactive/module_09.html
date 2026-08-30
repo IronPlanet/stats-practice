@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 9: Hypothesis Testing — BUS 322</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<style>
+  :root {
+    --lynn-blue: #003DA5;
+    --lynn-blue-light: #E8F0FE;
+    --lynn-gray: #B1B3B3;
+    --green: #4CAF50;
+    --red: #D32F2F;
+    --amber: #FFA726;
+    --text-dark: #1A1A2E;
+    --text-body: #333;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', 'Liberation Sans', Arial, sans-serif; color: var(--text-body); background: #fafafa; }
+  header { background: var(--lynn-blue); color: white; padding: 1.5rem 2rem; }
+  header h1 { font-size: 1.8rem; font-weight: 700; }
+  header p { opacity: 0.85; margin-top: 0.3rem; }
+  .tabs { display: flex; background: #f0f0f0; border-bottom: 2px solid var(--lynn-blue); overflow-x: auto; }
+  .tab { padding: 0.8rem 1.5rem; cursor: pointer; font-weight: 600; border: none; background: none; color: #666; white-space: nowrap; }
+  .tab.active { color: var(--lynn-blue); border-bottom: 3px solid var(--lynn-blue); background: white; }
+  .tab:hover { background: #e8e8e8; }
+  .panel { display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+  .panel.active { display: block; }
+  h2 { color: var(--lynn-blue); margin: 1.5rem 0 0.8rem; font-size: 1.4rem; }
+  h3 { color: var(--lynn-blue); margin: 1rem 0 0.5rem; font-size: 1.15rem; }
+  p, li { line-height: 1.65; margin-bottom: 0.5rem; }
+  .card { background: white; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  .card.blue { border-left: 4px solid var(--lynn-blue); }
+  .card.green { border-left: 4px solid var(--green); }
+  .card.red { border-left: 4px solid var(--red); }
+  .card.amber { border-left: 4px solid var(--amber); }
+  .formula { font-family: 'Consolas', 'DejaVu Sans Mono', monospace; background: var(--lynn-blue-light); padding: 0.3rem 0.6rem; border-radius: 4px; color: var(--lynn-blue); font-weight: 600; }
+  .excel-ref { font-family: 'Consolas', monospace; color: var(--lynn-blue); font-size: 0.95rem; }
+  .matrix-table { border-collapse: collapse; margin: 1rem 0; }
+  .matrix-table th, .matrix-table td { border: 2px solid #ccc; padding: 0.8rem 1.2rem; text-align: center; font-size: 1.1rem; min-width: 80px; }
+  .matrix-table th { background: var(--lynn-blue); color: white; }
+  .tp { background: #c8e6c9; font-weight: 700; }
+  .fp { background: #ffcdd2; font-weight: 700; }
+  .fn { background: #ffe0b2; font-weight: 700; }
+  .tn { background: #bbdefb; font-weight: 700; }
+  .slider-group { margin: 1rem 0; }
+  .slider-group label { font-weight: 600; display: block; margin-bottom: 0.3rem; }
+  .slider-group input[type=range] { width: 100%; max-width: 500px; }
+  .slider-val { font-weight: 700; color: var(--lynn-blue); font-size: 1.2rem; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .metric-box { background: white; border: 2px solid #e0e0e0; border-radius: 8px; padding: 1rem; text-align: center; }
+  .metric-box .label { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-box .value { font-size: 1.8rem; font-weight: 700; color: var(--lynn-blue); }
+  .metric-box .sub { font-size: 0.8rem; color: #999; }
+  .excel-toolkit { background: var(--lynn-blue-light); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
+  .excel-toolkit h3 { margin-top: 0; }
+  .excel-toolkit code { display: block; margin: 0.3rem 0; font-size: 0.95rem; }
+  .quiz-btn { background: var(--lynn-blue); color: white; border: none; padding: 0.8rem 2rem; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600; }
+  .quiz-btn:hover { background: #002a7a; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+  footer { text-align: center; padding: 2rem; color: #999; font-size: 0.85rem; border-top: 1px solid #eee; margin-top: 3rem; }
+
+  /* Flowchart styling */
+  .flowchart { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; margin: 1.5rem 0; }
+  .flow-box { padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; text-align: center; max-width: 400px; }
+  .flow-box.question { background: var(--lynn-blue-light); border: 2px solid var(--lynn-blue); color: var(--lynn-blue); border-radius: 20px; }
+  .flow-box.answer { background: white; border: 2px solid var(--lynn-gray); }
+  .flow-arrow { font-size: 1.5rem; color: var(--lynn-blue); }
+  .flow-branch { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+  .flow-branch .flow-box { flex: 1; min-width: 180px; }
+
+  /* Decision highlight */
+  .decision-reject { background: #ffebee; border: 2px solid var(--red); border-radius: 8px; padding: 1rem; text-align: center; }
+  .decision-fail { background: #e8f5e9; border: 2px solid var(--green); border-radius: 8px; padding: 1rem; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Module 9: Hypothesis Testing</h1>
+  <p>BUS 322 — Business Intelligence & Data Analytics | Lynn University</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showPanel('theory')">Theory</button>
+  <button class="tab" onclick="showPanel('pvalue')">P-Value Explorer</button>
+  <button class="tab" onclick="showPanel('errors')">Type I/II Tradeoff</button>
+  <button class="tab" onclick="showPanel('excel')">Excel Toolkit</button>
+  <button class="tab" onclick="showPanel('quiz')">SpotCheck Quiz</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- THEORY PANEL -->
+<!-- ============================================================ -->
+<div id="theory" class="panel active">
+  <h2>Hypotheses: H0 vs H1</h2>
+  <div class="two-col">
+    <div class="card blue">
+      <h3>H0 — The Null Hypothesis</h3>
+      <p>"Nothing has changed. The status quo holds."</p>
+      <p>H0 is what we <strong>assume is true</strong> until the data convinces us otherwise. It always contains an equality (=, &le;, or &ge;).</p>
+      <p><strong>AIOS Example:</strong> "The mean GPU spot price is <strong>equal to</strong> $2.50/hr." We assume the current pricing model is correct.</p>
+    </div>
+    <div class="card green">
+      <h3>H1 — The Alternative Hypothesis</h3>
+      <p>"Something is different. There is an effect."</p>
+      <p>H1 is the <strong>claim we're testing</strong> — the research question. It's what we need evidence to support.</p>
+      <p><strong>AIOS Example:</strong> "The mean GPU spot price is <strong>not equal to</strong> $2.50/hr." We suspect pricing has shifted.</p>
+    </div>
+  </div>
+
+  <div class="card amber">
+    <p><strong>Key rule:</strong> We never "accept" H0. We either <strong>reject H0</strong> (evidence supports H1) or <strong>fail to reject H0</strong> (insufficient evidence). Absence of evidence is not evidence of absence.</p>
+  </div>
+
+  <h2>One-Tail vs Two-Tail Tests</h2>
+  <div class="two-col">
+    <div class="card blue">
+      <h3>Two-Tail Test</h3>
+      <p>H1: &mu; &ne; &mu;0 (could be higher OR lower)</p>
+      <p>"Has GPU pricing <em>changed</em> from $2.50?"</p>
+      <p>Rejection region split between both tails. Use when you don't have a directional prediction.</p>
+    </div>
+    <div class="card blue">
+      <h3>One-Tail Test</h3>
+      <p>H1: &mu; &gt; &mu;0 (right-tail) or H1: &mu; &lt; &mu;0 (left-tail)</p>
+      <p>"Has GPU pricing <em>increased</em> above $2.50?"</p>
+      <p>All rejection region in one tail. More statistical power for a specific direction.</p>
+    </div>
+  </div>
+
+  <h2>Type I and Type II Errors — AIOS Consequences</h2>
+  <table class="matrix-table" style="margin: 1.5rem auto;">
+    <tr><th></th><th>H0 is Actually True<br>(Price = $2.50)</th><th>H0 is Actually False<br>(Price &ne; $2.50)</th></tr>
+    <tr>
+      <th>Reject H0<br>("Price changed!")</th>
+      <td class="fp"><strong>Type I Error (&alpha;)</strong><br>False alarm! We change our pricing strategy when nothing changed.<br><em>Cost: Wasted re-negotiation, lost contracts</em></td>
+      <td class="tp"><strong>Correct Decision</strong><br>(Power = 1 - &beta;)<br>We correctly detect the price shift.<br><em>Benefit: Adjust strategy, save money</em></td>
+    </tr>
+    <tr>
+      <th>Fail to Reject H0<br>("Price is fine")</th>
+      <td class="tn"><strong>Correct Decision</strong><br>We correctly stay the course.<br><em>Benefit: No unnecessary disruption</em></td>
+      <td class="fn"><strong>Type II Error (&beta;)</strong><br>Missed signal! Price shifted but we didn't catch it.<br><em>Cost: Overpaying for GPUs, budget overrun</em></td>
+    </tr>
+  </table>
+
+  <h2>Decision Flowchart: Which Test to Use</h2>
+  <div class="flowchart">
+    <div class="flow-box question">What are you comparing?</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-branch">
+      <div>
+        <div class="flow-box answer" style="border-color: var(--lynn-blue);">One sample mean vs known value</div>
+        <div class="flow-arrow" style="text-align:center;">&darr;</div>
+        <div class="flow-box question">Know &sigma;?</div>
+        <div class="flow-arrow" style="text-align:center;">&darr;</div>
+        <div class="flow-branch">
+          <div class="flow-box answer" style="background:#e8f5e9;">Yes &rarr; <strong>Z-test</strong></div>
+          <div class="flow-box answer" style="background:#e8f5e9;">No &rarr; <strong>t-test</strong></div>
+        </div>
+      </div>
+      <div>
+        <div class="flow-box answer" style="border-color: var(--lynn-blue);">Two sample means</div>
+        <div class="flow-arrow" style="text-align:center;">&darr;</div>
+        <div class="flow-box answer" style="background:#e8f5e9;"><strong>Two-sample t-test</strong><br>(paired or independent)</div>
+      </div>
+      <div>
+        <div class="flow-box answer" style="border-color: var(--lynn-blue);">Proportion (yes/no)</div>
+        <div class="flow-arrow" style="text-align:center;">&darr;</div>
+        <div class="flow-box answer" style="background:#e8f5e9;"><strong>Z-test for proportions</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card blue">
+    <h3>The 5-Step Hypothesis Testing Framework</h3>
+    <ol>
+      <li><strong>State hypotheses:</strong> Write H0 and H1 clearly</li>
+      <li><strong>Choose &alpha;:</strong> Set significance level (usually 0.05)</li>
+      <li><strong>Compute test statistic:</strong> t or z from the data</li>
+      <li><strong>Find p-value:</strong> Probability of seeing data this extreme if H0 is true</li>
+      <li><strong>Make decision:</strong> If p &le; &alpha;, reject H0. Otherwise, fail to reject.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P-VALUE EXPLORER PANEL -->
+<!-- ============================================================ -->
+<div id="pvalue" class="panel">
+  <h2>P-Value Explorer</h2>
+  <p>Adjust the sliders to see how sample mean, sample size, and standard deviation affect the t-statistic and p-value. The shaded regions show the rejection area at your chosen &alpha;.</p>
+
+  <div class="card blue">
+    <div class="two-col">
+      <div>
+        <div class="slider-group">
+          <label>Hypothesized Mean (&mu;0): <span class="slider-val" id="mu0-val">2.50</span></label>
+          <input type="range" id="mu0-slider" min="1.00" max="5.00" value="2.50" step="0.05" oninput="updatePValue()">
+        </div>
+        <div class="slider-group">
+          <label>Sample Mean (x&#772;): <span class="slider-val" id="xbar-val">2.80</span></label>
+          <input type="range" id="xbar-slider" min="1.00" max="5.00" value="2.80" step="0.05" oninput="updatePValue()">
+        </div>
+        <div class="slider-group">
+          <label>Sample Size (n): <span class="slider-val" id="n-val">30</span></label>
+          <input type="range" id="n-slider" min="5" max="200" value="30" step="1" oninput="updatePValue()">
+        </div>
+        <div class="slider-group">
+          <label>Standard Deviation (s): <span class="slider-val" id="sd-val">0.80</span></label>
+          <input type="range" id="sd-slider" min="0.10" max="3.00" value="0.80" step="0.05" oninput="updatePValue()">
+        </div>
+        <div class="slider-group">
+          <label>Significance Level (&alpha;):
+            <select id="alpha-select" onchange="updatePValue()" style="font-size:1rem; padding:0.3rem; font-weight:600; color:var(--lynn-blue);">
+              <option value="0.01">0.01</option>
+              <option value="0.05" selected>0.05</option>
+              <option value="0.10">0.10</option>
+            </select>
+          </label>
+        </div>
+        <div class="slider-group">
+          <label>Test Type:
+            <select id="tail-select" onchange="updatePValue()" style="font-size:1rem; padding:0.3rem; font-weight:600; color:var(--lynn-blue);">
+              <option value="two">Two-tail (H1: &mu; &ne; &mu;0)</option>
+              <option value="right">Right-tail (H1: &mu; &gt; &mu;0)</option>
+              <option value="left">Left-tail (H1: &mu; &lt; &mu;0)</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div>
+        <div class="metrics-grid" id="pval-metrics"></div>
+        <div id="pval-decision" style="margin-top:1rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="chart-tdist" style="height:450px;"></div>
+
+  <div class="card amber">
+    <h3>What the Graph Shows</h3>
+    <p>The blue curve is the t-distribution with n-1 degrees of freedom. The <span style="color:var(--red); font-weight:700;">red shaded areas</span> are the rejection regions at your chosen &alpha;. The <span style="color:var(--lynn-blue); font-weight:700;">blue vertical line</span> is your computed t-statistic. If the line falls in the red zone, you reject H0.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TYPE I/II ERROR TRADEOFF PANEL -->
+<!-- ============================================================ -->
+<div id="errors" class="panel">
+  <h2>Type I / Type II Error Tradeoff</h2>
+  <p>Two overlapping distributions: the <strong>null (H0 true)</strong> and the <strong>alternative (H1 true)</strong>. Changing &alpha; shifts the critical value, trading off between Type I and Type II errors.</p>
+
+  <div class="card blue">
+    <div class="slider-group">
+      <label>Significance Level (&alpha;): <span class="slider-val" id="alpha2-val">0.05</span></label>
+      <input type="range" id="alpha2-slider" min="0.005" max="0.200" value="0.05" step="0.005" oninput="updateErrors()">
+    </div>
+    <div class="slider-group">
+      <label>True Effect Size (difference in means): <span class="slider-val" id="effect-val">1.5</span></label>
+      <input type="range" id="effect-slider" min="0.5" max="4.0" value="1.5" step="0.1" oninput="updateErrors()">
+    </div>
+    <div class="slider-group">
+      <label>Standard Error: <span class="slider-val" id="se-val">1.0</span></label>
+      <input type="range" id="se-slider" min="0.3" max="2.0" value="1.0" step="0.1" oninput="updateErrors()">
+    </div>
+  </div>
+
+  <div class="metrics-grid" id="error-metrics"></div>
+
+  <div id="chart-errors" style="height:450px;"></div>
+
+  <div class="card amber">
+    <h3>The Tradeoff</h3>
+    <ul>
+      <li><strong>Decrease &alpha;</strong> (more strict) &rarr; fewer false alarms (Type I &darr;) but more missed signals (Type II &uarr;, Power &darr;)</li>
+      <li><strong>Increase &alpha;</strong> (more lenient) &rarr; more false alarms (Type I &uarr;) but fewer missed signals (Type II &darr;, Power &uarr;)</li>
+      <li><strong>Increase sample size</strong> &rarr; reduces standard error &rarr; both error types improve</li>
+      <li><strong>Larger effect size</strong> &rarr; distributions separate &rarr; easier to detect (Power &uarr;)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- EXCEL TOOLKIT PANEL -->
+<!-- ============================================================ -->
+<div id="excel" class="panel">
+  <h2>Excel Functions for Module 9</h2>
+  <p>These formulas map directly to the HW_M9 workbook. Copy them into the yellow answer cells.</p>
+
+  <div class="excel-toolkit">
+    <h3>T-Test Functions</h3>
+    <code class="excel-ref">=T.TEST(array1, array2, tails, type)         &#8594; p-value for comparing two samples</code>
+    <code class="excel-ref">    tails: 1 = one-tail, 2 = two-tail</code>
+    <code class="excel-ref">    type:  1 = paired, 2 = equal var, 3 = unequal var (Welch)</code>
+  </div>
+
+  <div class="excel-toolkit">
+    <h3>Critical Values and Distribution</h3>
+    <code class="excel-ref">=T.INV.2T(alpha, df)                          &#8594; critical t-value (two-tail)</code>
+    <code class="excel-ref">=T.INV(alpha, df)                              &#8594; critical t-value (one-tail, left)</code>
+    <code class="excel-ref">=T.DIST.2T(t_stat, df)                         &#8594; two-tail p-value from t-statistic</code>
+    <code class="excel-ref">=T.DIST.RT(t_stat, df)                         &#8594; right-tail p-value from t-statistic</code>
+  </div>
+
+  <div class="excel-toolkit">
+    <h3>Z-Test (known population std dev)</h3>
+    <code class="excel-ref">=Z.TEST(array, hypothesized_mean, sigma)       &#8594; one-tail p-value for Z-test</code>
+    <code class="excel-ref">=2*Z.TEST(array, hypothesized_mean, sigma)     &#8594; two-tail p-value</code>
+  </div>
+
+  <div class="excel-toolkit">
+    <h3>Manual T-Statistic Formula</h3>
+    <code class="excel-ref">t = (x&#772; - &mu;0) / (s / SQRT(n))</code>
+    <code class="excel-ref">=(AVERAGE(range) - mu0) / (STDEV.S(range) / SQRT(COUNT(range)))</code>
+  </div>
+
+  <div class="excel-toolkit">
+    <h3>Proportion Test (Z-test for proportions)</h3>
+    <code class="excel-ref">z = (p&#770; - p0) / SQRT(p0 * (1 - p0) / n)</code>
+    <code class="excel-ref">=(observed_proportion - hypothesized_p) / SQRT(hypothesized_p*(1-hypothesized_p)/n)</code>
+    <code class="excel-ref">=NORM.S.DIST(z, TRUE)                          &#8594; left-tail p-value</code>
+    <code class="excel-ref">=2*(1-NORM.S.DIST(ABS(z), TRUE))               &#8594; two-tail p-value</code>
+  </div>
+
+  <div class="card amber">
+    <h3>Connection to ExcelLabs HW_M9</h3>
+    <p>The HW_M9 workbook uses AIOS GPU pricing data. You'll compute t-statistics from sample data, find p-values using T.DIST.2T, and make reject/fail-to-reject decisions at &alpha; = 0.05. The same formulas above apply directly to the yellow answer cells.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- QUIZ PANEL -->
+<!-- ============================================================ -->
+<div id="quiz" class="panel">
+  <h2>SpotCheck Quiz — Module 9</h2>
+  <p>Test your understanding. Select the best answer for each question.</p>
+
+  <div id="quiz-container"></div>
+
+  <div style="margin-top: 2rem; text-align: center;">
+    <button class="quiz-btn" onclick="gradeQuiz()">Submit Answers</button>
+    <div id="quiz-result" style="margin-top: 1rem; font-size: 1.3rem; font-weight: 700;"></div>
+  </div>
+</div>
+
+<footer>
+  BUS 322 — Business Intelligence & Data Analytics | Lynn University | Module 9 Interactive
+</footer>
+
+<script>
+// ============================================================
+// TAB NAVIGATION
+// ============================================================
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'pvalue') updatePValue();
+  if (id === 'errors') updateErrors();
+}
+
+// ============================================================
+// MATH HELPERS
+// ============================================================
+function gaussPDF(x, mu, sigma) {
+  const z = (x - mu) / sigma;
+  return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
+}
+
+function erf(x) {
+  const a1=0.254829592, a2=-0.284496736, a3=1.421413741, a4=-1.453152027, a5=1.061405429, p=0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x);
+  const t = 1 / (1 + p * x);
+  return sign * (1 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t * Math.exp(-x*x));
+}
+
+function gaussCDF(x, mu, sigma) {
+  return 0.5 * (1 + erf((x - mu) / (sigma * Math.sqrt(2))));
+}
+
+// t-distribution PDF using gamma function approximation
+function lnGamma(z) {
+  // Lanczos approximation
+  const g = 7;
+  const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+    771.32342877765313, -176.61502916214059, 12.507343278686905,
+    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (z < 0.5) {
+    return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
+  }
+  z -= 1;
+  let x = c[0];
+  for (let i = 1; i < g + 2; i++) x += c[i] / (z + i);
+  const t = z + g + 0.5;
+  return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+}
+
+function tPDF(t, df) {
+  const coeff = Math.exp(lnGamma((df + 1) / 2) - lnGamma(df / 2)) / Math.sqrt(df * Math.PI);
+  return coeff * Math.pow(1 + t * t / df, -(df + 1) / 2);
+}
+
+// t-CDF via numerical integration (Simpson's rule)
+function tCDF(t, df) {
+  if (t === 0) return 0.5;
+  if (t < 0) return 1 - tCDF(-t, df);
+  // integrate from 0 to t
+  const n = 1000;
+  const h = t / n;
+  let sum = tPDF(0, df) + tPDF(t, df);
+  for (let i = 1; i < n; i++) {
+    const x = i * h;
+    sum += (i % 2 === 0 ? 2 : 4) * tPDF(x, df);
+  }
+  return 0.5 + (h / 3) * sum;
+}
+
+// Inverse t-CDF (bisection method)
+function tInv(p, df) {
+  // Find t such that tCDF(t, df) = p
+  let lo = -10, hi = 10;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    if (tCDF(mid, df) < p) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// ============================================================
+// P-VALUE EXPLORER
+// ============================================================
+function updatePValue() {
+  const mu0 = +document.getElementById('mu0-slider').value;
+  const xbar = +document.getElementById('xbar-slider').value;
+  const n = +document.getElementById('n-slider').value;
+  const sd = +document.getElementById('sd-slider').value;
+  const alpha = +document.getElementById('alpha-select').value;
+  const tail = document.getElementById('tail-select').value;
+
+  document.getElementById('mu0-val').textContent = mu0.toFixed(2);
+  document.getElementById('xbar-val').textContent = xbar.toFixed(2);
+  document.getElementById('n-val').textContent = n;
+  document.getElementById('sd-val').textContent = sd.toFixed(2);
+
+  const se = sd / Math.sqrt(n);
+  const df = n - 1;
+  const tStat = (xbar - mu0) / se;
+
+  // Compute p-value based on tail type
+  let pValue;
+  if (tail === 'two') {
+    pValue = 2 * (1 - tCDF(Math.abs(tStat), df));
+  } else if (tail === 'right') {
+    pValue = 1 - tCDF(tStat, df);
+  } else {
+    pValue = tCDF(tStat, df);
+  }
+  pValue = Math.max(0, Math.min(1, pValue));
+
+  const reject = pValue <= alpha;
+
+  // Metrics
+  const metricsDiv = document.getElementById('pval-metrics');
+  metricsDiv.innerHTML = [
+    { label: 't-Statistic', value: tStat.toFixed(4) },
+    { label: 'Degrees of Freedom', value: df },
+    { label: 'p-Value', value: pValue < 0.0001 ? '< 0.0001' : pValue.toFixed(4) },
+    { label: 'Standard Error', value: se.toFixed(4) },
+  ].map(m => `
+    <div class="metric-box">
+      <div class="label">${m.label}</div>
+      <div class="value" style="font-size:1.4rem;">${m.value}</div>
+    </div>
+  `).join('');
+
+  // Decision
+  const decDiv = document.getElementById('pval-decision');
+  if (reject) {
+    decDiv.innerHTML = `<div class="decision-reject"><strong style="font-size:1.2rem; color:var(--red);">REJECT H0</strong><br>p = ${pValue < 0.0001 ? '< 0.0001' : pValue.toFixed(4)} &le; &alpha; = ${alpha}<br>Evidence supports the alternative hypothesis.</div>`;
+  } else {
+    decDiv.innerHTML = `<div class="decision-fail"><strong style="font-size:1.2rem; color:var(--green);">FAIL TO REJECT H0</strong><br>p = ${pValue.toFixed(4)} &gt; &alpha; = ${alpha}<br>Insufficient evidence to reject the null hypothesis.</div>`;
+  }
+
+  // Build t-distribution curve
+  const xMin = -5, xMax = 5;
+  const xs = [], ys = [];
+  for (let x = xMin; x <= xMax; x += 0.05) {
+    xs.push(x);
+    ys.push(tPDF(x, df));
+  }
+
+  // Rejection region shading
+  const traces = [
+    { x: xs, y: ys, type: 'scatter', mode: 'lines', name: 't-distribution (df=' + df + ')',
+      line: { color: '#003DA5', width: 2.5 }, fill: 'tozeroy', fillcolor: 'rgba(0,61,165,0.08)' }
+  ];
+
+  if (tail === 'two') {
+    const tCrit = tInv(1 - alpha / 2, df);
+    // Left rejection
+    const lx = [], ly = [];
+    for (let x = xMin; x <= -tCrit; x += 0.05) { lx.push(x); ly.push(tPDF(x, df)); }
+    lx.push(-tCrit); ly.push(tPDF(-tCrit, df));
+    traces.push({ x: lx, y: ly, type: 'scatter', fill: 'tozeroy', fillcolor: 'rgba(211,47,47,0.35)',
+      line: { color: 'rgba(211,47,47,0.6)', width: 0 }, name: 'Rejection (\u03b1/2)', showlegend: true });
+    // Right rejection
+    const rx = [-tCrit], ry = [0];
+    rx.push(tCrit); ry.push(0);
+    const rx2 = [], ry2 = [];
+    for (let x = tCrit; x <= xMax; x += 0.05) { rx2.push(x); ry2.push(tPDF(x, df)); }
+    rx2.unshift(tCrit); ry2.unshift(tPDF(tCrit, df));
+    traces.push({ x: rx2, y: ry2, type: 'scatter', fill: 'tozeroy', fillcolor: 'rgba(211,47,47,0.35)',
+      line: { color: 'rgba(211,47,47,0.6)', width: 0 }, name: 'Rejection (\u03b1/2)', showlegend: false });
+  } else if (tail === 'right') {
+    const tCrit = tInv(1 - alpha, df);
+    const rx = [], ry = [];
+    for (let x = tCrit; x <= xMax; x += 0.05) { rx.push(x); ry.push(tPDF(x, df)); }
+    rx.unshift(tCrit); ry.unshift(tPDF(tCrit, df));
+    traces.push({ x: rx, y: ry, type: 'scatter', fill: 'tozeroy', fillcolor: 'rgba(211,47,47,0.35)',
+      line: { color: 'rgba(211,47,47,0.6)', width: 0 }, name: 'Rejection (\u03b1)' });
+  } else {
+    const tCrit = tInv(alpha, df);
+    const lx = [], ly = [];
+    for (let x = xMin; x <= tCrit; x += 0.05) { lx.push(x); ly.push(tPDF(x, df)); }
+    lx.push(tCrit); ly.push(tPDF(tCrit, df));
+    traces.push({ x: lx, y: ly, type: 'scatter', fill: 'tozeroy', fillcolor: 'rgba(211,47,47,0.35)',
+      line: { color: 'rgba(211,47,47,0.6)', width: 0 }, name: 'Rejection (\u03b1)' });
+  }
+
+  // t-statistic line
+  const tClipped = Math.max(xMin, Math.min(xMax, tStat));
+  traces.push({
+    x: [tClipped, tClipped], y: [0, tPDF(tClipped, df) * 1.3],
+    type: 'scatter', mode: 'lines', name: 't = ' + tStat.toFixed(3),
+    line: { color: '#003DA5', width: 3, dash: 'dash' }
+  });
+
+  Plotly.newPlot('chart-tdist', traces, {
+    title: 't-Distribution with Rejection Regions',
+    xaxis: { title: 't-value', range: [xMin, xMax] },
+    yaxis: { title: 'Density', rangemode: 'tozero' },
+    margin: { t: 40, b: 50 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' },
+    showlegend: true,
+    legend: { x: 0.02, y: 0.98 }
+  }, { responsive: true });
+}
+
+// ============================================================
+// TYPE I/II ERROR TRADEOFF
+// ============================================================
+function updateErrors() {
+  const alpha = +document.getElementById('alpha2-slider').value;
+  const effect = +document.getElementById('effect-slider').value;
+  const se = +document.getElementById('se-slider').value;
+
+  document.getElementById('alpha2-val').textContent = alpha.toFixed(3);
+  document.getElementById('effect-val').textContent = effect.toFixed(1);
+  document.getElementById('se-val').textContent = se.toFixed(1);
+
+  // Null distribution: N(0, se)
+  // Alt distribution: N(effect, se)
+  // Critical value for right-tail at alpha
+  const zCrit = -Math.sqrt(2) * erfInv(1 - 2 * (1 - alpha));  // approximate via normal
+
+  // Beta = P(Z < zCrit | H1 true) = P(N(effect, se) < zCrit * se)
+  const beta = gaussCDF(zCrit * se, effect, se);
+  const power = 1 - beta;
+
+  // Metrics
+  const metricsDiv = document.getElementById('error-metrics');
+  metricsDiv.innerHTML = [
+    { label: 'Alpha (\u03b1)', value: (alpha * 100).toFixed(1) + '%', sub: 'Type I Error Rate' },
+    { label: 'Beta (\u03b2)', value: (beta * 100).toFixed(1) + '%', sub: 'Type II Error Rate' },
+    { label: 'Power (1-\u03b2)', value: (power * 100).toFixed(1) + '%', sub: 'Probability of detecting real effect' },
+    { label: 'Critical Value', value: (zCrit * se).toFixed(2), sub: 'Reject H0 if x\u0304 > this' },
+  ].map(m => `
+    <div class="metric-box">
+      <div class="label">${m.label}</div>
+      <div class="value" style="font-size:1.4rem;">${m.value}</div>
+      <div class="sub">${m.sub}</div>
+    </div>
+  `).join('');
+
+  // Build overlapping distributions
+  const xMin = -4 * se, xMax = effect + 4 * se;
+  const xs = [];
+  for (let x = xMin; x <= xMax; x += (xMax - xMin) / 300) xs.push(x);
+
+  const nullY = xs.map(x => gaussPDF(x, 0, se));
+  const altY = xs.map(x => gaussPDF(x, effect, se));
+
+  const critX = zCrit * se;
+
+  // Alpha region: null distribution, x > critX
+  const alphaX = [], alphaY = [];
+  for (let x = critX; x <= xMax; x += (xMax - xMin) / 300) {
+    alphaX.push(x);
+    alphaY.push(gaussPDF(x, 0, se));
+  }
+  alphaX.unshift(critX); alphaY.unshift(0);
+  alphaX.push(xMax); alphaY.push(0);
+
+  // Beta region: alt distribution, x < critX
+  const betaX = [], betaY = [];
+  betaX.push(xMin); betaY.push(0);
+  for (let x = xMin; x <= critX; x += (xMax - xMin) / 300) {
+    betaX.push(x);
+    betaY.push(gaussPDF(x, effect, se));
+  }
+  betaX.push(critX); betaY.push(0);
+
+  const traces = [
+    { x: xs, y: nullY, type: 'scatter', mode: 'lines', name: 'H0 Distribution (null)',
+      line: { color: '#003DA5', width: 2.5 } },
+    { x: xs, y: altY, type: 'scatter', mode: 'lines', name: 'H1 Distribution (alternative)',
+      line: { color: '#4CAF50', width: 2.5 } },
+    { x: alphaX, y: alphaY, type: 'scatter', fill: 'tozeroy', fillcolor: 'rgba(211,47,47,0.35)',
+      line: { width: 0 }, name: 'Type I Error (\u03b1)', showlegend: true },
+    { x: betaX, y: betaY, type: 'scatter', fill: 'tozeroy', fillcolor: 'rgba(255,167,38,0.35)',
+      line: { width: 0 }, name: 'Type II Error (\u03b2)', showlegend: true },
+    { x: [critX, critX], y: [0, Math.max(gaussPDF(0, 0, se), gaussPDF(effect, effect, se)) * 1.1],
+      type: 'scatter', mode: 'lines', name: 'Critical Value',
+      line: { color: '#D32F2F', width: 2, dash: 'dash' } }
+  ];
+
+  Plotly.newPlot('chart-errors', traces, {
+    title: 'Type I vs Type II Error Tradeoff',
+    xaxis: { title: 'Test Statistic Value' },
+    yaxis: { title: 'Density', rangemode: 'tozero' },
+    margin: { t: 40, b: 50 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' },
+    showlegend: true,
+    legend: { x: 0.68, y: 0.98 }
+  }, { responsive: true });
+}
+
+// Inverse error function approximation
+function erfInv(x) {
+  const a = 0.147;
+  const ln1x2 = Math.log(1 - x * x);
+  const part1 = 2 / (Math.PI * a) + ln1x2 / 2;
+  const part2 = ln1x2 / a;
+  const sign = x < 0 ? -1 : 1;
+  return sign * Math.sqrt(Math.sqrt(part1 * part1 - part2) - part1);
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+const quizData = [
+  {
+    q: "Your boss asks: 'Has our average customer spend changed from $150?' What is H0?",
+    options: [
+      "H0: \u03bc > $150",
+      "H0: \u03bc = $150",
+      "H0: \u03bc \u2260 $150",
+      "H0: \u03bc < $150"
+    ],
+    answer: 1
+  },
+  {
+    q: "A p-value of 0.03 with \u03b1 = 0.05 means:",
+    options: [
+      "There is a 3% chance H0 is true",
+      "There is a 3% chance of seeing data this extreme if H0 is true",
+      "We fail to reject H0",
+      "The effect size is 3%"
+    ],
+    answer: 1
+  },
+  {
+    q: "AIOS tests whether GPU prices increased. They conclude prices rose, but actually they didn't. This is:",
+    options: [
+      "Type II Error",
+      "Correct decision",
+      "Type I Error (false alarm)",
+      "A power failure"
+    ],
+    answer: 2
+  },
+  {
+    q: "You want to test if a new pricing strategy increased revenue (not just changed it). Which test?",
+    options: [
+      "Two-tail t-test",
+      "Right-tail (one-tail) t-test",
+      "Left-tail (one-tail) t-test",
+      "Chi-square test"
+    ],
+    answer: 1
+  },
+  {
+    q: "With n = 25, sample mean = 52, \u03bc0 = 50, s = 5, the t-statistic is:",
+    options: [
+      "t = 0.40",
+      "t = 2.00",
+      "t = 10.00",
+      "t = 1.00"
+    ],
+    answer: 1
+  },
+  {
+    q: "Increasing the sample size while keeping everything else constant will:",
+    options: [
+      "Increase the p-value",
+      "Have no effect on the test",
+      "Decrease the standard error and increase power",
+      "Increase Type I error"
+    ],
+    answer: 2
+  },
+  {
+    q: "At \u03b1 = 0.01 you get p = 0.04. Your decision:",
+    options: [
+      "Reject H0 — p is small",
+      "Fail to reject H0 — p > \u03b1",
+      "Accept H0 — p is large",
+      "Inconclusive — need more data"
+    ],
+    answer: 1
+  },
+  {
+    q: "A Type II Error means:",
+    options: [
+      "Rejecting H0 when it is actually true",
+      "Failing to reject H0 when it is actually false",
+      "Rejecting H1 when it is actually true",
+      "Getting a p-value exactly equal to alpha"
+    ],
+    answer: 1
+  },
+  {
+    q: "Which Excel function gives you the two-tail p-value from a computed t-statistic?",
+    options: [
+      "=T.INV.2T(t_stat, df)",
+      "=T.DIST.2T(t_stat, df)",
+      "=T.TEST(array1, array2, 2, 2)",
+      "=NORM.S.DIST(t_stat, TRUE)"
+    ],
+    answer: 1
+  },
+  {
+    q: "Power = 0.80 means:",
+    options: [
+      "80% chance of a Type I Error",
+      "80% chance of detecting a real effect when it exists",
+      "80% chance that H0 is true",
+      "The test is 80% accurate"
+    ],
+    answer: 1
+  }
+];
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = quizData.map((q, i) => `
+    <div class="card blue" style="margin-bottom: 1rem;">
+      <p><strong>Q${i+1}.</strong> ${q.q}</p>
+      ${q.options.map((opt, j) => `
+        <label style="display:block; margin: 0.4rem 0; cursor:pointer;">
+          <input type="radio" name="q${i}" value="${j}"> ${opt}
+        </label>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function gradeQuiz() {
+  let correct = 0;
+  quizData.forEach((q, i) => {
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    if (sel && +sel.value === q.answer) correct++;
+  });
+  const pct = Math.round(correct / quizData.length * 100);
+  const result = document.getElementById('quiz-result');
+  result.textContent = `Score: ${correct}/${quizData.length} (${pct}%)`;
+  result.style.color = pct >= 80 ? '#4CAF50' : pct >= 60 ? '#FFA726' : '#D32F2F';
+}
+
+// Init
+buildQuiz();
+</script>
+</body>
+</html>

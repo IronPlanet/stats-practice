@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 8: Sensitivity & Specificity — BUS 322</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<style>
+  :root {
+    --lynn-blue: #003DA5;
+    --lynn-blue-light: #E8F0FE;
+    --lynn-gray: #B1B3B3;
+    --green: #4CAF50;
+    --red: #D32F2F;
+    --amber: #FFA726;
+    --text-dark: #1A1A2E;
+    --text-body: #333;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', 'Liberation Sans', Arial, sans-serif; color: var(--text-body); background: #fafafa; }
+  header { background: var(--lynn-blue); color: white; padding: 1.5rem 2rem; }
+  header h1 { font-size: 1.8rem; font-weight: 700; }
+  header p { opacity: 0.85; margin-top: 0.3rem; }
+  .tabs { display: flex; background: #f0f0f0; border-bottom: 2px solid var(--lynn-blue); overflow-x: auto; }
+  .tab { padding: 0.8rem 1.5rem; cursor: pointer; font-weight: 600; border: none; background: none; color: #666; white-space: nowrap; }
+  .tab.active { color: var(--lynn-blue); border-bottom: 3px solid var(--lynn-blue); background: white; }
+  .tab:hover { background: #e8e8e8; }
+  .panel { display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+  .panel.active { display: block; }
+  h2 { color: var(--lynn-blue); margin: 1.5rem 0 0.8rem; font-size: 1.4rem; }
+  h3 { color: var(--lynn-blue); margin: 1rem 0 0.5rem; font-size: 1.15rem; }
+  p, li { line-height: 1.65; margin-bottom: 0.5rem; }
+  .card { background: white; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  .card.blue { border-left: 4px solid var(--lynn-blue); }
+  .card.green { border-left: 4px solid var(--green); }
+  .card.red { border-left: 4px solid var(--red); }
+  .card.amber { border-left: 4px solid var(--amber); }
+  .formula { font-family: 'Consolas', 'DejaVu Sans Mono', monospace; background: var(--lynn-blue-light); padding: 0.3rem 0.6rem; border-radius: 4px; color: var(--lynn-blue); font-weight: 600; }
+  .excel-ref { font-family: 'Consolas', monospace; color: var(--lynn-blue); font-size: 0.95rem; }
+  .matrix-table { border-collapse: collapse; margin: 1rem 0; }
+  .matrix-table th, .matrix-table td { border: 2px solid #ccc; padding: 0.8rem 1.2rem; text-align: center; font-size: 1.1rem; min-width: 80px; }
+  .matrix-table th { background: var(--lynn-blue); color: white; }
+  .tp { background: #c8e6c9; font-weight: 700; }
+  .fp { background: #ffcdd2; font-weight: 700; }
+  .fn { background: #ffe0b2; font-weight: 700; }
+  .tn { background: #bbdefb; font-weight: 700; }
+  .slider-group { margin: 1rem 0; }
+  .slider-group label { font-weight: 600; display: block; margin-bottom: 0.3rem; }
+  .slider-group input[type=range] { width: 100%; max-width: 500px; }
+  .slider-val { font-weight: 700; color: var(--lynn-blue); font-size: 1.2rem; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .metric-box { background: white; border: 2px solid #e0e0e0; border-radius: 8px; padding: 1rem; text-align: center; }
+  .metric-box .label { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-box .value { font-size: 1.8rem; font-weight: 700; color: var(--lynn-blue); }
+  .metric-box .sub { font-size: 0.8rem; color: #999; }
+  .excel-toolkit { background: var(--lynn-blue-light); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
+  .excel-toolkit h3 { margin-top: 0; }
+  .excel-toolkit code { display: block; margin: 0.3rem 0; font-size: 0.95rem; }
+  .quiz-btn { background: var(--lynn-blue); color: white; border: none; padding: 0.8rem 2rem; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600; }
+  .quiz-btn:hover { background: #002a7a; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+  footer { text-align: center; padding: 2rem; color: #999; font-size: 0.85rem; border-top: 1px solid #eee; margin-top: 3rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Module 8: Sensitivity & Specificity</h1>
+  <p>BUS 322 — Business Intelligence & Data Analytics | Lynn University</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showPanel('theory')">Theory</button>
+  <button class="tab" onclick="showPanel('interactive')">Interactive Lab</button>
+  <button class="tab" onclick="showPanel('tradeoff')">Tradeoff Explorer</button>
+  <button class="tab" onclick="showPanel('excel')">Excel Toolkit</button>
+  <button class="tab" onclick="showPanel('quiz')">SpotCheck Quiz</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- THEORY PANEL -->
+<!-- ============================================================ -->
+<div id="theory" class="panel active">
+  <h2>The Confusion Matrix — Foundation of Everything</h2>
+  <p>Every binary classifier's performance fits in a 2×2 table. Signal Detection Theory (WWII radar operators) → Medical diagnosis (Yerushalmy 1947) → Machine Learning today.</p>
+
+  <div class="card blue">
+    <p><strong>Memory trick:</strong> The second word is the prediction. The first word says if it was right.<br>
+    <em>"True Positive" = correctly predicted positive. "False Negative" = incorrectly predicted negative.</em></p>
+  </div>
+
+  <table class="matrix-table" style="margin: 1.5rem auto;">
+    <tr><th></th><th>Actually Positive</th><th>Actually Negative</th></tr>
+    <tr><th>Predicted Positive</th><td class="tp">TP (Hit)</td><td class="fp">FP (False Alarm)</td></tr>
+    <tr><th>Predicted Negative</th><td class="fn">FN (Miss)</td><td class="tn">TN (Correct Rejection)</td></tr>
+  </table>
+
+  <h2>Core Metrics</h2>
+  <div class="two-col">
+    <div class="card green">
+      <h3>Sensitivity (Recall / TPR)</h3>
+      <p class="formula">Sensitivity = TP / (TP + FN)</p>
+      <p>"Of all who are actually sick, what % did we catch?"</p>
+      <p><strong>Prioritize when:</strong> Missing a case is catastrophic (cancer screening, airport security).</p>
+    </div>
+    <div class="card blue">
+      <h3>Specificity (TNR)</h3>
+      <p class="formula">Specificity = TN / (TN + FP)</p>
+      <p>"Of all who are actually healthy, what % did we correctly clear?"</p>
+      <p><strong>Prioritize when:</strong> False alarms have serious consequences (criminal conviction, expensive tests).</p>
+    </div>
+    <div class="card amber">
+      <h3>Precision (PPV)</h3>
+      <p class="formula">PPV = TP / (TP + FP)</p>
+      <p>"Of everyone we flagged positive, what % were real?"</p>
+      <p><strong>The patient's question:</strong> "I tested positive — how worried should I be?"</p>
+    </div>
+    <div class="card red">
+      <h3>The Lazy Classifier Trap</h3>
+      <p class="formula">Accuracy = (TP + TN) / Total</p>
+      <p>A classifier that always says "negative" gets 97% accuracy when disease prevalence is 3%. <strong>It catches zero patients.</strong></p>
+      <p>MCC fixes this: lazy classifier scores <strong>MCC = 0.00</strong>.</p>
+    </div>
+  </div>
+
+  <h2>Key Formulas Summary</h2>
+  <div class="card blue">
+    <p><span class="formula">F1 = 2 × (Precision × Sensitivity) / (Precision + Sensitivity)</span> — Harmonic mean, penalizes imbalance</p>
+    <p><span class="formula">MCC = (TP×TN − FP×FN) / √((TP+FP)(TP+FN)(TN+FP)(TN+FN))</span> — Gold standard for imbalanced data</p>
+    <p><span class="formula">NPV = TN / (TN + FN)</span> — "I tested negative — how safe should I feel?"</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- INTERACTIVE LAB PANEL -->
+<!-- ============================================================ -->
+<div id="interactive" class="panel">
+  <h2>Interactive Confusion Matrix</h2>
+  <p>Adjust the values below and watch all metrics update in real-time.</p>
+
+  <div class="card blue">
+    <div class="two-col">
+      <div>
+        <div class="slider-group">
+          <label>True Positives (TP): <span class="slider-val" id="tp-val">45</span></label>
+          <input type="range" id="tp-slider" min="0" max="200" value="45" oninput="updateMatrix()">
+        </div>
+        <div class="slider-group">
+          <label>False Positives (FP): <span class="slider-val" id="fp-val">30</span></label>
+          <input type="range" id="fp-slider" min="0" max="200" value="30" oninput="updateMatrix()">
+        </div>
+        <div class="slider-group">
+          <label>False Negatives (FN): <span class="slider-val" id="fn-val">15</span></label>
+          <input type="range" id="fn-slider" min="0" max="200" value="15" oninput="updateMatrix()">
+        </div>
+        <div class="slider-group">
+          <label>True Negatives (TN): <span class="slider-val" id="tn-val">210</span></label>
+          <input type="range" id="tn-slider" min="0" max="500" value="210" oninput="updateMatrix()">
+        </div>
+      </div>
+      <div>
+        <table class="matrix-table" id="live-matrix">
+          <tr><th></th><th>Act. Positive</th><th>Act. Negative</th></tr>
+          <tr><th>Pred. Pos</th><td class="tp" id="m-tp">45</td><td class="fp" id="m-fp">30</td></tr>
+          <tr><th>Pred. Neg</th><td class="fn" id="m-fn">15</td><td class="tn" id="m-tn">210</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="metrics-grid" id="metrics-grid">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="two-col">
+    <div id="chart-metrics" style="height:400px;"></div>
+    <div id="chart-pie" style="height:400px;"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TRADEOFF EXPLORER PANEL -->
+<!-- ============================================================ -->
+<div id="tradeoff" class="panel">
+  <h2>Sensitivity–Specificity Tradeoff</h2>
+  <p>A loan default model scores customers 0–100. Drag the threshold to see the tradeoff: catching more defaults (↑ sensitivity) means more false alarms (↓ specificity).</p>
+
+  <div class="card amber">
+    <div class="slider-group">
+      <label>Classification Threshold: <span class="slider-val" id="thresh-val">50</span></label>
+      <input type="range" id="thresh-slider" min="10" max="90" value="50" step="1" oninput="updateTradeoff()">
+    </div>
+    <p id="thresh-explain"></p>
+  </div>
+
+  <div class="metrics-grid" id="tradeoff-metrics"></div>
+
+  <div class="two-col">
+    <div id="chart-roc" style="height:420px;"></div>
+    <div id="chart-tradeoff-bars" style="height:420px;"></div>
+  </div>
+
+  <div class="card blue">
+    <h3>The Key Insight</h3>
+    <p>There is no "best" threshold — only the best threshold <em>for your costs</em>. If missing a default costs $50,000 but investigating a false alarm costs $200, push the threshold lower (higher sensitivity). If false alarms cost $10,000 each, push it higher (higher specificity).</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- EXCEL TOOLKIT PANEL -->
+<!-- ============================================================ -->
+<div id="excel" class="panel">
+  <h2>Excel Functions for Module 8</h2>
+  <p>These formulas map directly to the HW_M8 workbook. Copy them into the yellow answer cells.</p>
+
+  <div class="excel-toolkit">
+    <h3>Confusion Matrix Counts</h3>
+    <code class="excel-ref">=COUNTIFS(predicted, "Positive", actual, "Positive")  → TP</code>
+    <code class="excel-ref">=COUNTIFS(predicted, "Positive", actual, "Negative")  → FP</code>
+    <code class="excel-ref">=COUNTIFS(predicted, "Negative", actual, "Positive")  → FN</code>
+    <code class="excel-ref">=COUNTIFS(predicted, "Negative", actual, "Negative")  → TN</code>
+  </div>
+
+  <div class="excel-toolkit">
+    <h3>Core Metrics</h3>
+    <code class="excel-ref">=TP/(TP+FN)                    → Sensitivity (Recall)</code>
+    <code class="excel-ref">=TN/(TN+FP)                    → Specificity</code>
+    <code class="excel-ref">=TP/(TP+FP)                    → Precision (PPV)</code>
+    <code class="excel-ref">=TN/(TN+FN)                    → NPV</code>
+    <code class="excel-ref">=(TP+TN)/(TP+FP+FN+TN)        → Accuracy</code>
+  </div>
+
+  <div class="excel-toolkit">
+    <h3>Advanced Metrics</h3>
+    <code class="excel-ref">=2*Precision*Sensitivity/(Precision+Sensitivity)     → F1 Score</code>
+    <code class="excel-ref">=(TP*TN-FP*FN)/SQRT((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))  → MCC</code>
+  </div>
+
+  <div class="card amber">
+    <h3>Connection to ExcelLabs HW_M8</h3>
+    <p>The HW_M8 workbook uses a revenue threshold ($140,000) to classify locations as "high revenue" or "low revenue." Your confusion matrix comes from comparing the model's prediction to actual revenue. The same formulas above apply — just with COUNTIFS on your data range.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- QUIZ PANEL -->
+<!-- ============================================================ -->
+<div id="quiz" class="panel">
+  <h2>SpotCheck Quiz — Module 8</h2>
+  <p>Test your understanding. Select the best answer for each question.</p>
+
+  <div id="quiz-container"></div>
+
+  <div style="margin-top: 2rem; text-align: center;">
+    <button class="quiz-btn" onclick="gradeQuiz()">Submit Answers</button>
+    <div id="quiz-result" style="margin-top: 1rem; font-size: 1.3rem; font-weight: 700;"></div>
+  </div>
+</div>
+
+<footer>
+  BUS 322 — Business Intelligence & Data Analytics | Lynn University | Module 8 Interactive
+</footer>
+
+<script>
+// ============================================================
+// TAB NAVIGATION
+// ============================================================
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'interactive') updateMatrix();
+  if (id === 'tradeoff') updateTradeoff();
+}
+
+// ============================================================
+// INTERACTIVE CONFUSION MATRIX
+// ============================================================
+function updateMatrix() {
+  const tp = +document.getElementById('tp-slider').value;
+  const fp = +document.getElementById('fp-slider').value;
+  const fn = +document.getElementById('fn-slider').value;
+  const tn = +document.getElementById('tn-slider').value;
+
+  document.getElementById('tp-val').textContent = tp;
+  document.getElementById('fp-val').textContent = fp;
+  document.getElementById('fn-val').textContent = fn;
+  document.getElementById('tn-val').textContent = tn;
+  document.getElementById('m-tp').textContent = tp;
+  document.getElementById('m-fp').textContent = fp;
+  document.getElementById('m-fn').textContent = fn;
+  document.getElementById('m-tn').textContent = tn;
+
+  const total = tp + fp + fn + tn;
+  const sens = tp + fn > 0 ? tp / (tp + fn) : 0;
+  const spec = tn + fp > 0 ? tn / (tn + fp) : 0;
+  const prec = tp + fp > 0 ? tp / (tp + fp) : 0;
+  const npv  = tn + fn > 0 ? tn / (tn + fn) : 0;
+  const acc  = total > 0 ? (tp + tn) / total : 0;
+  const f1   = prec + sens > 0 ? 2 * prec * sens / (prec + sens) : 0;
+  const mcc_num = tp * tn - fp * fn;
+  const mcc_den = Math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn));
+  const mcc  = mcc_den > 0 ? mcc_num / mcc_den : 0;
+
+  const metrics = [
+    { label: 'Sensitivity', value: sens, sub: 'TP/(TP+FN)' },
+    { label: 'Specificity', value: spec, sub: 'TN/(TN+FP)' },
+    { label: 'Precision', value: prec, sub: 'TP/(TP+FP)' },
+    { label: 'NPV', value: npv, sub: 'TN/(TN+FN)' },
+    { label: 'Accuracy', value: acc, sub: '(TP+TN)/Total' },
+    { label: 'F1 Score', value: f1, sub: '2·P·R/(P+R)' },
+    { label: 'MCC', value: mcc, sub: '[-1, +1] scale' },
+  ];
+
+  const grid = document.getElementById('metrics-grid');
+  grid.innerHTML = metrics.map(m => `
+    <div class="metric-box">
+      <div class="label">${m.label}</div>
+      <div class="value">${(m.value * 100).toFixed(1)}%</div>
+      <div class="sub">${m.sub}</div>
+    </div>
+  `).join('');
+
+  // Bar chart
+  Plotly.newPlot('chart-metrics', [{
+    x: metrics.map(m => m.label),
+    y: metrics.map(m => m.value * 100),
+    type: 'bar',
+    marker: { color: ['#4CAF50','#003DA5','#FFA726','#26A69A','#7B1FA2','#D32F2F','#333'] }
+  }], {
+    title: 'All Metrics',
+    yaxis: { title: '%', range: [-10, 105] },
+    margin: { t: 40, b: 80 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' }
+  }, { responsive: true });
+
+  // Pie chart
+  Plotly.newPlot('chart-pie', [{
+    values: [tp, fp, fn, tn],
+    labels: ['TP','FP','FN','TN'],
+    type: 'pie',
+    marker: { colors: ['#c8e6c9','#ffcdd2','#ffe0b2','#bbdefb'] },
+    textinfo: 'label+value+percent',
+    hole: 0.35
+  }], {
+    title: 'Confusion Matrix Distribution',
+    margin: { t: 40, b: 20 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' }
+  }, { responsive: true });
+}
+
+// ============================================================
+// TRADEOFF EXPLORER (simulated loan default model)
+// ============================================================
+// Simulated: 1000 customers, 100 actual defaults, 900 non-defaults
+// Scores: defaults ~N(60,15), non-defaults ~N(35,12)
+function gaussCDF(x, mu, sigma) {
+  return 0.5 * (1 + erf((x - mu) / (sigma * Math.sqrt(2))));
+}
+function erf(x) {
+  const a1=0.254829592, a2=-0.284496736, a3=1.421413741, a4=-1.453152027, a5=1.061405429, p=0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x);
+  const t = 1 / (1 + p * x);
+  return sign * (1 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t * Math.exp(-x*x));
+}
+
+function updateTradeoff() {
+  const thresh = +document.getElementById('thresh-slider').value;
+  document.getElementById('thresh-val').textContent = thresh;
+
+  const nPos = 100, nNeg = 900;
+  const muPos = 60, sdPos = 15, muNeg = 35, sdNeg = 12;
+
+  // At threshold: predict positive if score >= threshold
+  const tp = Math.round(nPos * (1 - gaussCDF(thresh, muPos, sdPos)));
+  const fn = nPos - tp;
+  const fp = Math.round(nNeg * (1 - gaussCDF(thresh, muNeg, sdNeg)));
+  const tn = nNeg - fp;
+
+  const sens = tp / (tp + fn);
+  const spec = tn / (tn + fp);
+  const prec = tp + fp > 0 ? tp / (tp + fp) : 0;
+  const f1 = prec + sens > 0 ? 2 * prec * sens / (prec + sens) : 0;
+
+  document.getElementById('thresh-explain').innerHTML =
+    `At threshold <strong>${thresh}</strong>: Predicting <strong>${tp+fp}</strong> defaults → catching <strong>${tp}</strong> of ${nPos} real defaults, with <strong>${fp}</strong> false alarms.`;
+
+  const metricsDiv = document.getElementById('tradeoff-metrics');
+  metricsDiv.innerHTML = [
+    { label: 'Sensitivity', value: sens },
+    { label: 'Specificity', value: spec },
+    { label: 'Precision', value: prec },
+    { label: 'F1 Score', value: f1 },
+    { label: 'False Alarms', value: fp, raw: true },
+    { label: 'Missed Defaults', value: fn, raw: true },
+  ].map(m => `
+    <div class="metric-box">
+      <div class="label">${m.label}</div>
+      <div class="value">${m.raw ? m.value : (m.value*100).toFixed(1)+'%'}</div>
+    </div>
+  `).join('');
+
+  // ROC curve: sweep thresholds
+  const roc_sens = [], roc_fpr = [];
+  for (let t = 5; t <= 95; t++) {
+    const s = 1 - gaussCDF(t, muPos, sdPos);
+    const f = 1 - gaussCDF(t, muNeg, sdNeg);
+    roc_sens.push(s * 100);
+    roc_fpr.push(f * 100);
+  }
+  const cur_fpr = (1 - spec) * 100;
+  const cur_sens = sens * 100;
+
+  Plotly.newPlot('chart-roc', [
+    { x: roc_fpr, y: roc_sens, mode: 'lines', name: 'ROC Curve', line: { color: '#003DA5', width: 3 } },
+    { x: [cur_fpr], y: [cur_sens], mode: 'markers', name: `Threshold=${thresh}`, marker: { size: 14, color: '#D32F2F' } },
+    { x: [0,100], y: [0,100], mode: 'lines', name: 'Random (AUC=0.5)', line: { dash: 'dash', color: '#ccc' } }
+  ], {
+    title: 'ROC Curve',
+    xaxis: { title: 'False Positive Rate (%)', range: [0,100] },
+    yaxis: { title: 'Sensitivity (%)', range: [0,100] },
+    margin: { t: 40, b: 50 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' },
+    showlegend: true,
+    legend: { x: 0.5, y: 0.15 }
+  }, { responsive: true });
+
+  // Tradeoff bars
+  Plotly.newPlot('chart-tradeoff-bars', [{
+    x: ['Sensitivity','Specificity','Precision','F1'],
+    y: [sens*100, spec*100, prec*100, f1*100],
+    type: 'bar',
+    marker: { color: ['#4CAF50','#003DA5','#FFA726','#7B1FA2'] }
+  }], {
+    title: `Metrics at Threshold = ${thresh}`,
+    yaxis: { title: '%', range: [0, 105] },
+    margin: { t: 40, b: 50 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' }
+  }, { responsive: true });
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+const quizData = [
+  {
+    q: "A drug test flags an employee as positive, but confirmatory testing reveals they are drug-free. What cell of the confusion matrix is this?",
+    options: ["True Positive", "False Positive", "False Negative", "True Negative"],
+    answer: 1
+  },
+  {
+    q: "Sensitivity measures:",
+    options: [
+      "Of all predicted positives, how many were correct",
+      "Of all actual positives, how many did we catch",
+      "Of all actual negatives, how many did we correctly clear",
+      "The overall accuracy of the model"
+    ],
+    answer: 1
+  },
+  {
+    q: "A classifier always predicts 'negative' on a dataset with 3% disease prevalence. What is its accuracy?",
+    options: ["3%", "50%", "97%", "100%"],
+    answer: 2
+  },
+  {
+    q: "A pregnancy test has TP=72, FN=8, FP=6, TN=114. What is the sensitivity?",
+    options: ["72/78 = 92.3%", "72/80 = 90.0%", "114/120 = 95.0%", "186/200 = 93.0%"],
+    answer: 1
+  },
+  {
+    q: "A hospital screens for a rare but treatable disease. Missing a case means permanent damage. Should they prioritize:",
+    options: ["Specificity — avoid false alarms", "Sensitivity — catch every case", "Accuracy — maximize correct answers", "Precision — minimize false positives"],
+    answer: 1
+  },
+  {
+    q: "A test has 95% sensitivity and 90% specificity. Disease prevalence is 3%. The PPV is approximately:",
+    options: ["95%", "90%", "23%", "85%"],
+    answer: 2
+  },
+  {
+    q: "What does MCC = 0.00 tell you about a classifier?",
+    options: ["It's perfect", "It's no better than random guessing", "It's worse than random", "It has 100% accuracy"],
+    answer: 1
+  },
+  {
+    q: "Which metric answers: 'I tested negative — how safe should I feel?'",
+    options: ["Sensitivity", "Specificity", "PPV (Precision)", "NPV"],
+    answer: 3
+  },
+  {
+    q: "Lowering a classification threshold will typically:",
+    options: [
+      "Increase sensitivity and increase specificity",
+      "Increase sensitivity and decrease specificity",
+      "Decrease sensitivity and increase specificity",
+      "Have no effect on either"
+    ],
+    answer: 1
+  },
+  {
+    q: "F1 Score is the harmonic mean of which two metrics?",
+    options: [
+      "Sensitivity and Specificity",
+      "Precision and Sensitivity",
+      "Accuracy and MCC",
+      "PPV and NPV"
+    ],
+    answer: 1
+  }
+];
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = quizData.map((q, i) => `
+    <div class="card blue" style="margin-bottom: 1rem;">
+      <p><strong>Q${i+1}.</strong> ${q.q}</p>
+      ${q.options.map((opt, j) => `
+        <label style="display:block; margin: 0.4rem 0; cursor:pointer;">
+          <input type="radio" name="q${i}" value="${j}"> ${opt}
+        </label>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function gradeQuiz() {
+  let correct = 0;
+  quizData.forEach((q, i) => {
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    if (sel && +sel.value === q.answer) correct++;
+  });
+  const pct = Math.round(correct / quizData.length * 100);
+  const result = document.getElementById('quiz-result');
+  result.textContent = `Score: ${correct}/${quizData.length} (${pct}%)`;
+  result.style.color = pct >= 80 ? '#4CAF50' : pct >= 60 ? '#FFA726' : '#D32F2F';
+}
+
+// Init
+buildQuiz();
+updateMatrix();
+</script>
+</body>
+</html>

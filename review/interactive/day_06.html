@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 6: Probability & Binomial Distribution — BUS 322</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<style>
+  :root {
+    --lynn-blue: #003DA5;
+    --lynn-blue-light: #E8F0FE;
+    --lynn-gray: #B1B3B3;
+    --green: #4CAF50;
+    --red: #D32F2F;
+    --amber: #FFA726;
+    --teal: #00897B;
+    --text-dark: #1A1A2E;
+    --text-body: #333;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', 'Liberation Sans', Arial, sans-serif; color: var(--text-body); background: #fafafa; }
+  header { background: var(--lynn-blue); color: white; padding: 1.5rem 2rem; }
+  header h1 { font-size: 1.8rem; font-weight: 700; }
+  header p { opacity: 0.85; margin-top: 0.3rem; }
+  .tabs { display: flex; background: #f0f0f0; border-bottom: 2px solid var(--lynn-blue); overflow-x: auto; }
+  .tab { padding: 0.8rem 1.5rem; cursor: pointer; font-weight: 600; border: none; background: none; color: #666; white-space: nowrap; }
+  .tab.active { color: var(--lynn-blue); border-bottom: 3px solid var(--lynn-blue); background: white; }
+  .tab:hover { background: #e8e8e8; }
+  .panel { display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+  .panel.active { display: block; }
+  h2 { color: var(--lynn-blue); margin: 1.5rem 0 0.8rem; font-size: 1.4rem; }
+  h3 { color: var(--lynn-blue); margin: 1rem 0 0.5rem; font-size: 1.15rem; }
+  p, li { line-height: 1.65; margin-bottom: 0.5rem; }
+  .card { background: white; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  .card.blue { border-left: 4px solid var(--lynn-blue); }
+  .card.green { border-left: 4px solid var(--green); }
+  .card.red { border-left: 4px solid var(--red); }
+  .card.amber { border-left: 4px solid var(--amber); }
+  .card.teal { border-left: 4px solid var(--teal); }
+  .formula { font-family: 'Consolas', 'DejaVu Sans Mono', monospace; background: var(--lynn-blue-light); padding: 0.3rem 0.6rem; border-radius: 4px; color: var(--lynn-blue); font-weight: 600; }
+  .excel-ref { font-family: 'Consolas', monospace; color: var(--lynn-blue); font-size: 0.95rem; }
+  .slider-group { margin: 1rem 0; }
+  .slider-group label { font-weight: 600; display: block; margin-bottom: 0.3rem; }
+  .slider-group input[type=range] { width: 100%; max-width: 500px; }
+  .slider-val { font-weight: 700; color: var(--lynn-blue); font-size: 1.2rem; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .metric-box { background: white; border: 2px solid #e0e0e0; border-radius: 8px; padding: 1rem; text-align: center; }
+  .metric-box .label { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-box .value { font-size: 1.8rem; font-weight: 700; color: var(--lynn-blue); }
+  .metric-box .sub { font-size: 0.8rem; color: #999; }
+  .excel-toolkit { background: var(--lynn-blue-light); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
+  .excel-toolkit h3 { margin-top: 0; }
+  .excel-toolkit code { display: block; margin: 0.3rem 0; font-size: 0.95rem; }
+  .quiz-btn { background: var(--lynn-blue); color: white; border: none; padding: 0.8rem 2rem; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600; }
+  .quiz-btn:hover { background: #002a7a; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+  table.prob-table { border-collapse: collapse; margin: 1rem 0; width: 100%; max-width: 600px; }
+  table.prob-table th, table.prob-table td { border: 2px solid #ccc; padding: 0.6rem 1rem; text-align: center; }
+  table.prob-table th { background: var(--lynn-blue); color: white; }
+  table.prob-table .highlight { background: var(--lynn-blue-light); font-weight: 700; }
+  .num-input { width: 80px; padding: 0.4rem; font-size: 1rem; text-align: center; border: 2px solid var(--lynn-blue); border-radius: 4px; }
+  footer { text-align: center; padding: 2rem; color: #999; font-size: 0.85rem; border-top: 1px solid #eee; margin-top: 3rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Day 6: Probability & Binomial Distribution</h1>
+  <p>BUS 322 — Business Intelligence & Data Analytics | Lynn University | Tuesday</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showPanel('theory')">Theory</button>
+  <button class="tab" onclick="showPanel('empirical')">Empirical Probability</button>
+  <button class="tab" onclick="showPanel('binomial')">Binomial Explorer</button>
+  <button class="tab" onclick="showPanel('excel')">Excel Toolkit</button>
+  <button class="tab" onclick="showPanel('quiz')">SpotCheck Quiz</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- THEORY PANEL -->
+<!-- ============================================================ -->
+<div id="theory" class="panel active">
+  <h2>What Is Probability?</h2>
+  <p>Probability measures how likely an event is to occur, on a scale from 0 (impossible) to 1 (certain). Three approaches:</p>
+
+  <div class="two-col">
+    <div class="card blue">
+      <h3>Classical (Theoretical)</h3>
+      <p class="formula">P(A) = favorable outcomes / total outcomes</p>
+      <p>Works when all outcomes are equally likely. Example: P(heads) = 1/2.</p>
+    </div>
+    <div class="card green">
+      <h3>Empirical (Relative Frequency)</h3>
+      <p class="formula">P(A) = count of A / total observations</p>
+      <p>Based on observed data. "Out of 24 hours, how often does demand exceed 3,000 queries?"</p>
+    </div>
+  </div>
+
+  <h2>Key Rules</h2>
+  <div class="card amber">
+    <h3>Complement Rule</h3>
+    <p class="formula">P(not A) = 1 - P(A)</p>
+    <p>The probability something does NOT happen. If P(rain) = 0.30, then P(no rain) = 0.70.</p>
+    <p><strong>When to use:</strong> "At least one" problems are almost always easier as 1 - P(none).</p>
+  </div>
+
+  <div class="card teal">
+    <h3>Cumulative Probability</h3>
+    <p class="formula">P(X &le; k) = P(X=0) + P(X=1) + ... + P(X=k)</p>
+    <p>Add up individual probabilities from 0 through k. Excel's cumulative flag (TRUE) does this automatically.</p>
+  </div>
+
+  <h2>Empirical Probability Distribution</h2>
+  <p>Bin your data into categories, count the frequency of each bin, divide by total observations. The result is a probability distribution where all P(X) values sum to 1.0.</p>
+  <div class="card blue">
+    <p><strong>Steps:</strong></p>
+    <ol>
+      <li>Define bins (ranges of values)</li>
+      <li>Count observations in each bin → frequency</li>
+      <li>Divide each frequency by total → P(X) = count / n</li>
+      <li>Cumulative P: running sum of P(X) from first to last bin</li>
+      <li>Expected Value: E(X) = SUMPRODUCT(midpoints, probabilities)</li>
+    </ol>
+  </div>
+
+  <h2>Binomial Distribution</h2>
+  <p>Counts the number of successes in a fixed number of independent trials, each with the same probability of success.</p>
+
+  <div class="card green">
+    <h3>Three Requirements</h3>
+    <ol>
+      <li><strong>Fixed number of trials (n)</strong> — you know how many times you're checking</li>
+      <li><strong>Two outcomes per trial</strong> — success or failure</li>
+      <li><strong>Constant probability (p)</strong> — same chance each trial</li>
+    </ol>
+  </div>
+
+  <div class="card blue">
+    <h3>Excel Functions</h3>
+    <p><span class="formula">=BINOM.DIST(k, n, p, FALSE)</span> — P(exactly k successes)</p>
+    <p><span class="formula">=BINOM.DIST(k, n, p, TRUE)</span> — P(at most k successes) — cumulative</p>
+    <p><span class="formula">=1 - BINOM.DIST(k, n, p, TRUE)</span> — P(more than k successes) — complement</p>
+  </div>
+
+  <div class="card amber">
+    <h3>Connection: Empirical → Binomial</h3>
+    <p>The empirical distribution gives you <strong>p</strong> (the probability of success per trial). Then the Binomial tells you what happens when you repeat that trial n times.</p>
+    <p>Example: If 10/24 hours are "Standard" demand (p = 10/24 = 0.417), what's the chance that exactly 4 out of 10 random hours are Standard?</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- EMPIRICAL PROBABILITY PANEL -->
+<!-- ============================================================ -->
+<div id="empirical" class="panel">
+  <h2>Build an Empirical Distribution</h2>
+  <p>AIOS tracks GPU queries per hour over a 24-hour cycle. The data is binned into 6 ranges. Adjust the counts below and watch the probability distribution, CDF, and expected value update live.</p>
+
+  <div class="card blue">
+    <h3>Bin Counts (must sum to 24)</h3>
+    <table class="prob-table" id="freq-table">
+      <tr>
+        <th>Bin</th><th>Range</th><th>Midpoint</th><th>Count</th><th>P(X)</th><th>Cumul P</th>
+      </tr>
+      <tr><td>1</td><td>0–999</td><td>500</td><td><input class="num-input" id="b1" type="number" min="0" max="24" value="3" onchange="updateEmpirical()"></td><td id="p1"></td><td id="c1"></td></tr>
+      <tr><td>2</td><td>1,000–1,999</td><td>1500</td><td><input class="num-input" id="b2" type="number" min="0" max="24" value="5" onchange="updateEmpirical()"></td><td id="p2"></td><td id="c2"></td></tr>
+      <tr><td>3</td><td>2,000–2,999</td><td>2500</td><td><input class="num-input" id="b3" type="number" min="0" max="24" value="4" onchange="updateEmpirical()"></td><td id="p3"></td><td id="c3"></td></tr>
+      <tr><td>4</td><td>3,000–3,999</td><td>3500</td><td><input class="num-input" id="b4" type="number" min="0" max="24" value="2" onchange="updateEmpirical()"></td><td id="p4"></td><td id="c4"></td></tr>
+      <tr><td>5</td><td>4,000–4,999</td><td>4500</td><td><input class="num-input" id="b5" type="number" min="0" max="24" value="6" onchange="updateEmpirical()"></td><td id="p5"></td><td id="c5"></td></tr>
+      <tr><td>6</td><td>5,000–5,999</td><td>5500</td><td><input class="num-input" id="b6" type="number" min="0" max="24" value="4" onchange="updateEmpirical()"></td><td id="p6"></td><td id="c6"></td></tr>
+    </table>
+    <p id="total-warn" style="color: var(--red); font-weight: 700;"></p>
+  </div>
+
+  <div class="metrics-grid" id="emp-metrics"></div>
+
+  <div class="two-col">
+    <div id="chart-pmf" style="height:400px;"></div>
+    <div id="chart-cdf" style="height:400px;"></div>
+  </div>
+
+  <div class="card green">
+    <h3>Key Takeaway</h3>
+    <p><strong>Expected Value</strong> = SUMPRODUCT(midpoints, probabilities). It's the weighted average — the "center of gravity" of the distribution. It does NOT have to equal any actual bin midpoint.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- BINOMIAL EXPLORER PANEL -->
+<!-- ============================================================ -->
+<div id="binomial" class="panel">
+  <h2>Binomial Distribution Explorer</h2>
+  <p>Set the number of trials (n) and probability of success (p), then explore the PMF and cumulative probabilities.</p>
+
+  <div class="card blue">
+    <div class="slider-group">
+      <label>Number of trials (n): <span class="slider-val" id="n-val">10</span></label>
+      <input type="range" id="n-slider" min="1" max="30" value="10" oninput="updateBinomial()">
+    </div>
+    <div class="slider-group">
+      <label>Probability of success (p): <span class="slider-val" id="p-val">0.42</span></label>
+      <input type="range" id="p-slider" min="1" max="99" value="42" oninput="updateBinomial()">
+    </div>
+  </div>
+
+  <div class="metrics-grid" id="binom-metrics"></div>
+
+  <div class="two-col">
+    <div id="chart-binom-pmf" style="height:420px;"></div>
+    <div id="chart-binom-cdf" style="height:420px;"></div>
+  </div>
+
+  <div class="card amber">
+    <h3>Try These Scenarios</h3>
+    <ul>
+      <li><strong>AIOS Standard hours:</strong> n=10, p=0.42 — What's the chance of exactly 4 Standard hours out of 10?</li>
+      <li><strong>AIOS Off-Peak hours:</strong> n=6, p=0.58 — What's the chance of at most 2 Off-Peak hours out of 6?</li>
+      <li><strong>Fair coin:</strong> n=20, p=0.50 — How symmetric is the distribution?</li>
+      <li><strong>Rare event:</strong> n=20, p=0.05 — Notice the heavy left skew.</li>
+    </ul>
+  </div>
+
+  <div class="card green">
+    <h3>Complement Trick</h3>
+    <p><span class="formula">P(at least 1) = 1 - P(exactly 0)</span></p>
+    <p>This is almost always easier than adding up P(1) + P(2) + P(3) + ... Set k=0 below to see P(X=0), then subtract from 1.</p>
+  </div>
+
+  <div class="card blue">
+    <h3>Probability Calculator</h3>
+    <div style="margin: 0.5rem 0;">
+      <label>k = <input class="num-input" id="k-input" type="number" min="0" max="30" value="4" onchange="updateBinomial()"></label>
+    </div>
+    <div class="metrics-grid" id="binom-calc"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- EXCEL TOOLKIT PANEL -->
+<!-- ============================================================ -->
+<div id="excel" class="panel">
+  <h2>Excel Functions for Day 6</h2>
+  <p>These formulas connect to the M3 workbook (Probability + Binomial tabs).</p>
+
+  <div class="excel-toolkit">
+    <h3>Empirical Probability</h3>
+    <code class="excel-ref">=COUNTIFS(range, "&gt;="&amp;low, range, "&lt;"&amp;high)    → count in bin</code>
+    <code class="excel-ref">=count / total                                    → P(X) for that bin</code>
+    <code class="excel-ref">=SUMPRODUCT(midpoints, probabilities)              → Expected Value</code>
+    <code class="excel-ref">=1 - SUM(P_first_k_bins)                          → Complement</code>
+  </div>
+
+  <div class="excel-toolkit">
+    <h3>Binomial Distribution</h3>
+    <code class="excel-ref">=BINOM.DIST(k, n, p, FALSE)     → P(exactly k successes)</code>
+    <code class="excel-ref">=BINOM.DIST(k, n, p, TRUE)      → P(at most k successes)</code>
+    <code class="excel-ref">=1 - BINOM.DIST(k, n, p, TRUE)  → P(more than k successes)</code>
+    <code class="excel-ref">=1 - BINOM.DIST(0, n, p, FALSE) → P(at least 1 success)</code>
+  </div>
+
+  <div class="excel-toolkit">
+    <h3>Key Statistics</h3>
+    <code class="excel-ref">=n * p                           → Expected number of successes</code>
+    <code class="excel-ref">=n * p * (1 - p)                 → Variance</code>
+    <code class="excel-ref">=SQRT(n * p * (1 - p))           → Standard deviation</code>
+  </div>
+
+  <div class="card amber">
+    <h3>Connection to M3 Workbook</h3>
+    <p>The Histogram tab bins AIOS query data into 6 ranges. Column F has P(X) for each bin. The Probability tabs ask questions using those bins. The Binomial tabs derive p from the Histogram (e.g., fraction of "Standard" hours) and apply BINOM.DIST.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- QUIZ PANEL -->
+<!-- ============================================================ -->
+<div id="quiz" class="panel">
+  <h2>SpotCheck Quiz — Day 6: Probability</h2>
+  <p>Test your understanding. Select the best answer for each question.</p>
+
+  <div id="quiz-container"></div>
+
+  <div style="margin-top: 2rem; text-align: center;">
+    <button class="quiz-btn" onclick="gradeQuiz()">Submit Answers</button>
+    <div id="quiz-result" style="margin-top: 1rem; font-size: 1.3rem; font-weight: 700;"></div>
+  </div>
+</div>
+
+<footer>
+  BUS 322 — Business Intelligence & Data Analytics | Lynn University | Day 6 Interactive
+</footer>
+
+<script>
+// ============================================================
+// TAB NAVIGATION
+// ============================================================
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'empirical') updateEmpirical();
+  if (id === 'binomial') updateBinomial();
+}
+
+// ============================================================
+// EMPIRICAL PROBABILITY
+// ============================================================
+const midpoints = [500, 1500, 2500, 3500, 4500, 5500];
+
+function updateEmpirical() {
+  const counts = [];
+  for (let i = 1; i <= 6; i++) counts.push(+document.getElementById('b'+i).value);
+  const total = counts.reduce((a,b) => a+b, 0);
+
+  const warn = document.getElementById('total-warn');
+  warn.textContent = total !== 24 ? `Total = ${total} (should be 24)` : '';
+
+  const probs = counts.map(c => total > 0 ? c / total : 0);
+  let cumul = 0;
+  const cumulProbs = probs.map(p => { cumul += p; return cumul; });
+
+  for (let i = 0; i < 6; i++) {
+    document.getElementById('p'+(i+1)).textContent = probs[i].toFixed(4);
+    document.getElementById('c'+(i+1)).textContent = cumulProbs[i].toFixed(4);
+  }
+
+  const ev = midpoints.reduce((sum, m, i) => sum + m * probs[i], 0);
+  const variance = midpoints.reduce((sum, m, i) => sum + probs[i] * Math.pow(m - ev, 2), 0);
+
+  document.getElementById('emp-metrics').innerHTML = [
+    { label: 'Total Obs', value: total, raw: true },
+    { label: 'Expected Value', value: ev.toFixed(0), raw: true },
+    { label: 'Std Dev', value: Math.sqrt(variance).toFixed(0), raw: true },
+    { label: 'Sum P(X)', value: probs.reduce((a,b) => a+b, 0).toFixed(4), raw: true },
+  ].map(m => `
+    <div class="metric-box">
+      <div class="label">${m.label}</div>
+      <div class="value">${m.value}</div>
+    </div>
+  `).join('');
+
+  const labels = ['0–999','1k–2k','2k–3k','3k–4k','4k–5k','5k–6k'];
+
+  Plotly.newPlot('chart-pmf', [{
+    x: labels, y: probs, type: 'bar',
+    marker: { color: probs.map((p,i) => i < 3 ? '#003DA5' : '#00897B') },
+    text: probs.map(p => p.toFixed(3)), textposition: 'outside'
+  }], {
+    title: 'Probability Distribution P(X)',
+    yaxis: { title: 'P(X)', range: [0, Math.max(...probs)*1.3 || 0.5] },
+    margin: { t: 40, b: 60 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' }
+  }, { responsive: true });
+
+  Plotly.newPlot('chart-cdf', [{
+    x: labels, y: cumulProbs, type: 'scatter', mode: 'lines+markers',
+    line: { color: '#003DA5', width: 3, shape: 'hv' },
+    marker: { size: 10, color: '#003DA5' },
+    text: cumulProbs.map(p => p.toFixed(3)), textposition: 'top center'
+  }], {
+    title: 'Cumulative Distribution F(X)',
+    yaxis: { title: 'Cumulative P', range: [0, 1.1] },
+    margin: { t: 40, b: 60 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' }
+  }, { responsive: true });
+}
+
+// ============================================================
+// BINOMIAL EXPLORER
+// ============================================================
+function binomPMF(k, n, p) {
+  let coeff = 1;
+  for (let i = 0; i < k; i++) coeff = coeff * (n - i) / (i + 1);
+  return coeff * Math.pow(p, k) * Math.pow(1 - p, n - k);
+}
+
+function updateBinomial() {
+  const n = +document.getElementById('n-slider').value;
+  const p = +document.getElementById('p-slider').value / 100;
+  const k = +document.getElementById('k-input').value;
+
+  document.getElementById('n-val').textContent = n;
+  document.getElementById('p-val').textContent = p.toFixed(2);
+
+  const mean = n * p;
+  const variance = n * p * (1 - p);
+  const sd = Math.sqrt(variance);
+
+  const xs = [], pmf = [], cdf = [];
+  let cumul = 0;
+  for (let i = 0; i <= n; i++) {
+    xs.push(i);
+    const prob = binomPMF(i, n, p);
+    pmf.push(prob);
+    cumul += prob;
+    cdf.push(cumul);
+  }
+
+  document.getElementById('binom-metrics').innerHTML = [
+    { label: 'Mean (np)', value: mean.toFixed(2) },
+    { label: 'Variance', value: variance.toFixed(3) },
+    { label: 'Std Dev', value: sd.toFixed(3) },
+    { label: 'Mode', value: Math.round((n+1)*p - 1 >= 0 ? Math.floor((n+1)*p) : 0) },
+  ].map(m => `
+    <div class="metric-box">
+      <div class="label">${m.label}</div>
+      <div class="value">${m.value}</div>
+    </div>
+  `).join('');
+
+  const colors = xs.map(i => i === k ? '#D32F2F' : '#003DA5');
+
+  Plotly.newPlot('chart-binom-pmf', [{
+    x: xs, y: pmf, type: 'bar',
+    marker: { color: colors },
+    text: pmf.map(v => v > 0.005 ? v.toFixed(3) : ''), textposition: 'outside'
+  }], {
+    title: `Binomial PMF: n=${n}, p=${p.toFixed(2)}`,
+    xaxis: { title: 'k (successes)', dtick: n <= 15 ? 1 : 2 },
+    yaxis: { title: 'P(X = k)', range: [0, Math.max(...pmf)*1.3] },
+    margin: { t: 40, b: 50 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' }
+  }, { responsive: true });
+
+  Plotly.newPlot('chart-binom-cdf', [{
+    x: xs, y: cdf, type: 'scatter', mode: 'lines+markers',
+    line: { color: '#00897B', width: 3, shape: 'hv' },
+    marker: { size: 8, color: '#00897B' }
+  }], {
+    title: `Binomial CDF: P(X ≤ k)`,
+    xaxis: { title: 'k (successes)', dtick: n <= 15 ? 1 : 2 },
+    yaxis: { title: 'Cumulative P', range: [0, 1.05] },
+    margin: { t: 40, b: 50 },
+    font: { family: 'Segoe UI, Liberation Sans, Arial' }
+  }, { responsive: true });
+
+  // Calculator
+  const kSafe = Math.min(k, n);
+  const pExact = binomPMF(kSafe, n, p);
+  const pAtMost = cdf[kSafe] || 0;
+  const pMoreThan = 1 - pAtMost;
+  const pAtLeast1 = 1 - binomPMF(0, n, p);
+
+  document.getElementById('binom-calc').innerHTML = [
+    { label: `P(X = ${kSafe})`, value: pExact.toFixed(4), sub: 'Exactly k' },
+    { label: `P(X ≤ ${kSafe})`, value: pAtMost.toFixed(4), sub: 'At most k (CDF)' },
+    { label: `P(X > ${kSafe})`, value: pMoreThan.toFixed(4), sub: 'More than k' },
+    { label: 'P(X ≥ 1)', value: pAtLeast1.toFixed(4), sub: '1 - P(X=0)' },
+  ].map(m => `
+    <div class="metric-box">
+      <div class="label">${m.label}</div>
+      <div class="value">${m.value}</div>
+      <div class="sub">${m.sub}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+const quizData = [
+  {
+    q: "If 10 out of 24 hours are 'Standard' demand, what is P(Standard)?",
+    options: ["10/14 = 0.714", "10/24 = 0.417", "14/24 = 0.583", "10/10 = 1.000"],
+    answer: 1
+  },
+  {
+    q: "P(A) = 0.35. What is P(not A)?",
+    options: ["0.35", "0.65", "1.35", "0.00"],
+    answer: 1
+  },
+  {
+    q: "In a binomial experiment, which is NOT required?",
+    options: [
+      "Fixed number of trials",
+      "Each trial has exactly two outcomes",
+      "Probability changes from trial to trial",
+      "Trials are independent"
+    ],
+    answer: 2
+  },
+  {
+    q: "=BINOM.DIST(3, 10, 0.4, FALSE) gives you:",
+    options: [
+      "P(at most 3 successes in 10 trials)",
+      "P(exactly 3 successes in 10 trials)",
+      "P(more than 3 successes)",
+      "The expected number of successes"
+    ],
+    answer: 1
+  },
+  {
+    q: "What does the TRUE flag in BINOM.DIST do?",
+    options: [
+      "Returns the exact probability",
+      "Returns the cumulative probability P(X ≤ k)",
+      "Makes the function work for continuous data",
+      "Switches to Poisson distribution"
+    ],
+    answer: 1
+  },
+  {
+    q: "P(at least 1 success in 5 trials) is easiest computed as:",
+    options: [
+      "P(1) + P(2) + P(3) + P(4) + P(5)",
+      "1 - P(0)",
+      "5 × p",
+      "BINOM.DIST(1, 5, p, TRUE)"
+    ],
+    answer: 1
+  },
+  {
+    q: "Expected Value of a probability distribution equals:",
+    options: [
+      "The most common value",
+      "The midpoint of the range",
+      "SUMPRODUCT(values, probabilities)",
+      "SUM(probabilities)"
+    ],
+    answer: 2
+  },
+  {
+    q: "A valid probability distribution must have all P(X) values that:",
+    options: [
+      "Sum to 0",
+      "Are equal to each other",
+      "Sum to 1.0 and each is between 0 and 1",
+      "Sum to the sample size"
+    ],
+    answer: 2
+  },
+  {
+    q: "If n=10, p=0.42, what is the expected number of successes?",
+    options: ["4.2", "4.0", "5.0", "0.42"],
+    answer: 0
+  },
+  {
+    q: "The CDF value at the last bin of a valid probability distribution is always:",
+    options: ["0", "0.5", "1.0", "Depends on the data"],
+    answer: 2
+  }
+];
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = quizData.map((q, i) => `
+    <div class="card blue" style="margin-bottom: 1rem;">
+      <p><strong>Q${i+1}.</strong> ${q.q}</p>
+      ${q.options.map((opt, j) => `
+        <label style="display:block; margin: 0.4rem 0; cursor:pointer;">
+          <input type="radio" name="q${i}" value="${j}"> ${opt}
+        </label>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function gradeQuiz() {
+  let correct = 0;
+  quizData.forEach((q, i) => {
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    if (sel && +sel.value === q.answer) correct++;
+  });
+  const pct = Math.round(correct / quizData.length * 100);
+  const result = document.getElementById('quiz-result');
+  result.textContent = `Score: ${correct}/${quizData.length} (${pct}%)`;
+  result.style.color = pct >= 80 ? '#4CAF50' : pct >= 60 ? '#FFA726' : '#D32F2F';
+}
+
+// Init
+buildQuiz();
+updateEmpirical();
+</script>
+</body>
+</html>
