@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Test? — t, Welch's t, F and χ² · BUS 322 Review</title>
+<style>
+:root{
+  --bg:#fafaf8; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+  --blue:#2a78d6; --orange:#eb6834; --aqua:#1baf7a; --yellow:#eda100; --lynn:#003da5;
+  --blue-soft:#e8f0fb; --orange-soft:#fdeee8; --aqua-soft:#e6f7f0; --yellow-soft:#fff5dd;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{background:var(--lynn);color:#fff;padding:36px 20px 28px}
+header .wrap{max-width:900px;margin:0 auto}
+header h1{margin:0 0 6px;font-size:30px;font-weight:700;letter-spacing:-.01em}
+header p{margin:0;opacity:.9;font-size:17px}
+header .crumb{font-size:13px;opacity:.75;margin-bottom:10px}
+header a{color:#fff}
+main{max-width:900px;margin:0 auto;padding:24px 20px 80px}
+h2{font-size:24px;margin:44px 0 10px;padding-top:8px;border-top:3px solid var(--line);letter-spacing:-.01em}
+h2 .tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#fff;border-radius:999px;padding:2px 10px;margin-right:10px;vertical-align:middle}
+h3{font-size:18px;margin:26px 0 8px}
+p{margin:10px 0}
+.lead{font-size:18px;color:#374151}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.card.blue{border-left:5px solid var(--blue)} .card.orange{border-left:5px solid var(--orange)}
+.card.aqua{border-left:5px solid var(--aqua)} .card.yellow{border-left:5px solid var(--yellow)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.plain{background:var(--blue-soft);border-radius:10px;padding:12px 16px;margin:12px 0}
+.plain b{color:var(--lynn)}
+.formula{font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:19px;background:#f3f4f6;border-radius:10px;padding:14px 18px;margin:12px 0;overflow-x:auto;text-align:center}
+.formula.small{font-size:16px;text-align:left}
+.frac{display:inline-block;vertical-align:middle;text-align:center;margin:0 4px}
+.frac>span{display:block;padding:0 6px}
+.frac>span:first-child{border-bottom:1.5px solid var(--ink)}
+.sq{vertical-align:super;font-size:.65em;line-height:0}
+.steps{counter-reset:s;padding-left:0;list-style:none;margin:12px 0}
+.steps li{counter-increment:s;position:relative;padding:8px 0 8px 46px;border-bottom:1px dashed var(--line)}
+.steps li:last-child{border-bottom:0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:30px;height:30px;border-radius:50%;background:var(--lynn);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:15px;margin:8px 0}
+.kv div:nth-child(odd){color:var(--muted)}
+.pill{display:inline-block;border-radius:999px;padding:1px 10px;font-size:13px;font-weight:600;background:var(--line)}
+.pill.blue{background:var(--blue-soft);color:var(--blue)} .pill.orange{background:var(--orange-soft);color:var(--orange)}
+.pill.aqua{background:var(--aqua-soft);color:#0f7a54} .pill.yellow{background:var(--yellow-soft);color:#9a6600}
+.try{background:linear-gradient(180deg,#fff,#f8fafc);border:1px solid #d6dee8;border-radius:12px;padding:16px 18px;margin:16px 0}
+.try h4{margin:0 0 8px;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--lynn)}
+.ctrl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px;margin:8px 0 12px}
+.ctrl label{display:block;font-size:13px;color:var(--muted)}
+.ctrl input[type=range]{width:100%}
+.ctrl output{font-weight:700;color:var(--ink)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat .lab{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stat .val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.blue .val{color:var(--blue)} .stat.orange .val{color:var(--orange)} .stat.aqua .val{color:#0f7a54}
+.verdict{font-weight:600;padding:8px 12px;border-radius:8px;margin-top:8px}
+.verdict.yes{background:var(--orange-soft);color:#b3400f} .verdict.no{background:var(--aqua-soft);color:#0f7a54}
+svg{max-width:100%;height:auto;display:block}
+.chart{margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:10px 0}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:#374151}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+input.cnt{width:64px;padding:4px 6px;font:inherit;border:1px solid #cbd5e1;border-radius:6px;text-align:right}
+.flow{margin:14px 0}
+.note{font-size:14px;color:var(--muted)}
+.qa{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fff}
+.qa summary{cursor:pointer;font-weight:600}
+.qa p{margin:8px 0 0}
+.mistake{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;margin:10px 0}
+.mistake .x{width:30px;height:30px;border-radius:50%;background:var(--orange-soft);color:var(--orange);font-weight:800;display:flex;align-items:center;justify-content:center}
+a{color:var(--blue)}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+.toc a{background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;text-decoration:none;color:var(--ink)}
+.toc a:hover{border-color:var(--blue);color:var(--blue)}
+.cf{font-size:13px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="crumb"><a href="../BUS322_A_Review_Hub.html">← Review Hub</a> · Week 3 · Test Claims · Test selection</div>
+    <h1>Which test? A field guide to t, Welch's t, F and χ²</h1>
+    <p>Every one of these tests answers the same question: <em>could this difference be nothing but luck?</em> This page shows what each one measures, the math behind the score, and — most important — how to pick the right one.</p>
+  </div>
+</header>
+
+<main>
+
+<div class="toc">
+  <a href="#idea">1 · The one idea</a>
+  <a href="#map">2 · The map</a>
+  <a href="#f">3 · F-test</a>
+  <a href="#t">4 · t vs Welch's t</a>
+  <a href="#chi">5 · χ²</a>
+  <a href="#cheat">6 · Cheat sheet</a>
+  <a href="#mistakes">7 · Mistakes</a>
+  <a href="#check">8 · Self-check</a>
+</div>
+
+<!-- ============================================================ 1 -->
+<h2 id="idea"><span class="tag" style="background:var(--lynn)">1</span>The one idea behind every test</h2>
+
+<p class="lead">You have two numbers that are different. The question is never "are they different?" — they always are. The question is <b>"is the gap bigger than luck alone would produce?"</b></p>
+
+<div class="card">
+<p>Every test on this page works the same way in three moves:</p>
+<ol class="steps">
+  <li><b>Compute a score</b> from the data. The score is always some version of <em>signal ÷ noise</em>: how big the gap is, divided by how much wobble you'd expect anyway.</li>
+  <li><b>Hand the score to a referee.</b> The referee is a curve (t, F or χ²) that says how often a score that big shows up when <em>nothing real is going on</em>.</li>
+  <li><b>Read the p-value.</b> That's the referee's answer: the fraction of "nothing going on" worlds that would produce a score at least this extreme. Small p (usually under 0.05) → luck is a poor explanation → we say the gap is <em>statistically significant</em>.</li>
+</ol>
+<p class="note">Same recipe every time. The only things that change are <em>what kind of data you have</em> (which sets the score) and <em>which referee</em> you hand it to.</p>
+</div>
+
+<h3>Why "t" instead of the normal curve?</h3>
+<p>You already know the bell curve. A t-curve is a bell curve that has been told <em>"you only saw a small sample, so be humble."</em> With few observations, your estimate of the spread (the standard deviation) is shaky, so the t-curve grows fatter tails: extreme scores are treated as more ordinary, and you need a bigger score to be convinced. As the sample grows, t turns back into the normal curve.</p>
+
+<div class="try">
+<h4>Try it — drag the degrees of freedom</h4>
+<div class="ctrl">
+  <div><label>degrees of freedom (df ≈ sample size − 1): <output id="tdf-out">4</output></label><input type="range" id="tdf" min="1" max="60" value="4"></div>
+</div>
+<div class="chart" id="t-vs-z"></div>
+<div class="readout">
+  <div class="stat blue"><div class="lab">t-curve: score needed for p &lt; 0.05 (two-sided)</div><div class="val" id="tcrit">—</div></div>
+  <div class="stat"><div class="lab">normal curve: score needed</div><div class="val">1.96</div></div>
+</div>
+<p class="note">At df = 4 you need a score above 2.78 to reach p &lt; 0.05. At df = 30 it is 2.04. By df = 60 the two curves are nearly the same line.</p>
+</div>
+
+<!-- ============================================================ 2 -->
+<h2 id="map"><span class="tag" style="background:var(--lynn)">2</span>The map: which test, and why</h2>
+
+<p class="lead">Ask three questions about your data. The answers walk you to the test.</p>
+
+<div class="card">
+<div class="flow" id="flow"></div>
+<p class="note">Click any box to jump to that section. Blue = comparing averages (t family). Orange = comparing spreads (F). Green = comparing counts (χ²).</p>
+</div>
+
+<div class="grid2">
+  <div class="card blue">
+    <p><b>Question 1 — What did you measure?</b></p>
+    <p><span class="pill blue">Numbers</span> Seconds, dollars, degrees, scores. You will compare <em>averages</em> (t, or ANOVA for 3+ groups) or <em>spreads</em> (F).</p>
+    <p><span class="pill aqua">Categories / counts</span> Yes-or-no, weekday, which plan, complained-or-not. You count how many landed in each bucket and compare <em>counts</em> (χ²).</p>
+  </div>
+  <div class="card blue">
+    <p><b>Question 2 — How many groups, and are they the same individuals twice?</b></p>
+    <p>One group vs a target number → <em>one-sample t</em>. The same stores/people measured before and after → <em>paired t</em>. Two separate groups → <em>two-sample t</em>. Three or more groups → <em>ANOVA</em> (which uses the F referee).</p>
+  </div>
+  <div class="card orange">
+    <p><b>Question 3 — Do the two groups have the same spread?</b></p>
+    <p>This is where the <em>F-test</em> comes in. If the spreads are similar, the classic (pooled) t-test is fine. If one group is much wilder than the other, use <em>Welch's t</em>. When in doubt, Welch is always safe.</p>
+  </div>
+  <div class="card aqua">
+    <p><b>χ² has two jobs</b></p>
+    <p><em>Goodness of fit</em>: do counts across buckets match a pattern you expected (equal, or proportional to something)? <em>Association</em>: are two category variables linked (does the service plan change the chance of a slow response)?</p>
+  </div>
+</div>
+
+<!-- ============================================================ 3 -->
+<h2 id="f"><span class="tag" style="background:var(--orange)">3</span>The F-test — the spread check</h2>
+
+<div class="plain"><b>Plain English.</b> Two groups can have the same average and still behave very differently: one steady, one wild. The F-test asks whether two <em>spreads</em> are really different. It is also the engine inside ANOVA — but here we use it for its simplest job.</div>
+
+<h3>The score</h3>
+<p>Variance is the standard deviation squared (<em>s</em>²). The F score is just one variance divided by the other, bigger on top:</p>
+<div class="formula">
+  F &nbsp;=&nbsp; <span class="frac"><span>s<span class="sq">2</span><sub>larger</sub></span><span>s<span class="sq">2</span><sub>smaller</sub></span></span>
+</div>
+<p>If the two groups wobble the same amount, F lands near 1. The further above 1 it climbs, the harder it is to blame luck. Because F is a ratio of squared things it can never go below zero, so the referee curve is lopsided: a hump near 1 with a long tail to the right.</p>
+
+<h3>The referee</h3>
+<p>The F-curve needs two degrees of freedom — one for each group: <em>df</em><sub>1</sub> = <em>n</em><sub>1</sub> − 1 (top group), <em>df</em><sub>2</sub> = <em>n</em><sub>2</sub> − 1 (bottom group). Small groups → wide curve → you need a bigger F to convince it.</p>
+
+<h3>Plug in real numbers — a before/after example</h3>
+<div class="card orange">
+<p>A service desk measures its daily average wait. Before a process change: 14 days, SD = <b>4.80 s</b>. After: 31 days, SD = <b>1.87 s</b>.</p>
+<ol class="steps">
+  <li>Square the SDs: 4.80² = <b>23.0</b> and 1.87² = <b>3.50</b>.</li>
+  <li>Bigger over smaller: F = 23.0 ÷ 3.50 = <b>6.6</b>.</li>
+  <li>Degrees of freedom: df<sub>1</sub> = 14 − 1 = 13, df<sub>2</sub> = 31 − 1 = 30.</li>
+  <li>Referee: with (13, 30) df, a ratio this lopsided happens by luck about <b>2 times in 100,000</b> (p ≈ 0.00002, two-sided — the same number Excel's F.TEST reports).</li>
+</ol>
+<div class="verdict yes">Verdict: the spreads are different. the before period was six times wilder (in variance) than the after period. → Do <b>not</b> pool; use Welch's t for the averages.</div>
+</div>
+
+<div class="try">
+<h4>Try it — how wild does one group have to be?</h4>
+<div class="ctrl">
+  <div><label>SD of group A: <output id="fa-out">4.80</output> s</label><input type="range" id="fa" min="0.5" max="8" step="0.01" value="4.80"></div>
+  <div><label>SD of group B: <output id="fb-out">1.87</output> s</label><input type="range" id="fb" min="0.5" max="8" step="0.01" value="1.87"></div>
+  <div><label>n in group A: <output id="fna-out">14</output></label><input type="range" id="fna" min="3" max="60" value="14"></div>
+  <div><label>n in group B: <output id="fnb-out">31</output></label><input type="range" id="fnb" min="3" max="60" value="31"></div>
+</div>
+<div class="grid2">
+  <div><div class="chart" id="f-bells"></div><p class="cf">Two groups with the same average, different spreads.</p></div>
+  <div><div class="chart" id="f-ref"></div><p class="cf">The F referee curve. The p-value is the area beyond the score (doubled, because either group could have been the wild one) — with F = 6.6 it is too thin to see.</p></div>
+</div>
+<div class="readout">
+  <div class="stat orange"><div class="lab">F score</div><div class="val" id="f-val">—</div></div>
+  <div class="stat"><div class="lab">df</div><div class="val" id="f-df">—</div></div>
+  <div class="stat orange"><div class="lab">p-value</div><div class="val" id="f-p">—</div></div>
+</div>
+<div class="verdict" id="f-verdict"></div>
+<p class="note">Notice: with tiny groups (n = 5 each) even an F of 3 is not convincing. With 40 each, F = 2 already is. Sample size is baked into the referee.</p>
+</div>
+
+<div class="card">
+<p><b>Two honest caveats.</b> First, the F-test for spreads is touchy about non-normal data — a couple of outliers can inflate a variance and fake a "different" verdict. Statisticians often prefer Levene's test for that reason, but the idea is identical. Second, when the data are not normal, the F-test may signal "different" when a rank-based test is the safer road — see <a href="nonparametric.html">Non-Parametric Methods</a>.</p>
+</div>
+
+<!-- ============================================================ 4 -->
+<h2 id="t"><span class="tag" style="background:var(--blue)">4</span>t-test vs Welch's t-test</h2>
+
+<div class="card orange" style="border-left-width:6px">
+<p style="margin-top:0"><b>The rule, up front.</b> Both tests compare two averages. The only question that decides between them is: <b>do the two groups have the same spread (variance)?</b></p>
+<table>
+  <thead><tr><th>Spreads (variances)</th><th>Use</th><th>How you know</th><th>Excel</th><th>Python</th></tr></thead>
+  <tbody>
+    <tr><td><b>Equal</b> (about the same SD)</td><td><b>Classic / pooled t</b></td><td>F-test does <em>not</em> reject (p ≥ 0.05), or SD ratio under ~2</td><td><code>=T.TEST(a, b, 2, <b>2</b>)</code></td><td><code>ttest_ind(a, b)</code></td></tr>
+    <tr><td><b>Unequal</b> (one group clearly wilder)</td><td><b>Welch's t</b></td><td>F-test rejects (p &lt; 0.05), or SD ratio over ~2, or sizes very different</td><td><code>=T.TEST(a, b, 2, <b>3</b>)</code></td><td><code>ttest_ind(a, b, equal_var=False)</code></td></tr>
+    <tr><td><b>Not sure</b></td><td><b>Welch's t</b></td><td>Welch is correct in both cases; the classic test is correct in only one</td><td><code>=T.TEST(a, b, 2, 3)</code></td><td><code>equal_var=False</code></td></tr>
+  </tbody>
+</table>
+<p class="note" style="margin-bottom:0">Check first with <code>=F.TEST(a, b)</code> (two-tailed, order doesn't matter) or <code>scipy.stats.f.sf(F, df1, df2)</code>. Third argument in T.TEST = tails (2 = two-sided); fourth = type (1 paired · 2 equal variances · 3 unequal variances).</p>
+</div>
+<div class="plain"><b>Plain English.</b> Both tests compare two averages. The score is <em>gap ÷ noise</em>. They disagree only about how to measure the noise: the classic test assumes both groups wobble equally and blends their spreads; Welch's keeps them separate. If the spreads really are equal, the two tests give nearly the same answer. If they are not, the classic one can be over-confident.</div>
+
+<h3>The score (the part they share)</h3>
+<div class="formula">
+  t &nbsp;=&nbsp; <span class="frac"><span>x̄<sub>1</sub> − x̄<sub>2</sub></span><span>SE</span></span>
+  &nbsp;&nbsp;&nbsp;<span style="font-size:15px;color:#6b7280">gap between the averages ÷ standard error (the expected wobble of that gap)</span>
+</div>
+
+<h3>The noise (the part they argue about)</h3>
+<div class="grid2">
+  <div class="card blue">
+    <p><b>Classic (pooled / Student's) t</b></p>
+    <p>Blend the two variances into one, weighting by sample size:</p>
+    <div class="formula small">
+      s<span class="sq">2</span><sub>p</sub> = <span class="frac"><span>(n<sub>1</sub>−1)s<sub>1</sub><span class="sq">2</span> + (n<sub>2</sub>−1)s<sub>2</sub><span class="sq">2</span></span><span>n<sub>1</sub> + n<sub>2</sub> − 2</span></span><br><br>
+      SE = √( s<span class="sq">2</span><sub>p</sub> · ( <span class="frac"><span>1</span><span>n<sub>1</sub></span></span> + <span class="frac"><span>1</span><span>n<sub>2</sub></span></span> ) )
+    </div>
+    <p>df = n<sub>1</sub> + n<sub>2</sub> − 2. Simple, and the most power <em>if</em> the spreads truly match.</p>
+  </div>
+  <div class="card orange">
+    <p><b>Welch's t</b></p>
+    <p>Keep each group's own variance, each divided by its own n:</p>
+    <div class="formula small">
+      SE = √( <span class="frac"><span>s<sub>1</sub><span class="sq">2</span></span><span>n<sub>1</sub></span></span> + <span class="frac"><span>s<sub>2</sub><span class="sq">2</span></span><span>n<sub>2</sub></span></span> )
+    </div>
+    <p>The price: a smaller (and usually non-whole-number) df, computed by the Welch–Satterthwaite formula:</p>
+    <div class="formula small">
+      df = <span class="frac"><span>(a + b)<span class="sq">2</span></span><span>a<span class="sq">2</span>/(n<sub>1</sub>−1) + b<span class="sq">2</span>/(n<sub>2</sub>−1)</span></span><br>
+      <span style="font-size:14px;color:#6b7280">where a = s<sub>1</sub><span class="sq">2</span>/n<sub>1</sub> and b = s<sub>2</sub><span class="sq">2</span>/n<sub>2</sub> (the two pieces of Welch's SE)</span>
+    </div>
+    <p>Think of it as a penalty: the wilder, smaller group drags the df down, so you need a bigger t.</p>
+  </div>
+</div>
+
+<h3>Plug in real numbers — the same before/after example</h3>
+<div class="card blue">
+<p>Before: n = 14, mean 37.26 s, SD 4.80. After: n = 31, mean 30.96 s, SD 1.87. Gap = <b>6.30 s</b>.</p>
+<div class="grid2">
+<div>
+<p><span class="pill blue">Classic</span></p>
+<ol class="steps">
+  <li>s²<sub>p</sub> = (13 × 23.0 + 30 × 3.50) ÷ 43 = (299.5 + 105) ÷ 43 = <b>9.41</b></li>
+  <li>SE = √(9.41 × (1/14 + 1/31)) = √(9.41 × 0.1037) = <b>0.99</b></li>
+  <li>t = 6.30 ÷ 0.99 = <b>6.38</b>, df = 43 → p ≈ 0.0000001</li>
+</ol>
+</div>
+<div>
+<p><span class="pill orange">Welch</span></p>
+<ol class="steps">
+  <li>a = 23.0/14 = 1.646, b = 3.50/31 = 0.113</li>
+  <li>SE = √(1.646 + 0.113) = √1.759 = <b>1.33</b></li>
+  <li>t = 6.30 ÷ 1.33 = <b>4.75</b>, df = (1.759)² ÷ (1.646²/13 + 0.113²/30) = 3.094 ÷ 0.2088 ≈ <b>14.8</b> → p ≈ 0.0003</li>
+</ol>
+</div>
+</div>
+<div class="verdict yes">Both reject "no difference" — but look at the noise. Classic says SE = 0.99; Welch says 1.33. The classic test under-counted the noise by a third because it let the calm "after" group vouch for the wild "before" group. Same conclusion this time; not always.</div>
+</div>
+
+<div class="try">
+<h4>Try it — when do the two tests disagree?</h4>
+<div class="ctrl">
+  <div><label>Group A mean: <output id="ma-out">37.26</output></label><input type="range" id="ma" min="20" max="50" step="0.01" value="37.26"></div>
+  <div><label>Group B mean: <output id="mb-out">30.96</output></label><input type="range" id="mb" min="20" max="50" step="0.01" value="30.96"></div>
+  <div><label>Group A SD: <output id="sa-out">4.80</output></label><input type="range" id="sa" min="0.5" max="10" step="0.01" value="4.80"></div>
+  <div><label>Group B SD: <output id="sb-out">1.87</output></label><input type="range" id="sb" min="0.5" max="10" step="0.01" value="1.87"></div>
+  <div><label>n A: <output id="na-out">14</output></label><input type="range" id="na" min="3" max="60" value="14"></div>
+  <div><label>n B: <output id="nb-out">31</output></label><input type="range" id="nb" min="3" max="60" value="31"></div>
+</div>
+<div class="chart" id="t-bells"></div>
+<div class="readout">
+  <div class="stat blue"><div class="lab">Classic t · df · p</div><div class="val" id="t-pooled">—</div></div>
+  <div class="stat orange"><div class="lab">Welch t · df · p</div><div class="val" id="t-welch">—</div></div>
+  <div class="stat"><div class="lab">F for the spreads</div><div class="val" id="t-f">—</div></div>
+</div>
+<div class="verdict" id="t-verdict"></div>
+<p class="note">Recipe for a disagreement: make the <em>small</em> group the <em>wild</em> one (say n A = 5, SD A = 9, n B = 50, SD B = 1) and a modest gap of about 4. Classic t says "significant"; Welch says "not so fast". That is exactly the situation the classic test gets wrong.</p>
+</div>
+
+<div class="card">
+<p><b>So which do I use?</b> Run the F-test (or just compare the SDs — a ratio above about 2 is a warning). Similar spreads → either test, they agree. Different spreads → Welch. And if you can only remember one rule: <b>Welch is never wrong to use.</b> Its only cost is a slightly smaller df, which barely matters unless the groups are tiny. Most modern software defaults to Welch for that reason.</p>
+</div>
+
+<!-- ============================================================ 5 -->
+<h2 id="chi"><span class="tag" style="background:var(--aqua)">5</span>χ² — the test for counts</h2>
+
+<div class="plain"><b>Plain English.</b> No averages here. You sorted things into buckets and counted. The χ² (chi-square) test asks: are the counts you <em>observed</em> far from the counts you'd <em>expect</em> if nothing interesting were happening?</div>
+
+<h3>The score</h3>
+<div class="formula">
+  χ<span class="sq">2</span> &nbsp;=&nbsp; Σ&nbsp;<span class="frac"><span>(Observed − Expected)<span class="sq">2</span></span><span>Expected</span></span>
+</div>
+<p>For every bucket: take the miss, square it (so misses in either direction count, and big misses count a lot), then divide by the expected count (a miss of 5 is a big deal when you expected 10, a rounding error when you expected 1,000). Add them all up. Zero means a perfect match; bigger means further from "boring".</p>
+
+<h3>The referee</h3>
+<p>The χ²-curve, with df = (number of buckets − 1) for a goodness-of-fit test, or df = (rows − 1) × (columns − 1) for a table. Like F, it lives only on the positive side with a right tail. One rule of thumb: every expected count should be at least 5, or the referee's answer gets unreliable.</p>
+
+<h3>Job 1 — Goodness of fit: "are complaints evenly spread across the week?"</h3>
+<div class="card aqua">
+<p>Complaints logged at a help desk over one month, by weekday. Total 250. If weekday doesn't matter, we expect 250 ÷ 7 = <b>35.7</b> per day.</p>
+<div class="try" style="margin-top:8px">
+<h4>Try it — edit the observed counts</h4>
+<table>
+  <thead><tr><th>Day</th><th>Observed</th><th>Expected</th><th>(O − E)² / E</th></tr></thead>
+  <tbody id="gof-body"></tbody>
+  <tfoot><tr><th>Total</th><th id="gof-total"></th><th id="gof-etotal"></th><th id="gof-chi"></th></tr></tfoot>
+</table>
+<div class="chart" id="gof-chart"></div>
+<div class="readout">
+  <div class="stat aqua"><div class="lab">χ² score</div><div class="val" id="gof-val">—</div></div>
+  <div class="stat"><div class="lab">df</div><div class="val" id="gof-df">6</div></div>
+  <div class="stat aqua"><div class="lab">p-value</div><div class="val" id="gof-p">—</div></div>
+</div>
+<div class="verdict" id="gof-verdict"></div>
+<p class="note">With these numbers, χ² ≈ 4.0 on 6 df, p ≈ 0.67 — the wobble from day to day is exactly what luck produces. Now type 60 into Monday and watch the referee change its mind.</p>
+</div>
+</div>
+
+<h3>Job 2 — Association: "does the service plan change the odds of a slow response?"</h3>
+<div class="card aqua">
+<p>Two service plans, 270 sessions each. Every session is either <em>fast</em> (≤ 30 s) or <em>slow</em> (&gt; 30 s). Count them:</p>
+<table>
+  <thead><tr><th>Plan</th><th>Fast (≤ 30 s)</th><th>Slow (&gt; 30 s)</th><th>Total</th><th>% slow</th></tr></thead>
+  <tbody id="assoc-body"></tbody>
+</table>
+<p><b>Where "expected" comes from.</b> Overall, 175 of 540 sessions were slow (32.4 %). If the plan made no difference, each plan's 270 sessions should split the same way: 270 × 0.324 = <b>87.5</b> slow and <b>182.5</b> fast. In general: expected = (row total × column total) ÷ grand total.</p>
+<div class="readout">
+  <div class="stat aqua"><div class="lab">χ² score</div><div class="val" id="as-val">—</div></div>
+  <div class="stat"><div class="lab">df = (2−1)(2−1)</div><div class="val">1</div></div>
+  <div class="stat aqua"><div class="lab">p-value</div><div class="val" id="as-p">—</div></div>
+</div>
+<div class="verdict" id="as-verdict"></div>
+<p class="note">Edit the four counts above to see the score move. Try making both plans 87 slow / 183 fast — χ² drops to about zero, because that <em>is</em> the "no association" pattern.</p>
+</div>
+
+<div class="card">
+<p><b>How χ² relates to the others.</b> Notice the shape of the score: (miss)² ÷ expected, summed. That is a squared, standardised distance — the same idea as t² or the "between ÷ within" of F. All three referees are cousins: t² with 1 df on top is an F; a χ² with 1 df is a squared normal. Different data types, one family of ideas.</p>
+</div>
+
+<!-- ============================================================ 6 -->
+<h2 id="cheat"><span class="tag" style="background:var(--lynn)">6</span>Cheat sheet</h2>
+
+<table>
+<thead><tr><th>You have…</th><th>You want to know…</th><th>Test</th><th>Score</th><th>Referee · df</th></tr></thead>
+<tbody>
+<tr><td>Numbers, one group</td><td>Is the average different from a target?</td><td>One-sample t</td><td>(x̄ − target) ÷ (s/√n)</td><td>t · n − 1</td></tr>
+<tr><td>Numbers, same units twice</td><td>Did each one change?</td><td>Paired t</td><td>mean of differences ÷ (s<sub>d</sub>/√n)</td><td>t · n − 1</td></tr>
+<tr><td>Numbers, two groups, <b>equal variances</b> (F-test not rejected)</td><td>Are the averages different?</td><td>Classic / pooled t (Excel type 2)</td><td>gap ÷ pooled SE</td><td>t · n<sub>1</sub> + n<sub>2</sub> − 2</td></tr>
+<tr><td>Numbers, two groups, <b>unequal variances</b> (F-test rejects) — or unsure</td><td>Are the averages different?</td><td><b>Welch's t</b> (Excel type 3)</td><td>gap ÷ √(s₁²/n₁ + s₂²/n₂)</td><td>t · Welch–Satterthwaite</td></tr>
+<tr><td>Numbers, two groups</td><td>Are the <em>spreads</em> different?</td><td>F-test</td><td>s²<sub>big</sub> ÷ s²<sub>small</sub></td><td>F · (n₁ − 1, n₂ − 1)</td></tr>
+<tr><td>Numbers, 3+ groups</td><td>Is any average different?</td><td>ANOVA</td><td>between-group variance ÷ within-group variance</td><td>F · (k − 1, N − k)</td></tr>
+<tr><td>Counts in buckets</td><td>Do counts match a pattern?</td><td>χ² goodness of fit</td><td>Σ (O − E)²/E</td><td>χ² · buckets − 1</td></tr>
+<tr><td>Counts in a table</td><td>Are two categories linked?</td><td>χ² association</td><td>Σ (O − E)²/E</td><td>χ² · (r − 1)(c − 1)</td></tr>
+</tbody>
+</table>
+
+<div class="card">
+<p><b>The flow in one breath.</b> Counts → χ². Numbers → how many groups? One → one-sample t. Same things twice → paired t. Two groups → check spreads with F → similar: classic t, different: Welch. Three or more → ANOVA. Data badly skewed or tiny → swap the t for its rank-based cousin (Mann–Whitney, Wilcoxon) — see <a href="nonparametric.html">Non-Parametric Methods</a>.</p>
+</div>
+
+<!-- ============================================================ 7 -->
+<h2 id="mistakes"><span class="tag" style="background:var(--orange)">7</span>Five mistakes that cost points (and money)</h2>
+
+<div class="card">
+<div class="mistake"><div class="x">1</div><div><b>Using a two-sample t on paired data.</b> If the same twelve stores were measured before and after, the before-and-after numbers travel together. The paired test removes the store-to-store noise; the two-sample test leaves it in and often finds "nothing" when something is there.</div></div>
+<div class="mistake"><div class="x">2</div><div><b>Pooling when the spreads are obviously different.</b> A wild small group plus a calm big group makes the classic t over-confident. F-test first, or default to Welch.</div></div>
+<div class="mistake"><div class="x">3</div><div><b>Reading a tiny p-value as a big effect.</b> p says "not luck". It says nothing about "how much". A 0.3-second improvement can be wildly significant with enough data and still be worthless. Report the gap (and Cohen's d) next to the p.</div></div>
+<div class="mistake"><div class="x">4</div><div><b>Running χ² on percentages or averages.</b> χ² needs raw counts of things in buckets. 45 % is not a count; 45 out of 100 is.</div></div>
+<div class="mistake"><div class="x">5</div><div><b>Testing the wrong question.</b> "Is the after period calmer than the before period?" is a spread question (F), not an average question (t). Write the question as a sentence before choosing the test.</div></div>
+</div>
+
+<!-- ============================================================ 8 -->
+<h2 id="check"><span class="tag" style="background:var(--aqua)">8</span>Self-check — no calculator needed</h2>
+
+<details class="qa"><summary>1. A manager compares average delivery time for two courier companies, 8 shipments each. One company's times range 20–24 min, the other's 10–45 min. Which test?</summary><p><b>Welch's t.</b> Two separate groups (two-sample), and the spreads are clearly unequal (an F-test would confirm it). Pooling would let the steady company hide the wild one's noise.</p></details>
+<details class="qa"><summary>2. Same twelve branches, wait time measured the week before and the week after a software change. Which test?</summary><p><b>Paired t</b> on the twelve differences. The "before" and "after" numbers belong to the same branch, so you subtract first and test whether the average difference is zero.</p></details>
+<details class="qa"><summary>3. Of 300 customers on the basic plan, 40 complained; of 200 on the premium plan, 12 complained. Is plan linked to complaining?</summary><p><b>χ² association</b> on the 2 × 2 table (plan × complained). Counts in buckets, two category variables. df = 1.</p></details>
+<details class="qa"><summary>4. Group A has variance 20, group B has variance 5. What is F, and what does "F ≈ 1" mean?</summary><p>F = 20 ÷ 5 = <b>4</b>. F ≈ 1 would mean the two groups wobble about the same amount — no evidence of different spreads. Whether 4 is "big enough" depends on the sample sizes (the df).</p></details>
+<details class="qa"><summary>5. Two tests on the same data: classic t gives p = 0.03, Welch gives p = 0.09. What happened, and which do you report?</summary><p>The spreads (or sizes) differ enough that pooling under-counted the noise. Report <b>Welch</b>. The disagreement itself is the finding: the evidence is weaker than the classic test claimed.</p></details>
+<details class="qa"><summary>6. Complaints by weekday: Mon 42, Tue 31, Wed 39, Thu 29, Fri 33, Sat 36, Sun 40. Your boss says "Mondays are clearly worse." What do you say?</summary><p>Run <b>χ² goodness of fit</b> against an equal split (35.7 each). χ² ≈ 4.0 on 6 df, p ≈ 0.67 — this much day-to-day wobble is normal. Eyeballs convict on vibes; the referee wants evidence.</p></details>
+
+<div class="card" style="margin-top:30px">
+<p><b>Keep going.</b> <a href="../BUS322_A_Review_Hub.html">🗺 Review Hub</a> · <a href="normality_test_selection.html">Normality &amp; Test Selection</a> · <a href="hypothesis_testing.html">Hypothesis Testing</a> · <a href="dist_referees.html">χ² &amp; F — the referees</a> (drag the curves) · <a href="mann_whitney.html">Mann–Whitney U from the ground up</a> · <a href="nonparametric.html">Non-Parametric Methods</a> · <a href="anova_manova.html">ANOVA &amp; MANOVA</a> · <a href="https://ironplanet.github.io/stats-practice/#topic=t10">Practice quiz</a></p>
+<p class="note">Worked numbers are illustrative. p-values on this page are computed live in your browser.</p>
+</div>
+
+</main>
+
+<script>
+/* ---------- numerics (no libraries) ---------- */
+function lgamma(x){const c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgamma(1-x);x-=1;let a=c[0];const t=x+7.5;for(let i=1;i<9;i++)a+=c[i]/(x+i);return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);}
+function betacf(a,b,x){const FP=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;for(let m=1;m<=300;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<3e-14)break;}return h;}
+function ibeta(a,b,x){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function tcdf(t,df){const p=0.5*ibeta(df/2,0.5,df/(df+t*t));return t>0?1-p:p;}
+function t2p(t,df){return 2*(1-tcdf(Math.abs(t),df));}
+function fcdf(f,d1,d2){return f<=0?0:ibeta(d1/2,d2/2,d1*f/(d1*f+d2));}
+function gammainc(a,x){if(x<=0)return 0;if(x<a+1){let ap=a,sum=1/a,del=sum;for(let n=1;n<600;n++){ap++;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*3e-14)break;}return sum*Math.exp(-x+a*Math.log(x)-lgamma(a));}let b=x+1-a,c=1e300,d=1/b,h=d;for(let i=1;i<600;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-300)d=1e-300;c=b+an/c;if(Math.abs(c)<1e-300)c=1e-300;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<3e-14)break;}return 1-Math.exp(-x+a*Math.log(x)-lgamma(a))*h;}
+function chi2cdf(x,k){return gammainc(k/2,x/2);}
+function tpdf(t,df){return Math.exp(lgamma((df+1)/2)-lgamma(df/2))/Math.sqrt(df*Math.PI)*Math.pow(1+t*t/df,-(df+1)/2);}
+function npdf(z){return Math.exp(-z*z/2)/Math.sqrt(2*Math.PI);}
+function fpdf(x,d1,d2){if(x<=0)return 0;const lb=lgamma(d1/2)+lgamma(d2/2)-lgamma((d1+d2)/2);return Math.exp(0.5*(d1*Math.log(d1*x)+d2*Math.log(d2)-(d1+d2)*Math.log(d1*x+d2))-Math.log(x)-lb);}
+function chi2pdf(x,k){if(x<=0)return 0;return Math.exp((k/2-1)*Math.log(x)-x/2-(k/2)*Math.log(2)-lgamma(k/2));}
+function tcrit(df){let lo=0,hi=50;for(let i=0;i<80;i++){const m=(lo+hi)/2;if(t2p(m,df)>0.05)lo=m;else hi=m;}return (lo+hi)/2;}
+function fmtp(p){if(p<1e-5)return "< 0.00001";if(p<0.001)return p.toFixed(5);return p.toFixed(p<0.01?4:3);}
+const BLUE="#2a78d6",ORANGE="#eb6834",AQUA="#1baf7a",YELLOW="#eda100",GRAY="#9ca3af";
+
+/* ---------- tiny SVG chart helper ---------- */
+function curveChart(el,{w=420,h=200,xmin,xmax,series,shade,vline,xlabel,ticks}){
+  const ml=10,mr=10,mt=10,mb=30,iw=w-ml-mr,ih=h-mt-mb;
+  const N=240;const xs=[];for(let i=0;i<=N;i++)xs.push(xmin+(xmax-xmin)*i/N);
+  let ymax=0;const pts=series.map(s=>{const ys=xs.map(x=>{const y=s.f(x);return isFinite(y)?y:0;});ymax=Math.max(ymax,...ys);return ys;});
+  if(series.some(s=>s.ymax))ymax=Math.max(...series.map(s=>s.ymax||0));
+  const X=x=>ml+(x-xmin)/(xmax-xmin)*iw,Y=y=>mt+ih-Math.min(y,ymax*1.05)/(ymax*1.05)*ih;
+  let svg=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" font-family="inherit" font-size="11">`;
+  svg+=`<line x1="${ml}" y1="${mt+ih}" x2="${ml+iw}" y2="${mt+ih}" stroke="#d1d5db"/>`;
+  if(shade){const {i,from,to,color}=shade;let d="";xs.forEach((x,k)=>{if(x>=from&&x<=to)d+=(d?"L":"M")+X(x).toFixed(1)+","+Y(pts[i][k]).toFixed(1)+" ";});if(d){d+=`L${X(Math.min(to,xmax)).toFixed(1)},${(mt+ih).toFixed(1)} L${X(Math.max(from,xmin)).toFixed(1)},${(mt+ih).toFixed(1)} Z`;svg+=`<path d="${d}" fill="${color}" opacity=".28"/>`;}}
+  series.forEach((s,i)=>{let d="";xs.forEach((x,k)=>{d+=(k?"L":"M")+X(x).toFixed(1)+","+Y(pts[i][k]).toFixed(1)+" ";});svg+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.width||2.2}" ${s.dash?'stroke-dasharray="5 4"':''}/>`;});
+  if(vline!==undefined&&vline>=xmin&&vline<=xmax)svg+=`<line x1="${X(vline)}" y1="${mt}" x2="${X(vline)}" y2="${mt+ih}" stroke="#374151" stroke-dasharray="3 3"/><text x="${X(vline)+4}" y="${mt+12}" fill="#374151" font-weight="600">score</text>`;
+  (ticks||[]).forEach(t=>{if(t>=xmin&&t<=xmax)svg+=`<text x="${X(t)}" y="${mt+ih+14}" text-anchor="middle" fill="#6b7280">${t}</text>`;});
+  if(xlabel)svg+=`<text x="${ml+iw/2}" y="${h-3}" text-anchor="middle" fill="#6b7280">${xlabel}</text>`;
+  series.forEach((s,i)=>{if(s.label)svg+=`<text x="${ml+iw-4}" y="${mt+12+i*14}" text-anchor="end" fill="${s.color}" font-weight="600">${s.label}</text>`;});
+  el.innerHTML=svg+"</svg>";
+}
+const $=id=>document.getElementById(id);
+function bind(ids,fn){ids.forEach(id=>{const el=$(id);const o=$(id+"-out");const up=()=>{if(o)o.textContent=el.value;fn();};el.addEventListener("input",up);});fn();}
+
+/* ---------- 1. t vs normal ---------- */
+bind(["tdf"],()=>{const df=+$("tdf").value;curveChart($("t-vs-z"),{w:860,h:230,xmin:-4.5,xmax:4.5,ticks:[-4,-2,0,2,4],xlabel:"score",series:[{f:npdf,color:GRAY,dash:true,label:"normal (z)"},{f:x=>tpdf(x,df),color:BLUE,label:"t, df = "+df}]});$("tcrit").textContent=tcrit(df).toFixed(2);});
+
+/* ---------- 2. flow map ---------- */
+(function(){
+  const W=880,H=540;const B=[];
+  function box(x,y,w,h,txt,fill,href,sub){B.push({x,y,w,h,txt,fill,href,sub});}
+  function arrow(x1,y1,x2,y2,lab,dx=0){return `<path d="M${x1},${y1} C${x1},${(y1+y2)/2} ${x2},${(y1+y2)/2} ${x2},${y2}" fill="none" stroke="#9ca3af" stroke-width="1.6" marker-end="url(#ah)"/>`+(lab?`<text x="${(x1+x2)/2+dx}" y="${(y1+y2)/2-4}" text-anchor="${dx?'start':'middle'}" font-size="11" fill="#374151" font-weight="600">${lab}</text>`:"");}
+  const L="#003da5",DG="#0f7a54";
+  box(340,10,200,44,"What did you measure?",L,"#map");
+  box(80,90,220,44,"Counts in buckets",AQUA,"#chi");
+  box(440,90,300,44,"Numbers (averages, spreads)",BLUE,"#t");
+  box(20,180,160,54,"χ² goodness of fit",DG,"#chi","one variable · df = k − 1");
+  box(200,180,160,54,"χ² association",DG,"#chi","two variables · df = (r−1)(c−1)");
+  box(440,180,300,44,"Averages: how many groups?",BLUE,"#t");
+  box(300,280,120,54,"One-sample t",BLUE,"#cheat","vs a target");
+  box(430,280,120,54,"Paired t",BLUE,"#cheat","same units twice");
+  box(560,280,120,54,"Two groups",BLUE,"#t","separate samples");
+  box(690,280,130,54,"ANOVA",ORANGE,"#cheat","F referee");
+  box(520,370,200,54,"F-test on the variances",ORANGE,"#f","equal or unequal?");
+  box(400,470,160,54,"Classic (pooled) t",BLUE,"#t","equal variances");
+  box(640,470,160,54,"Welch's t",ORANGE,"#t","unequal variances, or unsure");
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="inherit"><defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#9ca3af"/></marker></defs>`;
+  s+=arrow(400,54,190,90,"categories")+arrow(480,54,590,90,"numbers");
+  s+=arrow(150,134,100,180)+arrow(230,134,280,180);
+  s+=arrow(590,134,590,180);
+  s+=arrow(500,224,360,280,"one")+arrow(560,224,490,280,"same, twice")+arrow(620,224,620,280,"two",8)+arrow(680,224,755,280,"three +");
+  s+=arrow(620,334,620,370);
+  s+=arrow(580,424,480,470,"F: equal")+arrow(660,424,720,470,"F: unequal");
+  B.forEach(b=>{s+=`<a href="${b.href}"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="10" fill="${b.fill}"/><text x="${b.x+b.w/2}" y="${b.y+(b.sub?21:27)}" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">${b.txt}</text>${b.sub?`<text x="${b.x+b.w/2}" y="${b.y+39}" text-anchor="middle" fill="#fff" font-size="11" opacity=".9">${b.sub}</text>`:""}</a>`;});
+  $("flow").innerHTML=s+"</svg>";
+})();
+
+/* ---------- 3. F explorer ---------- */
+bind(["fa","fb","fna","fnb"],()=>{
+  let sa=+$("fa").value,sb=+$("fb").value,na=+$("fna").value,nb=+$("fnb").value;
+  let big=sa>=sb?{s:sa,n:na}:{s:sb,n:nb},small=sa>=sb?{s:sb,n:nb}:{s:sa,n:na};
+  const F=(big.s*big.s)/(small.s*small.s),d1=big.n-1,d2=small.n-1;
+  const p=Math.min(1,2*(1-fcdf(F,d1,d2)));
+  curveChart($("f-bells"),{xmin:15,xmax:45,ticks:[20,30,40],xlabel:"wait (s)",series:[{f:x=>npdf((x-30)/sa)/sa,color:BLUE,label:"A  SD "+sa},{f:x=>npdf((x-30)/sb)/sb,color:ORANGE,label:"B  SD "+sb}]});
+  const xmax=Math.max(6,F*1.3);
+  curveChart($("f-ref"),{xmin:0.01,xmax,ticks:[1,2,3,4,5,6,8,10].filter(t=>t<xmax),xlabel:"F",vline:F,series:[{f:x=>fpdf(x,d1,d2),color:ORANGE,label:`F(${d1}, ${d2})`}],shade:{i:0,from:F,to:xmax,color:ORANGE}});
+  $("f-val").textContent=F.toFixed(2);$("f-df").textContent=`${d1}, ${d2}`;$("f-p").textContent=fmtp(p);
+  const v=$("f-verdict");if(p<0.05){v.className="verdict yes";v.textContent="Unequal variances (F-test p < 0.05) → Welch's t (T.TEST type 3).";}else{v.className="verdict no";v.textContent="Equal variances not rejected (p ≥ 0.05) → classic pooled t is acceptable (T.TEST type 2); Welch still fine.";}
+});
+
+/* ---------- 4. t explorer ---------- */
+function welch(m1,s1,n1,m2,s2,n2){const a=s1*s1/n1,b=s2*s2/n2;const se=Math.sqrt(a+b);const t=(m1-m2)/se;const df=(a+b)*(a+b)/(a*a/(n1-1)+b*b/(n2-1));return {t,df,p:t2p(t,df),se};}
+function pooled(m1,s1,n1,m2,s2,n2){const sp2=((n1-1)*s1*s1+(n2-1)*s2*s2)/(n1+n2-2);const se=Math.sqrt(sp2*(1/n1+1/n2));const t=(m1-m2)/se;const df=n1+n2-2;return {t,df,p:t2p(t,df),se};}
+bind(["ma","mb","sa","sb","na","nb"],()=>{
+  const m1=+$("ma").value,m2=+$("mb").value,s1=+$("sa").value,s2=+$("sb").value,n1=+$("na").value,n2=+$("nb").value;
+  const P=pooled(m1,s1,n1,m2,s2,n2),Wt=welch(m1,s1,n1,m2,s2,n2);
+  const F=Math.max(s1,s2)**2/Math.min(s1,s2)**2;
+  curveChart($("t-bells"),{w:860,h:190,xmin:10,xmax:60,ticks:[10,20,30,40,50,60],xlabel:"value",series:[{f:x=>npdf((x-m1)/s1)/s1,color:BLUE,label:`A  mean ${m1}, SD ${s1}, n ${n1}`},{f:x=>npdf((x-m2)/s2)/s2,color:ORANGE,label:`B  mean ${m2}, SD ${s2}, n ${n2}`}]});
+  $("t-pooled").textContent=`${P.t.toFixed(2)} · ${P.df} · ${fmtp(P.p)}`;
+  $("t-welch").textContent=`${Wt.t.toFixed(2)} · ${Wt.df.toFixed(1)} · ${fmtp(Wt.p)}`;
+  $("t-f").textContent=F.toFixed(2);
+  const v=$("t-verdict");const a=P.p<0.05,b=Wt.p<0.05;
+  if(a&&b){v.className="verdict yes";v.textContent="Both tests say the averages differ. Spreads "+(F>2?"differ, so quote Welch.":"are similar; either test is fine.");}
+  else if(!a&&!b){v.className="verdict no";v.textContent="Neither test finds a difference — the gap is inside the noise.";}
+  else if(a&&!b){v.className="verdict yes";v.textContent="DISAGREEMENT: classic t says significant, Welch says not. The classic test under-counted the noise. Trust Welch.";}
+  else{v.className="verdict yes";v.textContent="Unusual: Welch significant, classic not — happens when the big group is the wild one. Trust Welch.";}
+});
+
+/* ---------- 5a. χ² goodness of fit ---------- */
+const days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],obs0=[42,31,39,29,33,36,40];
+(function(){
+  const tb=$("gof-body");tb.innerHTML=days.map((d,i)=>`<tr><td>${d}</td><td><input class="cnt" type="number" min="0" id="g${i}" value="${obs0[i]}"></td><td class="num" id="ge${i}"></td><td class="num" id="gc${i}"></td></tr>`).join("");
+  function up(){const o=days.map((_,i)=>Math.max(0,+$("g"+i).value||0));const T=o.reduce((a,b)=>a+b,0);const E=T/7;let chi=0;
+    o.forEach((v,i)=>{const c=E>0?(v-E)**2/E:0;chi+=c;$("ge"+i).textContent=E.toFixed(1);$("gc"+i).textContent=c.toFixed(2);});
+    $("gof-total").textContent=T;$("gof-etotal").textContent=T.toFixed(1);$("gof-chi").textContent=chi.toFixed(2);
+    const p=1-chi2cdf(chi,6);$("gof-val").textContent=chi.toFixed(2);$("gof-p").textContent=fmtp(p);
+    const v=$("gof-verdict");if(p<0.05){v.className="verdict yes";v.textContent="Counts do not fit an even split — some day really is different.";}else{v.className="verdict no";v.textContent="Not convicted: this much day-to-day wobble is what luck produces.";}
+    // bar chart
+    const w=860,h=200,ml=12,mb=28,iw=w-ml-10,ih=h-10-mb,ymax=Math.max(...o,E)*1.15||1,bw=iw/7;
+    let s=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" font-size="12" font-family="inherit">`;
+    o.forEach((v,i)=>{const x=ml+i*bw+bw*0.2,bh=v/ymax*ih;s+=`<rect x="${x}" y="${10+ih-bh}" width="${bw*0.6}" height="${bh}" fill="${AQUA}" rx="3"/><text x="${x+bw*0.3}" y="${10+ih-bh-4}" text-anchor="middle" fill="#374151">${v}</text><text x="${x+bw*0.3}" y="${h-8}" text-anchor="middle" fill="#6b7280">${days[i]}</text>`;});
+    const ey=10+ih-E/ymax*ih;s+=`<line x1="${ml}" y1="${ey}" x2="${ml+iw}" y2="${ey}" stroke="${ORANGE}" stroke-width="2" stroke-dasharray="6 4"/><text x="${ml+4}" y="${ey-6}" text-anchor="start" fill="${ORANGE}" font-weight="600">expected ${E.toFixed(1)} per day</text>`;
+    $("gof-chart").innerHTML=s+"</svg>";}
+  days.forEach((_,i)=>$("g"+i).addEventListener("input",up));up();
+})();
+
+/* ---------- 5b. χ² association ---------- */
+(function(){
+  const arms=[["Plan A",131,139],["Plan B",234,36]];
+  const tb=$("assoc-body");tb.innerHTML=arms.map((a,i)=>`<tr><td>${a[0]}</td><td><input class="cnt" type="number" min="0" id="a${i}f" value="${a[1]}"></td><td><input class="cnt" type="number" min="0" id="a${i}s" value="${a[2]}"></td><td class="num" id="a${i}t"></td><td class="num" id="a${i}p"></td></tr>`).join("");
+  function up(){const f=[+$("a0f").value||0,+$("a1f").value||0],s=[+$("a0s").value||0,+$("a1s").value||0];const rt=[f[0]+s[0],f[1]+s[1]],ct=[f[0]+f[1],s[0]+s[1]],G=rt[0]+rt[1];let chi=0;
+    for(let i=0;i<2;i++){const ef=rt[i]*ct[0]/G,es=rt[i]*ct[1]/G;if(ef>0)chi+=(f[i]-ef)**2/ef;if(es>0)chi+=(s[i]-es)**2/es;$("a"+i+"t").textContent=rt[i];$("a"+i+"p").textContent=rt[i]?(100*s[i]/rt[i]).toFixed(1)+" %":"—";}
+    const p=1-chi2cdf(chi,1);$("as-val").textContent=chi.toFixed(2);$("as-p").textContent=fmtp(p);
+    const v=$("as-verdict");if(p<0.05){v.className="verdict yes";v.textContent="Plan and slowness are linked: the split differs between the two plans far more than luck allows.";}else{v.className="verdict no";v.textContent="No evidence the plan changes the odds of a slow response.";}}
+  ["a0f","a0s","a1f","a1s"].forEach(id=>$(id).addEventListener("input",up));up();
+})();
+</script>
+</body>
+</html>

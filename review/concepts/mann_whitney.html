@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Mann–Whitney U Test, From the Ground Up · BUS 322 Review</title>
+<style>
+:root{--bg:#fafaf8;--card:#fff;--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--blue:#2a78d6;--orange:#eb6834;--aqua:#1baf7a;--yellow:#eda100;--lynn:#003da5;--blue-soft:#e8f0fb;--orange-soft:#fdeee8;--aqua-soft:#e6f7f0;--yellow-soft:#fff5dd}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{background:var(--lynn);color:#fff;padding:36px 20px 28px}header .wrap{max-width:900px;margin:0 auto}
+header h1{margin:0 0 6px;font-size:30px}header p{margin:0;opacity:.9;font-size:17px}header .crumb{font-size:13px;opacity:.75;margin-bottom:10px}header a{color:#fff}
+main{max-width:900px;margin:0 auto;padding:24px 20px 80px}
+h2{font-size:24px;margin:44px 0 10px;padding-top:8px;border-top:3px solid var(--line)}
+h2 .tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#fff;border-radius:999px;padding:2px 10px;margin-right:10px;vertical-align:middle;background:var(--lynn)}
+h3{font-size:18px;margin:26px 0 8px}p{margin:10px 0}.lead{font-size:18px;color:#374151}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+.card.blue{border-left:5px solid var(--blue)}.card.orange{border-left:5px solid var(--orange)}.card.aqua{border-left:5px solid var(--aqua)}.card.yellow{border-left:5px solid var(--yellow)}
+.plain{background:var(--blue-soft);border-radius:10px;padding:12px 16px;margin:12px 0}.plain b{color:var(--lynn)}
+.formula{font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:19px;background:#f3f4f6;border-radius:10px;padding:14px 18px;margin:12px 0;overflow-x:auto;text-align:center}
+.formula.small{font-size:16px;text-align:left}
+.frac{display:inline-block;vertical-align:middle;text-align:center;margin:0 4px}.frac>span{display:block;padding:0 6px}.frac>span:first-child{border-bottom:1.5px solid var(--ink)}
+.steps{counter-reset:s;padding-left:0;list-style:none;margin:12px 0}.steps li{counter-increment:s;position:relative;padding:8px 0 8px 46px;border-bottom:1px dashed var(--line)}.steps li:last-child{border-bottom:0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:30px;height:30px;border-radius:50%;background:var(--lynn);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.try{background:linear-gradient(180deg,#fff,#f8fafc);border:1px solid #d6dee8;border-radius:12px;padding:16px 18px;margin:16px 0}.try h4{margin:0 0 8px;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--lynn)}
+.ctrl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px;margin:8px 0 12px}.ctrl label{display:block;font-size:13px;color:var(--muted)}.ctrl input[type=range]{width:100%}.ctrl output{font-weight:700;color:var(--ink)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}.stat .lab{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.stat .val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.blue .val{color:var(--blue)}.stat.orange .val{color:var(--orange)}.stat.aqua .val{color:#0f7a54}
+.verdict{font-weight:600;padding:8px 12px;border-radius:8px;margin-top:8px}.verdict.yes{background:var(--orange-soft);color:#b3400f}.verdict.no{background:var(--aqua-soft);color:#0f7a54}
+svg{max-width:100%;height:auto;display:block}
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin:10px 0}th,td{border-bottom:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}th{background:#f3f4f6;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+input.v{width:64px;padding:3px 5px;font:inherit;border:1px solid #cbd5e1;border-radius:6px;text-align:right}
+.C{color:#0f7a54;font-weight:600}.A{color:var(--blue);font-weight:600}
+.note{font-size:14px;color:var(--muted)}.qa{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fff}.qa summary{cursor:pointer;font-weight:600}.qa p{margin:8px 0 0}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}.toc a{background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;text-decoration:none;color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+.pairgrid{display:grid;grid-template-columns:auto repeat(12,1fr);gap:2px;font-size:11px;text-align:center}.pairgrid div{padding:3px 0;border-radius:3px}.pairgrid .h{background:#f3f4f6;font-weight:600}.pairgrid .lt{background:#d9f3e8}.pairgrid .gt{background:#fdeee8}.pairgrid .eq{background:#fff5dd}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;background:#eef2f7;padding:0 4px;border-radius:4px}pre{background:#f3f4f6;border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:13px}
+a{color:var(--blue)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div class="crumb"><a href="../BUS322_A_Review_Hub.html">← Review Hub</a> · Week 3 · Non-parametric tests · Deep dive</div>
+<h1>The Mann–Whitney U test, from the ground up</h1>
+<p>What it actually tests, why ranks make it immune to a wild value, how the p-value is counted rather than looked up, and how to read the result — worked on six machines from a new supplier against twelve existing machines.</p>
+</div></header>
+<main>
+<div class="toc"><a href="#names">0 · Names</a><a href="#problem">1 · The problem</a><a href="#idea">2 · The idea</a><a href="#u">3 · What U counts</a><a href="#null">4 · Where p comes from</a><a href="#worked">5 · Worked example</a><a href="#outlier">6 · Why the outlier can't win</a><a href="#h0">7 · What H₀ really says</a><a href="#effect">8 · How big</a><a href="#large">9 · Large samples, ties</a><a href="#how">10 · How to run it</a><a href="#check">11 · Self-check</a></div>
+
+<!-- 0 -->
+<h2 id="names"><span class="tag">0</span>Three names, one test</h2>
+<p><b>Mann–Whitney U</b>, the <b>Wilcoxon rank-sum test</b>, and the <b>Wilcoxon–Mann–Whitney test</b> are the same procedure. Wilcoxon (1945) added up ranks; Mann and Whitney (1947) counted pairs; the two numbers differ by a constant you can compute in your head, and the p-value is identical. Software labels the statistic <i>U</i> or <i>W</i> depending on which paper the author read.</p>
+<p>The test that is <em>not</em> the same is the <b>Wilcoxon signed-rank</b> test — that is for paired data (the same units measured twice). This page is about the two-independent-groups test only.</p>
+
+<!-- 1 -->
+<h2 id="problem"><span class="tag">1</span>The problem the test was built for</h2>
+<p class="lead">You have two groups of numbers and want to know whether one group tends to be bigger than the other — and you do not trust the average.</p>
+<div class="card">
+<p>Six machines from a new supplier (<span class="C">group C</span>) and twelve existing machines (<span class="A">group A</span>) each ran for fourteen days. Summarise each machine by its typical day (its median response time, in seconds):</p>
+<p><span class="C">Group C:</span> 17.3 · 17.5 · 17.9 · 19.2 · 19.4 · 19.5<br><span class="A">Group A:</span> 22.7 · 23.0 · 23.4 · 23.8 · 24.8 · 25.1 · 25.2 · 25.2 · 25.4 · 26.4 · 27.0 · 27.0</p>
+<p>Now summarise each machine by its <em>mean</em> instead. Five of the C nodes barely move. The sixth, C5, had outages on two of its fourteen days and spent them answering in five to nine minutes; its mean is <b>78.8 s</b>.</p>
+<p><span class="C">Group C (means):</span> 18.4 · 20.0 · 17.6 · 20.3 · <b>78.8</b> · 18.1<br><span class="A">Group A (means):</span> 26.2 · 24.1 · 24.8 · 27.2 · 23.0 · 26.1 · 24.3 · 26.3 · 24.2 · 26.4 · 25.4 · 26.4</p>
+<p>A t-test on the six means against the twelve says p = 0.74 — "no difference." One number out of eighteen decided that. The t-test is doing exactly what it is designed to do: it measures the gap between the two averages in units of the spread, and C5 has made group C's average <em>larger</em> than A's and its spread enormous. The question is whether that is the question you wanted answered.</p>
+</div>
+<div class="plain"><b>The question Mann–Whitney answers instead:</b> if I pick one group C machine at random and one group A machine at random, how often is the C machine faster? If the two groups are really the same, the answer is half the time. If C is really faster, it is more than half. That question does not care how much faster — only which one wins.</div>
+
+<!-- 2 -->
+<h2 id="idea"><span class="tag">2</span>The idea: replace values with ranks</h2>
+<p>Take all eighteen numbers, throw them into one pile, sort them, and number them 1 to 18 from smallest to largest. Those position numbers are the <b>ranks</b>. Then forget the original values entirely.</p>
+<div class="card blue">
+<p><b>Why this helps.</b> The largest value in the pile gets rank 18. It gets rank 18 if it is 27.2 and it gets rank 18 if it is 78.8 or 78,000. The rank records <em>that</em> it is the biggest, not <em>how much</em> bigger. So a single wild value can move one rank to the end of the line — and no further. That is the entire source of the test's robustness, and also of its blind spot: it cannot tell a gap of 1 second from a gap of 60.</p>
+</div>
+<p>Now the logic of the test in one sentence: <b>if the two groups were interchangeable, the six group C ranks would be a random handful of six numbers drawn from 1…18.</b> Sometimes that handful would be low, sometimes high, usually middling. We can write down every possible handful, see how unusual ours is, and that fraction is the p-value. No bell curve, no standard deviation, no assumption about the shape of the data — just counting.</p>
+
+<div class="try">
+<h4>Try it — a toy version you can count by hand</h4>
+<p class="note">Three values in each group. Edit them and watch the ranks, U, and the exact p-value. There are only C(6,3) = 20 ways to hand three ranks to group X, so every one is listed below.</p>
+<div class="ctrl">
+  <div><label>Group X</label><input class="v" id="tx0" value="5"> <input class="v" id="tx1" value="7"> <input class="v" id="tx2" value="9"></div>
+  <div><label>Group Y</label><input class="v" id="ty0" value="11"> <input class="v" id="ty1" value="14"> <input class="v" id="ty2" value="20"></div>
+</div>
+<div id="toy-rank"></div>
+<div class="readout">
+  <div class="stat aqua"><div class="lab">rank sum of X</div><div class="val" id="toy-R">—</div></div>
+  <div class="stat aqua"><div class="lab">U for X = R − 3·4/2</div><div class="val" id="toy-U">—</div></div>
+  <div class="stat orange"><div class="lab">exact two-sided p</div><div class="val" id="toy-p">—</div></div>
+</div>
+<div id="toy-enum"></div>
+</div>
+
+<!-- 3 -->
+<h2 id="u"><span class="tag">3</span>What U actually counts</h2>
+<p>The statistic has two equivalent readings. Understanding both is what makes the test stop feeling arbitrary.</p>
+<div class="grid2">
+<div class="card aqua"><p><b>Reading 1 — pairs.</b> Line up every possible (C, A) pair. With 6 and 12 machines there are 6 × 12 = 72 pairs. U<sub>C</sub> is the number of pairs in which the C value is <em>smaller</em>. If the groups were identical you'd expect about half, 36. If every C is below every A, U<sub>C</sub> = 0. If every C is above every A, U<sub>C</sub> = 72.</p></div>
+<div class="card blue"><p><b>Reading 2 — rank sums.</b> Sum the ranks of the C group: R<sub>C</sub>. The smallest possible sum is 1+2+…+6 = 21 (all six C machines are the six smallest). U<sub>C</sub> = R<sub>C</sub> − 21. In general:</p>
+<div class="formula small">U<sub>1</sub> = R<sub>1</sub> − <span class="frac"><span>n<sub>1</sub>(n<sub>1</sub>+1)</span><span>2</span></span> &nbsp;&nbsp;&nbsp; U<sub>2</sub> = n<sub>1</sub>n<sub>2</sub> − U<sub>1</sub></div></div>
+</div>
+<p>The two readings agree exactly: subtracting the minimum possible rank sum converts "sum of positions" into "number of opponents beaten." That is the constant separating Wilcoxon's W from Mann and Whitney's U. Software reports the smaller of U<sub>1</sub> and U<sub>2</sub>, or sometimes U<sub>1</sub> for the first group named — check which, because the p-value is the same either way but the number is not.</p>
+
+<div class="try">
+<h4>The 72 pairs, on the eighteen machine medians</h4>
+<p class="note">Each cell is one (C machine, A machine) pair. Green = C smaller, orange = C larger, yellow = tie (counts ½). U<sub>C</sub> is the number of green cells.</p>
+<div id="pairgrid"></div>
+<div class="readout">
+  <div class="stat aqua"><div class="lab">green cells (C smaller)</div><div class="val" id="pg-lt">—</div></div>
+  <div class="stat orange"><div class="lab">orange cells (C larger)</div><div class="val" id="pg-gt">—</div></div>
+  <div class="stat"><div class="lab">U<sub>C</sub></div><div class="val" id="pg-U">—</div></div>
+</div>
+</div>
+
+<!-- 4 -->
+<h2 id="null"><span class="tag">4</span>Where the p-value comes from: counting, not a table</h2>
+<p>Here is the step that is usually skipped and is the reason the test feels fuzzy. The p-value of a Mann–Whitney test is a <em>count</em>.</p>
+<ol class="steps">
+<li>Under H₀ ("the groups are interchangeable"), every way of assigning 6 of the 18 ranks to group C is equally likely. There are C(18, 6) = 18,564 such ways.</li>
+<li>For each of those 18,564 ways, compute U. Tally how many ways give each value of U. That tally is the <b>null distribution of U</b> — it is what "just luck" looks like.</li>
+<li>Find where the U you actually observed sits in that tally. The fraction of ways that give a U at least as extreme (both tails, for a two-sided test) is the p-value.</li>
+</ol>
+<p>For our data U<sub>C</sub> = 0: all six C machines hold the six lowest ranks. Exactly one of the 18,564 arrangements does that, and one more gives the mirror image (all six highest). p = 2 / 18,564 = <b>0.000108</b>. No distribution was assumed anywhere; we counted arrangements.</p>
+
+<div class="try">
+<h4>Try it — the null distribution of U for any group sizes</h4>
+<div class="ctrl">
+  <div><label>n₁ (smaller group): <output id="n1-out">6</output></label><input type="range" id="n1" min="2" max="15" value="6"></div>
+  <div><label>n₂: <output id="n2-out">12</output></label><input type="range" id="n2" min="2" max="20" value="12"></div>
+  <div><label>observed U: <output id="uo-out">0</output></label><input type="range" id="uo" min="0" max="72" value="0"></div>
+</div>
+<div id="nullchart"></div>
+<div class="readout">
+  <div class="stat"><div class="lab">arrangements C(n₁+n₂, n₁)</div><div class="val" id="nd-N">—</div></div>
+  <div class="stat"><div class="lab">ways giving this U or lower</div><div class="val" id="nd-k">—</div></div>
+  <div class="stat orange"><div class="lab">exact two-sided p</div><div class="val" id="nd-p">—</div></div>
+  <div class="stat"><div class="lab">normal-approx. p (§9)</div><div class="val" id="nd-pz">—</div></div>
+</div>
+<p class="note">Slide U toward the middle (n₁n₂/2) and watch p climb to 1: a U near the centre is exactly what interchangeable groups produce. Slide n₁ and n₂ up and watch the shape become a bell — that is why the normal approximation works for larger samples.</p>
+</div>
+
+<!-- 5 -->
+<h2 id="worked"><span class="tag">5</span>Worked, step by step, on the eighteen machine medians</h2>
+<div class="try">
+<h4>Editable rank table</h4>
+<p class="note">Values are the eighteen machine medians. Change any value and everything below recomputes — try setting C5 to 78.8 (its mean) and see what happens to the ranks.</p>
+<table id="wt"><thead><tr><th>Machine</th><th>Group</th><th>Value (s)</th><th>Rank</th></tr></thead><tbody></tbody></table>
+<div class="readout">
+  <div class="stat aqua"><div class="lab">R<sub>C</sub> (sum of C ranks)</div><div class="val" id="w-RC">—</div></div>
+  <div class="stat aqua"><div class="lab">U<sub>C</sub> = R<sub>C</sub> − 21</div><div class="val" id="w-UC">—</div></div>
+  <div class="stat"><div class="lab">U<sub>A</sub> = 72 − U<sub>C</sub></div><div class="val" id="w-UA">—</div></div>
+  <div class="stat orange"><div class="lab">exact two-sided p</div><div class="val" id="w-p">—</div></div>
+  <div class="stat"><div class="lab">Cliff's δ</div><div class="val" id="w-d">—</div></div>
+  <div class="stat"><div class="lab">Hodges–Lehmann shift</div><div class="val" id="w-hl">—</div></div>
+  <div class="stat blue"><div class="lab">Welch t p (for contrast)</div><div class="val" id="w-tp">—</div></div>
+</div>
+<div class="verdict" id="w-verdict"></div>
+</div>
+<div class="card">
+<p><b>Reading the result.</b> R<sub>C</sub> = 21 is the smallest sum six ranks can have, so U<sub>C</sub> = 0: every one of the 72 pairs has the group C machine below the group A machine. The exact p is 0.0001. In words for management: <i>"Pick any group C machine and any group A machine at random; on a typical day the C machine is faster every single time. The chance of that pattern arising if the two kinds of machine were really interchangeable is about one in nine thousand."</i></p>
+</div>
+
+<!-- 6 -->
+<h2 id="outlier"><span class="tag">6</span>Why the outlier cannot win</h2>
+<p>This is the part to internalise. Drag C5's value from its median (19.4 s) up to its outage-day mean and beyond, and watch the two tests respond.</p>
+<div class="try">
+<h4>Drag C5</h4>
+<div class="ctrl"><div><label>C5 value (s): <output id="p5-out">19.4</output></label><input type="range" id="p5" min="15" max="600" step="0.1" value="19.4"></div></div>
+<div id="p5chart"></div>
+<div class="readout">
+  <div class="stat"><div class="lab">C5's rank (of 18)</div><div class="val" id="p5-rank">—</div></div>
+  <div class="stat aqua"><div class="lab">U<sub>C</sub></div><div class="val" id="p5-U">—</div></div>
+  <div class="stat orange"><div class="lab">Mann–Whitney p</div><div class="val" id="p5-mw">—</div></div>
+  <div class="stat blue"><div class="lab">Welch t p</div><div class="val" id="p5-t">—</div></div>
+</div>
+<p class="note">The vertical axis is logarithmic (p from 0.0001 to 1). Once C5 passes 27.0 s it holds rank 18 and nothing changes after that: U<sub>C</sub> = 12 whether C5 reads 28 or 600. The t-test keeps deteriorating all the way up. The rank test's answer is bounded by design; the t-test's is not.</p>
+</div>
+
+<!-- 7 -->
+<h2 id="h0"><span class="tag">7</span>What H₀ really says (and what it does not)</h2>
+<div class="card orange">
+<p>Most textbooks write H₀ as "the two medians are equal." That is a convenient shorthand and it is <em>not</em> what the test checks. The precise null hypothesis is:</p>
+<div class="formula">H₀: P(X &lt; Y) = ½ &nbsp;&nbsp;<span style="font-size:14px;color:#6b7280">a random draw from group 1 is equally likely to fall below or above a random draw from group 2</span></div>
+<p>The quantity P(X &lt; Y) is called the <b>probability of superiority</b>, and U estimates it directly: U<sub>C</sub> / (n₁n₂) = 0 / 72 = 0 here, meaning a C machine beats an A machine 100 % of the time. If the two groups have the same <em>shape</em> and differ only by a shift, then "P(X &lt; Y) = ½" and "medians equal" are the same statement. If the shapes differ — one skewed, one symmetric, one much wider — they can come apart: two groups can have identical medians and still have one "usually below" the other. So say "one group tends to be lower," and only say "medians differ" when the histograms look alike.</p>
+</div>
+<p><b>Assumptions the test does make:</b> the observations are independent (18 machines, not 18 × 14 daily rows that share days), the data are at least ordinal (bigger/smaller is meaningful), and the two samples are drawn independently. <b>Assumptions it does not make:</b> Normality, equal variances, large n.</p>
+
+<!-- 8 -->
+<h2 id="effect"><span class="tag">8</span>How big is the difference? Effect sizes for U</h2>
+<p>A p-value of 0.0001 says the pattern is not luck. It says nothing about whether the gap matters. Three ways to say how big:</p>
+<table>
+<tr><th>Measure</th><th>Formula</th><th>Example (18 medians)</th><th>How to read it</th></tr>
+<tr><td><b>Probability of superiority</b></td><td>U<sub>C</sub> / (n₁n₂)</td><td class="num">0 / 72 = 0.00 → C faster 100 % of pairs</td><td>0.5 = coin flip; 0 or 1 = complete separation</td></tr>
+<tr><td><b>Cliff's δ</b></td><td>(pairs C &gt; A − pairs C &lt; A) / n₁n₂</td><td class="num">(0 − 72)/72 = <b>−1.00</b></td><td>like a correlation: |δ| ≈ 0.15 small · 0.33 medium · 0.47 large</td></tr>
+<tr><td><b>Rank-biserial r</b></td><td>1 − 2U / n₁n₂</td><td class="num">1 − 0 = 1.00</td><td>same information as δ, opposite sign convention</td></tr>
+<tr><td><b>Hodges–Lehmann shift</b></td><td>median of all n₁n₂ pairwise differences (C − A)</td><td class="num"><b>−6.1 s</b></td><td>the number in the data's own units — what management wants</td></tr>
+</table>
+<p class="note">δ and r are unit-free and bounded; the Hodges–Lehmann estimate is the robust cousin of "difference in means." Report one bounded measure plus the shift in seconds.</p>
+
+<!-- 9 -->
+<h2 id="large"><span class="tag">9</span>Larger samples, and ties</h2>
+<div class="grid2">
+<div class="card"><p><b>The normal approximation.</b> When both groups have about ten or more observations, the null distribution of U (you saw it become a bell in §4) is close enough to Normal that you can skip the counting:</p>
+<div class="formula small">μ<sub>U</sub> = <span class="frac"><span>n<sub>1</sub>n<sub>2</sub></span><span>2</span></span> &nbsp; σ<sub>U</sub> = √<span class="frac"><span>n<sub>1</sub>n<sub>2</sub>(n<sub>1</sub>+n<sub>2</sub>+1)</span><span>12</span></span> &nbsp; z = <span class="frac"><span>U − μ<sub>U</sub></span><span>σ<sub>U</sub></span></span></div>
+<p>For 6 vs 12: μ = 36, σ = √(72 × 19 / 12) = 10.7, z = (0 − 36)/10.7 = −3.37, p ≈ 0.0008. The exact answer was 0.0001; the approximation is conservative here because n₁ = 6 is small. Software often adds a continuity correction (±0.5 to U).</p></div>
+<div class="card"><p><b>Ties.</b> Two equal values share the average of the ranks they would have taken: 25.2 and 25.2 at positions 13 and 14 both get 13.5. Ties make the exact count slightly inaccurate, so most software switches to the normal approximation (with a variance correction) as soon as any tie exists. That is why <code>scipy.stats.mannwhitneyu</code> reports p = 0.0009 on the rounded medians (two ties) and p = 0.0001 on the unrounded ones — same data, same U, different p-value route. Don't round before you rank.</p></div>
+</div>
+
+<!-- 10 -->
+<h2 id="how"><span class="tag">10</span>How to run it</h2>
+<div class="grid2">
+<div class="card"><p><b>Python (preferred)</b></p>
+<pre>from scipy import stats
+C = [17.3, 17.5, 17.9, 19.2, 19.4, 19.5]
+A = [22.7, 23.0, 23.4, 23.8, 24.8, 25.1,
+     25.2, 25.2, 25.4, 26.4, 27.0, 27.0]
+res = stats.mannwhitneyu(C, A, alternative="two-sided",
+                         method="exact")   # "auto" switches on ties
+res.statistic   # U for the first argument (C) = 0
+res.pvalue
+# effect sizes
+import numpy as np
+U = res.statistic; n1, n2 = len(C), len(A)
+cliff = (2*U/(n1*n2)) - 1          # here −1.0  (sign: C below A)
+hl = np.median([c - a for c in C for a in A])   # −6.1</pre></div>
+<div class="card"><p><b>Excel (no built-in test)</b></p>
+<ol class="steps">
+<li>Put all 18 values in one column with a group label beside them.</li>
+<li><code>=RANK.AVG(value, all_values, 1)</code> — ascending, ties averaged.</li>
+<li><code>=SUMIF(group_col, "C", rank_col)</code> → R<sub>C</sub>.</li>
+<li>U<sub>C</sub> = R<sub>C</sub> − n₁(n₁+1)/2.</li>
+<li>For the p-value use the z formula in §9 with <code>=2*(1-NORM.S.DIST(ABS(z),TRUE))</code>, or look U up in a Mann–Whitney table for small n. Excel cannot do the exact count.</li>
+</ol></div>
+</div>
+<div class="plain"><b>Reporting line.</b> "Mann–Whitney U = 0, n = 6 vs 12, exact two-sided p = 0.0001; Cliff's δ = −1.0 (complete separation); Hodges–Lehmann shift −6.1 s (C faster)." Then say, in a sentence, which question the test answered — <em>typical machine</em>, not <em>the total over the fortnight</em> — and put the outage days in their own paragraph.</div>
+
+<!-- 11 -->
+<h2 id="check"><span class="tag">11</span>Self-check</h2>
+<details class="qa"><summary>1. Group X has ranks 2, 5, 9 out of 9 values (n₁ = 3, n₂ = 6). What is U<sub>X</sub>?</summary><p>R<sub>X</sub> = 16; U<sub>X</sub> = 16 − 3·4/2 = <b>10</b>. Check by pairs: rank 2 beats 1 Y value, rank 5 beats 3, rank 9 beats 6 — total 10 pairs where X is <em>larger</em>; so U<sub>X</sub> counts "X larger" here (1+3+6 = 10) and U<sub>Y</sub> = 18 − 10 = 8. Either convention works; report which.</p></details>
+<details class="qa"><summary>2. If the largest group C value jumped from 19.5 s to 1,000 s, what would happen to U<sub>C</sub>, and to the t-test?</summary><p>That value moves from rank 6 to rank 18: U<sub>C</sub> goes from 0 to 12 and stays there no matter how large the value gets. The t-test's p-value keeps rising toward 1 as the value grows. Bounded vs unbounded influence.</p></details>
+<details class="qa"><summary>3. Why is the smallest possible two-sided p for 6 vs 12 exactly 2/18,564 and not smaller?</summary><p>Because only one arrangement of ranks gives U = 0 and only one gives U = 72; there is nothing more extreme to count. With small groups the exact p has a floor, just as the Wilcoxon signed-rank test does (2/2ⁿ). Plan the sample size with the floor in mind.</p></details>
+<details class="qa"><summary>4. Two groups have the same median but one is much more spread out. Can Mann–Whitney reject?</summary><p>Yes, if the spread is asymmetric enough that one group's values tend to fall below the other's. H₀ is P(X &lt; Y) = ½, not "medians equal." Say "tends to be lower," and check the histograms before saying "median."</p></details>
+<details class="qa"><summary>5. You have 756 rows (18 machines × 14 days × 3 time windows). Why not run Mann–Whitney on all of them?</summary><p>Rows on the same day share that day's conditions; windows on the same machine-day share a machine. They are not independent draws, and the counting in §4 assumes they are — so the p-value would be far too small. Collapse to one number per independent unit (the machine) first.</p></details>
+
+<div class="card" style="margin-top:30px"><p><b>Next.</b> The paired cousin — Wilcoxon signed-rank — uses the same "count the arrangements" logic on the <em>signs</em> of paired differences; Kruskal–Wallis extends the rank idea to three or more groups — both on the <a href="nonparametric.html">Non-Parametric Methods</a> page. Related: <a href="../BUS322_A_Review_Hub.html">🗺 Review Hub</a> · <a href="which_test.html">t vs Welch vs F vs χ² field guide</a> · <a href="dist_referees.html">the referees</a> · <a href="anova_manova.html">ANOVA &amp; MANOVA</a>.</p></div>
+</main>
+
+<script>
+/* ---------- numerics ---------- */
+function lgamma(x){const c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgamma(1-x);x-=1;let a=c[0];const t=x+7.5;for(let i=1;i<9;i++)a+=c[i]/(x+i);return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);}
+function betacf(a,b,x){const FP=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;for(let m=1;m<=300;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<3e-14)break;}return h;}
+function ibeta(a,b,x){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function t2p(t,df){const p=0.5*ibeta(df/2,0.5,df/(df+t*t));return 2*p;}
+function ncdf(z){return 0.5*(1+erf(z/Math.SQRT2));}
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+function welchP(a,b){const m=v=>v.reduce((s,x)=>s+x,0)/v.length,va=v=>{const mu=m(v);return v.reduce((s,x)=>s+(x-mu)**2,0)/(v.length-1)};const A=va(a)/a.length,B=va(b)/b.length;const t=(m(a)-m(b))/Math.sqrt(A+B);const df=(A+B)**2/(A*A/(a.length-1)+B*B/(b.length-1));return t2p(Math.abs(t),df);}
+function ranks(v){const idx=v.map((x,i)=>[x,i]).sort((p,q)=>p[0]-q[0]);const r=new Array(v.length);let i=0;while(i<idx.length){let j=i;while(j+1<idx.length&&idx[j+1][0]===idx[i][0])j++;const avg=(i+j+2)/2;for(let k=i;k<=j;k++)r[idx[k][1]]=avg;i=j+1;}return r;}
+/* exact null distribution of U: count[u] for group sizes n1,n2 */
+const memo={};
+function nullU(n1,n2){const key=n1+","+n2;if(memo[key])return memo[key];
+  // dp over adding elements; f(n1,n2)[u]: number of arrangements with U=u where U = #pairs (x<y)
+  let f=[[1]];// base f(0,j)=[1], f(i,0)=[1]
+  const F=[];for(let i=0;i<=n1;i++){F.push([]);for(let j=0;j<=n2;j++){if(i===0||j===0){F[i][j]=[1];continue;}
+    const a=F[i-1][j],b=F[i][j-1];const out=new Array(i*j+1).fill(0);
+    // largest element belongs to group1 (contributes j pairs where x>y... define U as # (x<y)): if largest is x, it is above all j y's -> adds 0 to U(x<y) but occupies; if largest is y, it is above all i x's -> adds i to U
+    for(let u=0;u<a.length;u++)if(a[u])out[u]+=a[u];
+    for(let u=0;u<b.length;u++)if(b[u])out[u+i]+=b[u];
+    F[i][j]=out;}}
+  memo[key]=F[n1][n2];return F[n1][n2];}
+function exactP(U,n1,n2){const d=nullU(n1,n2);const N=d.reduce((s,x)=>s+x,0);const lo=Math.floor(U);let k=0;for(let u=0;u<=lo;u++)k+=d[u];const hi=n1*n2-Math.ceil(U);let k2=0;for(let u=hi;u<d.length;u++)k2+=d[u];// two-sided: count both tails, U and its mirror
+  const p=Math.min(1,(U<=n1*n2/2)?(2*k/N):(2*k2/N));return {p,N,k:(U<=n1*n2/2?k:k2)};}
+function fmtp(p){if(p<1e-5)return "< 0.00001";if(p<0.001)return p.toFixed(5);return p.toFixed(p<0.01?4:3);}
+const $=id=>document.getElementById(id);
+const AQUA="#1baf7a",BLUE="#2a78d6",ORANGE="#eb6834",GRAY="#9ca3af";
+
+/* ---------- toy example ---------- */
+function toy(){const x=[0,1,2].map(i=>+$("tx"+i).value),y=[0,1,2].map(i=>+$("ty"+i).value);const all=x.concat(y);const r=ranks(all);const R=r.slice(0,3).reduce((s,v)=>s+v,0);const U=R-6;
+  let h='<table><tr><th>Value</th>'+all.map(v=>`<td class=num>${v}</td>`).join("")+'</tr><tr><th>Group</th>'+[...x.map(()=>'<td class=C>X</td>'),...y.map(()=>'<td class=A>Y</td>')].join("")+'</tr><tr><th>Rank</th>'+r.map(v=>`<td class=num>${v}</td>`).join("")+'</tr></table>';
+  $("toy-rank").innerHTML=h;$("toy-R").textContent=R;$("toy-U").textContent=U;
+  const e=exactP(U,3,3);$("toy-p").textContent=fmtp(e.p);
+  // enumerate all 20 handfuls
+  const combos=[];for(let a=1;a<=6;a++)for(let b=a+1;b<=6;b++)for(let c=b+1;c<=6;c++)combos.push([a,b,c]);
+  let t='<p class="note">All 20 ways to give three of the ranks 1–6 to X, with the U each produces. Highlighted rows are as extreme as, or more extreme than, yours (both tails).</p><table><tr><th>X ranks</th><th>R</th><th>U</th></tr>';
+  combos.forEach(cm=>{const RR=cm[0]+cm[1]+cm[2],UU=RR-6;const ext=(UU<=Math.min(U,9-U))||(UU>=Math.max(U,9-U));t+=`<tr style="${ext?'background:#fdeee8':''}"><td>${cm.join(", ")}</td><td class=num>${RR}</td><td class=num>${UU}</td></tr>`;});
+  $("toy-enum").innerHTML=t+'</table>';}
+[0,1,2].forEach(i=>{$("tx"+i).addEventListener("input",toy);$("ty"+i).addEventListener("input",toy);});toy();
+
+/* ---------- example data ---------- */
+const NODES=[["C1","C",17.5],["C2","C",19.2],["C3","C",17.3],["C4","C",19.5],["C5","C",19.4],["C6","C",17.9],
+ ["A1","A",27.0],["A2","A",23.4],["A3","A",25.2],["A4","A",27.0],["A5","A",22.7],["A6","A",25.1],["A7","A",23.8],["A8","A",26.4],["A9","A",23.0],["A10","A",25.4],["A11","A",24.8],["A12","A",25.2]];
+const NODES_EXACT=[["C1","C",17.45],["C2","C",19.2],["C3","C",17.3],["C4","C",19.5],["C5","C",19.4],["C6","C",17.85],["A1","A",27.0],["A2","A",23.4],["A3","A",25.2],["A4","A",27.0],["A5","A",22.7],["A6","A",25.1],["A7","A",23.8],["A8","A",26.4],["A9","A",23.0],["A10","A",25.4],["A11","A",24.8],["A12","A",25.2]];
+function pairGrid(){const C=NODES.filter(n=>n[1]==="C"),A=NODES.filter(n=>n[1]==="A");let lt=0,gt=0;let h='<div class="pairgrid"><div class="h"></div>'+A.map(a=>`<div class="h">${a[0]}</div>`).join("");
+  C.forEach(c=>{h+=`<div class="h">${c[0]}</div>`;A.forEach(a=>{const cls=c[2]<a[2]?"lt":c[2]>a[2]?"gt":"eq";if(cls==="lt")lt++;else if(cls==="gt")gt++;h+=`<div class="${cls}">${c[2]<a[2]?"&lt;":c[2]>a[2]?"&gt;":"="}</div>`;});});
+  $("pairgrid").innerHTML=h+"</div>";$("pg-lt").textContent=lt;$("pg-gt").textContent=gt;$("pg-U").textContent=lt+(72-lt-gt)/2;}
+pairGrid();
+
+/* ---------- null distribution chart ---------- */
+function drawNull(){const n1=+$("n1").value,n2=+$("n2").value;$("uo").max=n1*n2;let U=Math.min(+$("uo").value,n1*n2);$("uo").value=U;$("uo-out").textContent=U;
+  const d=nullU(n1,n2),N=d.reduce((s,x)=>s+x,0);const e=exactP(U,n1,n2);
+  const w=860,h=220,ml=36,mb=30,iw=w-ml-10,ih=h-14-mb,mx=Math.max(...d);const bw=iw/d.length;
+  let s=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" font-size="11" font-family="inherit">`;
+  d.forEach((c,u)=>{const bh=c/mx*ih;const ext=(U<=n1*n2/2)?(u<=U||u>=n1*n2-U):(u>=U||u<=n1*n2-U);s+=`<rect x="${ml+u*bw}" y="${14+ih-bh}" width="${Math.max(bw-0.5,0.5)}" height="${bh}" fill="${ext?ORANGE:BLUE}"/>`;});
+  const tick=Math.max(1,Math.round(d.length/10));for(let u=0;u<d.length;u+=tick)s+=`<text x="${ml+u*bw+bw/2}" y="${h-8}" text-anchor="middle" fill="#6b7280">${u}</text>`;
+  s+=`<line x1="${ml+U*bw+bw/2}" y1="14" x2="${ml+U*bw+bw/2}" y2="${14+ih}" stroke="#374151" stroke-dasharray="3 3"/><text x="${ml+U*bw+bw/2+4}" y="${14+ih*0.45}" fill="#374151" font-weight="600">observed U = ${U}</text><text x="${ml+2}" y="${22}" fill="#6b7280">arrangements per U · orange = at least as extreme (both tails)</text>`;
+  $("nullchart").innerHTML=s+"</svg>";
+  $("nd-N").textContent=N.toLocaleString();$("nd-k").textContent=e.k.toLocaleString();$("nd-p").textContent=fmtp(e.p);
+  const mu=n1*n2/2,sd=Math.sqrt(n1*n2*(n1+n2+1)/12);const z=(Math.abs(U-mu)-0.5)/sd;$("nd-pz").textContent=fmtp(Math.min(1,2*(1-ncdf(Math.max(0,z)))));}
+["n1","n2","uo"].forEach(id=>$(id).addEventListener("input",()=>{$("n1-out").textContent=$("n1").value;$("n2-out").textContent=$("n2").value;drawNull();}));drawNull();
+
+/* ---------- worked table ---------- */
+(function(){const tb=$("wt").querySelector("tbody");tb.innerHTML=NODES.map((n,i)=>`<tr><td>${n[0]}</td><td class="${n[1]}">${n[1]==="C"?"Group C":"Group A"}</td><td><input class="v" id="wv${i}" value="${n[2]}"></td><td class=num id="wr${i}"></td></tr>`).join("");
+  function up(){const vals=NODES.map((n,i)=>+$("wv"+i).value);const r=ranks(vals);r.forEach((v,i)=>$("wr"+i).textContent=v);
+    const RC=r.slice(0,6).reduce((s,v)=>s+v,0);const UC=RC-21,UA=72-UC;const C=vals.slice(0,6),A=vals.slice(6);
+    let lt=0,gt=0;const diffs=[];C.forEach(c=>A.forEach(a=>{if(c<a)lt++;else if(c>a)gt++;diffs.push(c-a);}));diffs.sort((p,q)=>p-q);const hl=(diffs[35]+diffs[36])/2;
+    const e=exactP(UC,6,12);$("w-RC").textContent=RC;$("w-UC").textContent=UC;$("w-UA").textContent=UA;$("w-p").textContent=fmtp(e.p);$("w-d").textContent=((gt-lt)/72).toFixed(2);$("w-hl").textContent=hl.toFixed(1)+" s";
+    const tp=welchP(C,A);$("w-tp").textContent=fmtp(tp);
+    const v=$("w-verdict");if(e.p<0.05){v.className="verdict yes";v.textContent=`Mann–Whitney rejects H₀ (p ${fmtp(e.p)}): one group tends to be lower. Welch t p = ${fmtp(tp)}.`;}else{v.className="verdict no";v.textContent=`Mann–Whitney does not reject (p ${fmtp(e.p)}). Welch t p = ${fmtp(tp)}.`;}}
+  NODES.forEach((n,i)=>$("wv"+i).addEventListener("input",up));up();})();
+
+/* ---------- C5 slider ---------- */
+(function(){const base=NODES_EXACT.map(n=>n[2]);function up(){const v=+$("p5").value;$("p5-out").textContent=v.toFixed(1);const vals=base.slice();vals[4]=v;const r=ranks(vals);const RC=r.slice(0,6).reduce((s,x)=>s+x,0);const UC=RC-21;const e=exactP(UC,6,12);const tp=welchP(vals.slice(0,6),vals.slice(6));
+    $("p5-rank").textContent=r[4];$("p5-U").textContent=UC;$("p5-mw").textContent=fmtp(e.p);$("p5-t").textContent=fmtp(tp);
+    // chart: p vs C5 value, both tests, log x
+    const w=860,h=230,ml=52,mb=28,iw=w-ml-10,ih=h-14-mb;const xs=[];for(let i=0;i<=120;i++)xs.push(15*Math.pow(600/15,i/120));
+    const X=x=>ml+Math.log(x/15)/Math.log(600/15)*iw,Y=p=>14+ih-(Math.log10(Math.max(p,1e-4))+4)/4*ih;
+    let pm="",pt="";xs.forEach((x,k)=>{const vv=base.slice();vv[4]=x;const rr=ranks(vv);const u=rr.slice(0,6).reduce((s,q)=>s+q,0)-21;const pmw=exactP(u,6,12).p;const ptt=welchP(vv.slice(0,6),vv.slice(6));pm+=(k?"L":"M")+X(x).toFixed(1)+","+Y(pmw).toFixed(1)+" ";pt+=(k?"L":"M")+X(x).toFixed(1)+","+Y(ptt).toFixed(1)+" ";});
+    let s=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" font-size="11" font-family="inherit"><line x1="${ml}" y1="${Y(0.05)}" x2="${ml+iw}" y2="${Y(0.05)}" stroke="#9ca3af" stroke-dasharray="4 4"/><text x="${ml+iw-2}" y="${Y(0.05)-4}" text-anchor="end" fill="#6b7280">p = 0.05</text>`;
+    s+=`<path d="${pt}" fill="none" stroke="${BLUE}" stroke-width="2.2"/><path d="${pm}" fill="none" stroke="${ORANGE}" stroke-width="2.2"/><line x1="${X(v)}" y1="14" x2="${X(v)}" y2="${14+ih}" stroke="#374151" stroke-dasharray="3 3"/>`;
+    [15,20,30,50,100,200,400,600].forEach(t=>s+=`<text x="${X(t)}" y="${h-8}" text-anchor="middle" fill="#6b7280">${t}</text>`);
+    [0.0001,0.001,0.01,0.05,0.1,1].forEach(p=>s+=`<text x="${ml-6}" y="${Y(p)+4}" text-anchor="end" fill="#6b7280">${p}</text>`);
+    s+=`<text x="${ml+4}" y="24" fill="${BLUE}" font-weight="600">Welch t p-value</text><text x="${ml+4}" y="38" fill="${ORANGE}" font-weight="600">Mann–Whitney p-value</text><text x="${ml+iw/2}" y="${h-0}" text-anchor="middle" fill="#6b7280" font-size="10"></text>`;
+    $("p5chart").innerHTML=s+"</svg>";}
+  $("p5").addEventListener("input",up);up();})();
+</script>
+</body>
+</html>
