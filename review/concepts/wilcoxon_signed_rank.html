@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>BUS 322 — Wilcoxon Signed-Rank Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--lynn:#003DA5;--lynnd:#002a73;--lynnl:#e8f0fa;--accent:#ffba08;
+--g50:#f8f9fb;--g200:#e1e4e8;--g800:#24292f;--good:#2d7d46;--bad:#dc2f02;--orange:#eb6834;--text:#1a1f27;}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+color:var(--text);background:var(--g50);margin:0;line-height:1.6}
+.wrap{max-width:840px;margin:0 auto;padding:0 16px 64px}
+.hero{background:linear-gradient(135deg,var(--lynn),var(--lynnd));color:#fff;
+padding:30px 26px;border-radius:0 0 14px 14px;margin-bottom:8px}
+.hero h1{margin:0 0 4px;font-size:1.6em}
+.hero .crumb{font-size:.85em}.hero .crumb a{color:var(--accent);text-decoration:none}
+.hero p{margin:6px 0 0;color:rgba(255,255,255,.88);font-size:.95em;max-width:44rem}
+h2{color:var(--lynnd);font-size:1.25em;margin:34px 0 10px;border-bottom:2px solid var(--lynnl);padding-bottom:4px}
+h3{font-size:1.02em;margin:18px 0 6px;color:var(--g800)}
+.story{background:#fff;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;
+padding:14px 18px;margin:10px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.story p{margin:8px 0}
+.eq{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:16px;
+margin:12px 0;text-align:center;font-size:1.2em;overflow-x:auto;font-family:"Cambria Math","STIX Two Math",Georgia,serif}
+.eq.small{font-size:1.02em;text-align:left}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center}
+.eq .frac span{display:block;padding:0 6px}
+.eq .frac span:first-child{border-bottom:1.5px solid var(--text)}
+.eq sup,.eq sub{font-size:.68em}
+.vars{background:var(--lynnl);border-radius:10px;padding:12px 18px;margin:10px 0;font-size:.94em}
+.vars b{color:var(--lynnd)}
+.sig{background:#fff;border:1px dashed var(--good);border-radius:10px;padding:10px 16px;
+margin:10px 0;font-size:.95em}
+.sig b{color:var(--good)}
+.panel{background:#fff;border:1px solid var(--g200);border-radius:12px;padding:16px;margin:12px 0}
+svg{max-width:100%;height:auto;display:block}
+.controls{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0;font-size:.9em}
+.controls label{display:flex;flex-direction:column;gap:2px;min-width:150px;flex:1}
+.controls input[type=range]{accent-color:var(--lynn)}
+.controls input[type=number],.controls input[type=text]{font:inherit;padding:4px 6px;border:1px solid #cbd5e1;border-radius:6px}
+.controls button,.btn{font:inherit;font-weight:600;background:var(--lynn);color:#fff;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;align-self:flex-end}
+.controls button:hover,.btn:hover{background:var(--lynnd)}
+.livebox{background:var(--g800);color:#7ee787;font-family:ui-monospace,Consolas,monospace;
+border-radius:8px;padding:10px 14px;margin-top:8px;font-size:.95em;overflow-x:auto;line-height:1.7}
+.livebox .lab{color:#8b949e}.livebox .warn{color:#e3b341}.livebox .bad{color:#ff7b72}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:.92em;background:#fff}
+th{background:var(--lynnl);color:var(--lynnd);text-align:left;padding:7px 10px;border:1px solid var(--g200)}
+td{padding:7px 10px;border:1px solid var(--g200);vertical-align:top}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td code,li code,p code,div code{background:var(--lynnl);padding:1px 6px;border-radius:5px;
+font-family:ui-monospace,Consolas,monospace;font-size:.92em}
+pre{background:#f3f4f6;border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:.85em;line-height:1.5}
+.ans{color:var(--good);font-weight:700;font-family:ui-monospace,Consolas,monospace}
+.tip{background:var(--lynnl);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:.92em}
+.warnbox{background:#fff5dd;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:10px 16px;margin:10px 0;font-size:.92em}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.subs{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
+.sub{font-size:.82em;font-weight:600;color:#fff;background:var(--lynn);border-radius:9px;
+padding:3px 11px;text-decoration:none;border:1px solid var(--lynnd)}
+.sub:hover{background:var(--lynnd)}
+.nav2{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.nav2 a{color:var(--lynn);text-decoration:none;font-weight:600;font-size:.9em;
+border:1px solid var(--g200);background:#fff;border-radius:9px;padding:7px 13px}
+.nav2 a:hover{border-color:var(--lynn)}
+.fitnote{font-size:.9em;color:#5a6270;margin-top:6px}
+input.v{width:60px;padding:3px 5px;font:inherit;border:1px solid #cbd5e1;border-radius:6px;text-align:right}
+textarea.v{width:100%;font:inherit;font-family:ui-monospace,Consolas,monospace;font-size:.9em;padding:6px;border:1px solid #cbd5e1;border-radius:6px;min-height:52px}
+.qcard{border-top:1px solid var(--g200);padding:12px 4px}
+.qcard:first-child{border-top:none}
+.qs{margin:4px 0 8px}
+.qopts{display:grid;gap:6px}
+.qopt{text-align:left;background:var(--g50);border:1px solid var(--g200);border-radius:8px;
+padding:8px 12px;font-size:.92em;cursor:pointer;font-family:inherit}
+.qopt:hover{border-color:var(--lynn)}
+.qopt.right{background:#e7f3ea;border-color:var(--good);font-weight:600}
+.qopt.wrong{background:#fdeceb;border-color:#dc2f02}
+.qwhy{display:none;background:var(--lynnl);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:.88em}
+.qwhy.show{display:block}
+</style></head><body>
+<div class="hero"><div class="wrap" style="padding:0">
+<div class="crumb"><a href="../BUS322_A_Review_Hub.html">← Review Hub</a> · Week 3 · Wednesday · Non-parametric deep dive</div>
+<h1>The Wilcoxon Signed-Rank Test</h1><p>Wilcoxon&rsquo;s 1945 idea for paired data — rank the differences by size, see which sign owns the big ranks, and count sign patterns instead of trusting a bell.</p></div></div>
+<div class="wrap">
+
+<h2>1 · Where it came from</h2>
+<div class="story">
+<p>1945, Stamford, Connecticut. <b>Frank Wilcoxon</b> is a 53-year-old chemist at American Cyanamid running
+assays on insecticides. His batches are small — six, eight, ten replicates — and the numbers are ugly: a
+skewed spread, an occasional wild reading. Student&rsquo;s t-test, the only tool anyone used, assumes a bell
+that his data never showed. Wilcoxon&rsquo;s four-page paper in <em>Biometrics Bulletin</em> (&ldquo;Individual
+Comparisons by Ranking Methods&rdquo;) proposed something radical: throw the numbers away and keep only their
+<em>order</em>. Two tests came out of it — the rank-sum test for two separate groups (today&rsquo;s Mann–Whitney)
+and the <b>signed-rank</b> test for <em>paired</em> measurements: the same batch before and after, the same
+plot with two treatments, the same store in two months.</p>
+<p>The signed-rank idea: for each pair, compute the difference; rank the differences by <em>size</em>, ignoring
+sign; then ask whether the big differences lean one way. If the treatment does nothing, plus and minus signs
+should be sprinkled randomly over the ranks and the two sign-sums should be about equal. Wilcoxon worked out the
+exact chances by counting sign patterns — no bell required. The test needed no table of the data&rsquo;s
+distribution because it never used the data&rsquo;s distribution. That is what &ldquo;non-parametric&rdquo; means.</p>
+</div>
+
+<h2>2 · The mathematics</h2>
+<div class="sig"><b>The question it answers.</b> Same units measured twice. Is the typical change different from zero?
+It replaces the paired t-test when the differences are skewed, have outliers, or are few.</div>
+<div class="eq small">
+<b>Step 1</b> &nbsp; d<sub>i</sub> = after<sub>i</sub> − before<sub>i</sub> &nbsp;&nbsp;(drop any pair with d<sub>i</sub> = 0; n = pairs left)<br>
+<b>Step 2</b> &nbsp; rank |d<sub>1</sub>| … |d<sub>n</sub>| from 1 (smallest) to n (largest); ties share the average rank<br>
+<b>Step 3</b> &nbsp; W<sup>+</sup> = Σ ranks where d<sub>i</sub> &gt; 0 &nbsp;&nbsp;&nbsp; W<sup>−</sup> = Σ ranks where d<sub>i</sub> &lt; 0 &nbsp;&nbsp;&nbsp; (check: W<sup>+</sup> + W<sup>−</sup> = n(n+1)/2)<br>
+<b>Step 4</b> &nbsp; W = min(W<sup>+</sup>, W<sup>−</sup>) &nbsp;→&nbsp; p-value from the exact sign-pattern count (small n) or the Normal approximation (n ≳ 15)
+</div>
+<div class="vars"><b>H<sub>0</sub></b>: the differences are symmetrically distributed around zero (equivalently, the median difference is 0) ·
+<b>H<sub>1</sub></b>: they are shifted (two-sided) · <b>W</b> — the smaller sign-sum; a small W means one sign has claimed the big ranks ·
+Textbooks and software disagree on which number to print (W<sup>+</sup>, W<sup>−</sup>, or the min) — the p-value is the same; say which you report.</div>
+
+<h3>Where the p-value comes from — counting, not a table</h3>
+<p>Under H<sub>0</sub> every difference is as likely to be positive as negative, independently. So each of the
+n ranks gets a + or a − by a fair coin: <b>2<sup>n</sup></b> equally likely sign patterns. For each pattern compute
+W<sup>+</sup>. The p-value is the fraction of patterns whose W is at least as extreme as yours (both tails). With n = 10 there are
+1,024 patterns; a computer lists them in a millisecond, and you can do n = 5 by hand.</p>
+<div class="sig"><b>The floor.</b> The most extreme pattern (all + or all −) occurs twice in 2<sup>n</sup>, so the smallest
+two-sided p is <b>2 / 2<sup>n</sup></b>: n = 5 → 0.0625 (can <em>never</em> reach 0.05) · n = 6 → 0.031 · n = 8 → 0.0078 ·
+n = 10 → 0.002. Plan the number of pairs with this in mind.</div>
+
+<h3>Large samples — the Normal approximation</h3>
+<div class="eq">μ<sub>W</sub> = <span class="frac"><span>n(n+1)</span><span>4</span></span>
+&nbsp;&nbsp;&nbsp; σ<sub>W</sub> = √<span class="frac"><span>n(n+1)(2n+1)</span><span>24</span></span>
+&nbsp;&nbsp;&nbsp; z = <span class="frac"><span>W<sup>+</sup> − μ<sub>W</sub></span><span>σ<sub>W</sub></span></span>
+&nbsp;&nbsp;&nbsp; p = 2 · [1 − Φ(|z|)]</div>
+<div class="vars">Good from about n = 15; software adds a continuity correction (±0.5) and a tie correction to σ<sub>W</sub>.
+This z is also the route to the effect size.</div>
+
+<h3>How big is the change? — effect sizes</h3>
+<table>
+<tr><th>Measure</th><th>Formula</th><th>Read it as</th></tr>
+<tr><td><b>r</b> (rank-biserial via z)</td><td>r = |z| / √n</td><td>0.1 small · 0.3 medium · 0.5 large — unit-free</td></tr>
+<tr><td><b>Matched-pairs rank-biserial</b></td><td>r = (W<sup>+</sup> − W<sup>−</sup>) / (W<sup>+</sup> + W<sup>−</sup>)</td><td>−1 … +1; the share of rank-weight leaning one way</td></tr>
+<tr><td><b>Median difference</b> / Hodges–Lehmann</td><td>median of d<sub>i</sub>; or median of all pairwise averages (d<sub>i</sub> + d<sub>j</sub>)/2</td><td>the answer in the data&rsquo;s own units — what the decision needs</td></tr>
+</table>
+
+<h2>3 · What it looks like — drag it around</h2>
+<div class="panel">
+<p class="fitnote">n pairs of before/after values. Edit any cell; the sign pattern, W, the exact p (all 2<sup>n</sup> patterns counted) and the Normal approximation update live.</p>
+<div class="controls">
+<label>pairs n = <b id="wn-out">10</b><input type="range" id="wn" min="5" max="14" value="10"></label>
+<label>drag pair 1&rsquo;s &ldquo;after&rdquo; = <b id="wdrag-out">38</b><input type="range" id="wdrag" min="0" max="200" value="38"></label>
+<button id="wreset">reset example</button>
+</div>
+<table id="wtab"><thead><tr><th>pair</th><th>before</th><th>after</th><th class="num">d</th><th class="num">|d|</th><th class="num">rank |d|</th><th>sign</th></tr></thead><tbody></tbody></table>
+<div id="wchart"></div>
+<div class="livebox">
+<span class="lab">W⁺ = </span><b id="w-plus">—</b> <span class="lab">· W⁻ = </span><b id="w-minus">—</b> <span class="lab">· check n(n+1)/2 = </span><b id="w-sum">—</b>
+<span class="lab">· W = min = </span><b id="w-w">—</b><br>
+<span class="lab">exact two-sided p (2ⁿ = </span><b id="w-N">—</b><span class="lab"> patterns, </span><b id="w-k">—</b><span class="lab"> at least as extreme) = </span><b id="w-p">—</b>
+<span class="lab">· floor 2/2ⁿ = </span><b id="w-floor">—</b><br>
+<span class="lab">Normal approx: μ = </span><b id="w-mu">—</b> <span class="lab">σ = </span><b id="w-sd">—</b> <span class="lab">z = </span><b id="w-z">—</b> <span class="lab">p ≈ </span><b id="w-pz">—</b>
+<span class="lab">· r = |z|/√n = </span><b id="w-r">—</b> <span class="lab">· median d = </span><b id="w-md">—</b><br>
+<span class="lab">paired t (for contrast): t = </span><b id="w-t">—</b> <span class="lab">p = </span><b id="w-tp">—</b>
+<span class="lab">· verdict: </span><b id="w-v">—</b>
+</div>
+<div class="fitnote">Drag pair 1&rsquo;s &ldquo;after&rdquo; to 200: its difference becomes +162 and takes rank n — and that is <em>all</em> that happens
+to W. The paired t-test&rsquo;s p climbs toward 1 because one number has inflated the SD of the differences. Then set n = 5 and watch
+the floor: even five unanimous drops can&rsquo;t reach 0.05.</div>
+</div>
+
+<h2>4 · Excel — run it in class</h2>
+<p><b>Scenario:</b> ten stores, average daily basket ($) in the four weeks before a layout change (column B) and the four weeks after (column C).
+Differences are skewed, so the paired t is off the table. Rows 2–11:</p>
+<table>
+<tr><th>cell</th><th>type this</th><th>meaning</th><th>you should see</th></tr>
+<tr><td>B2:B11</td><td><code>42, 51, 39, 60, 45, 55, 48, 62, 41, 57</code></td><td>before</td><td>—</td></tr>
+<tr><td>C2:C11</td><td><code>38, 47, 40, 52, 41, 50, 44, 53, 42, 49</code></td><td>after</td><td>—</td></tr>
+<tr><td>D2</td><td><code>=C2-B2</code> (fill down)</td><td>d = after − before</td><td class="ans">−4, −4, 1, −8, −4, −5, −4, −9, 1, −8</td></tr>
+<tr><td>E2</td><td><code>=ABS(D2)</code> (fill down)</td><td>|d|</td><td class="ans">4, 4, 1, 8, 4, 5, 4, 9, 1, 8</td></tr>
+<tr><td>F2</td><td><code>=IF(D2=0,"",RANK.AVG(E2,$E$2:$E$11,1))</code> (fill down)</td><td>rank of |d|, ascending, ties averaged, zeros dropped</td><td class="ans">4.5, 4.5, 1.5, 8.5, 4.5, 7, 4.5, 10, 1.5, 8.5</td></tr>
+<tr><td>H2</td><td><code>=SUMIF(D2:D11,"&gt;0",F2:F11)</code></td><td>W⁺</td><td class="ans">3</td></tr>
+<tr><td>H3</td><td><code>=SUMIF(D2:D11,"&lt;0",F2:F11)</code></td><td>W⁻</td><td class="ans">52</td></tr>
+<tr><td>H4</td><td><code>=COUNTIF(D2:D11,"&lt;&gt;0")</code></td><td>n (non-zero pairs)</td><td class="ans">10</td></tr>
+<tr><td>H5</td><td><code>=H4*(H4+1)/4</code></td><td>μ<sub>W</sub></td><td class="ans">27.5</td></tr>
+<tr><td>H6</td><td><code>=SQRT(H4*(H4+1)*(2*H4+1)/24)</code></td><td>σ<sub>W</sub></td><td class="ans">9.81</td></tr>
+<tr><td>H7</td><td><code>=(H2-H5)/H6</code></td><td>z</td><td class="ans">−2.50</td></tr>
+<tr><td>H8</td><td><code>=2*(1-NORM.S.DIST(ABS(H7),TRUE))</code></td><td>two-sided p (Normal approximation)</td><td class="ans">0.0125</td></tr>
+<tr><td>H9</td><td><code>=ABS(H7)/SQRT(H4)</code></td><td>effect size r</td><td class="ans">0.79 (large)</td></tr>
+<tr><td>H10</td><td><code>=MEDIAN(D2:D11)</code></td><td>median change</td><td class="ans">−4</td></tr>
+</table>
+<div class="tip"><b>The exact answer</b> for these ten pairs — counting all 1,024 sign patterns with the tied ranks — is p = <b>0.0078</b> (the lab in §3 reproduces it).
+Software prints 0.008–0.012 depending on how it treats the two ties and whether it applies a continuity correction (<code>scipy.stats.wilcoxon(after, before)</code> gives 0.0098);
+every version says &ldquo;about one in a hundred&rdquo;. The Normal approximation&rsquo;s 0.0125 is what Excel can do; say &ldquo;approximate&rdquo; when n &lt; 15. Excel has no built-in Wilcoxon function; the recipe above <em>is</em> the test.</div>
+<div class="tip"><b>Business read:</b> W⁺ = 3 means the only two increases were the two smallest changes (ranks 1.5 each). Eight of ten stores
+fell, typically by $4 a basket (r = 0.79, a large effect). &ldquo;The layout change lowered the typical basket; roll it back&rdquo; — and the
+paired t (p = 0.003) happens to agree here, but it was not entitled to an opinion on skewed differences.</div>
+
+<h2>5 · Does the test fit? — the assumptions and the hand count</h2>
+<div class="panel">
+<p class="fitnote">n = 5, so all 32 sign patterns fit on the screen. Click any pattern to see its W⁺. Highlighted rows are as extreme as the observed one (both tails).</p>
+<div class="controls"><label>observed W⁺ = <b id="e-obs-out">1</b><input type="range" id="e-obs" min="0" max="15" value="1"></label></div>
+<div id="enum"></div>
+<div class="livebox"><span class="lab">patterns with W as extreme: </span><b id="e-k">—</b><span class="lab"> of 32 → p = </span><b id="e-p">—</b></div>
+</div>
+<table>
+<tr><th>Assumption</th><th>How to check</th><th>If it fails</th></tr>
+<tr><td>Pairs are independent of each other (store 3&rsquo;s change doesn&rsquo;t drive store 4&rsquo;s)</td><td>Design</td><td>Aggregate to independent units first</td></tr>
+<tr><td>Differences are at least ordinal and roughly <b>symmetric</b> about their centre</td><td>Histogram / dot plot of d</td><td>Badly asymmetric d → the <b>sign test</b> (counts only + vs −; binomial p, less power)</td></tr>
+<tr><td>Few exact zeros and ties</td><td>Look at the d column</td><td>Many zeros shrink n; many ties → software&rsquo;s tie-corrected z</td></tr>
+</table>
+
+<h2>6 · When to reach for it — and when not</h2>
+<table>
+<tr><th>Wilcoxon signed-rank when…</th><th>Something else when…</th></tr>
+<tr><td>Same units measured twice (before/after, two conditions on each subject) — a <em>paired</em> design</td><td>Two separate groups → <a href="mann_whitney.html">Mann–Whitney U</a>; three+ conditions on the same units → Friedman</td></tr>
+<tr><td>Differences skewed, heavy-tailed, or n small (5–30)</td><td>Differences roughly Normal or n ≳ 30 → paired t keeps the units and ~5 % more power</td></tr>
+<tr><td>You need a verdict that one wild pair can&rsquo;t hijack</td><td>You need &ldquo;how much, with a CI, in dollars&rdquo; — report the median difference / Hodges–Lehmann alongside, or bootstrap</td></tr>
+<tr><td>Ordinal paired scores (satisfaction 1–5 before/after)</td><td>Only signs are trustworthy (differences not comparable in size) → sign test</td></tr>
+</table>
+<div class="warnbox"><b>Three mistakes.</b> (1) Ranking the raw values instead of the |differences| — that is a different test. (2) Describing the
+result as &ldquo;means differ&rdquo;; it is a rank/median statement. (3) Running it on 5 pairs and reporting &ldquo;no effect&rdquo; — the floor was 0.0625;
+the test could not have said yes.</div>
+<div class="tip"><b>Reporting line.</b> &ldquo;Wilcoxon signed-rank, n = 10 pairs, W⁺ = 3, exact p ≈ 0.01 (two-sided); median change −$4 per basket;
+r = 0.79.&rdquo; Then one sentence on what the test cannot say (whether the drop persists, whether traffic changed).</div>
+<div class="subs"><a class="sub" href="nonparametric.html">← Non-parametric chooser</a><a class="sub" href="mann_whitney.html">Mann–Whitney U (independent groups)</a><a class="sub" href="hypothesis_testing.html">Paired t (the parametric twin)</a></div>
+
+<h2>✅ Self-check — no internet needed</h2><div class="panel"><div class="qcard"><p class="qs"><b>Q1.</b> Eight stores, before/after. Differences: −6, −3, +1, −9, −4, −2, +2, −7. Ranks of |d|: 1→1, 2→2.5, 2→2.5, 3→4, 4→5, 6→6, 7→7, 9→8. W⁺ = ?</p><div class="qopts"><button class="qopt" data-q="0" data-ok="1">A. 3.5 — the two increases (+1, +2) hold ranks 1 and 2.5</button><button class="qopt" data-q="0" data-ok="0">B. 15</button><button class="qopt" data-q="0" data-ok="0">C. 36</button><button class="qopt" data-q="0" data-ok="0">D. 8</button></div><div class="qwhy" id="qwhy0">Only positive differences contribute to W⁺: rank(|+1|) = 1 and rank(|+2|) = 2.5 (tied with −2). W⁻ = 36 − 3.5 = 32.5. Small W⁺ = the increases were the tiniest changes.</div></div><div class="qcard"><p class="qs"><b>Q2.</b> A manager runs the paired t and Wilcoxon on the same 12 pairs: t gives p = 0.21, Wilcoxon p = 0.02. The differences show one pair at +85, the rest between −6 and −1. Which do you report and why?</p><div class="qopts"><button class="qopt" data-q="1" data-ok="1">A. Wilcoxon — one wild pair inflated the SD and neutered the t-test; the rank test bounds that pair&rsquo;s influence to a single rank</button><button class="qopt" data-q="1" data-ok="0">B. The t-test — it uses more information</button><button class="qopt" data-q="1" data-ok="0">C. Neither; the results contradict so the data are unusable</button><button class="qopt" data-q="1" data-ok="0">D. Average the two p-values</button></div><div class="qwhy" id="qwhy1">The +85 pair gets rank 12 whether it is +85 or +8,500. The t-test&rsquo;s SE is driven by that one number. Report Wilcoxon, show the outlier separately, and say what happened at that store.</div></div><div class="qcard"><p class="qs"><b>Q3.</b> With n = 5 pairs every difference is negative: W⁺ = 0. Two-sided exact p?</p><div class="qopts"><button class="qopt" data-q="2" data-ok="1">A. 0.0625 = 2/32 — the floor; not significant at 0.05 no matter how consistent the data</button><button class="qopt" data-q="2" data-ok="0">B. 0.03125</button><button class="qopt" data-q="2" data-ok="0">C. 0.05</button><button class="qopt" data-q="2" data-ok="0">D. 0.000</button></div><div class="qwhy" id="qwhy2">All-minus is one of 32 patterns; the mirror image (all-plus) is another. 2/32. Five pairs cannot reject at α = 0.05 — design for six or more.</div></div><div class="qcard"><p class="qs"><b>Q4.</b> Which statement about the test&rsquo;s H₀ is correct?</p><div class="qopts"><button class="qopt" data-q="3" data-ok="1">A. The differences are symmetric about zero (median difference = 0) — it is not a statement about means</button><button class="qopt" data-q="3" data-ok="0">B. The mean difference is zero</button><button class="qopt" data-q="3" data-ok="0">C. Before and after have the same variance</button><button class="qopt" data-q="3" data-ok="0">D. The data are Normal</button></div><div class="qwhy" id="qwhy3">The test works on signed ranks of differences. It says nothing about means, and it assumes no distribution — only symmetry of the differences and independent pairs.</div></div></div><p class="fitnote">These questions are new (pending Prof. review for the class bank).</p>
+<div class="nav2">
+<a href="../BUS322_A_Review_Hub.html">🗺 Review Hub</a>
+<a href="normality_test_selection.html">Normality &amp; Test Selection</a>
+<a href="hypothesis_testing.html">Hypothesis Testing</a>
+<a href="nonparametric.html">Non-Parametric</a>
+<a href="anova_manova.html">ANOVA &amp; MANOVA</a>
+<a href="which_test.html">📋 Which test? field guide</a>
+<a href="mann_whitney.html">🔬 Mann–Whitney deep dive</a>
+<a href="dist_chooser.html">🧭 Distribution chooser</a>
+</div>
+<div class="nav2" style="margin-top:10px"><span style="font-size:.8em;color:#8b949e;align-self:center">Non-parametric deep dives:</span>
+<a href="mann_whitney.html">Mann–Whitney</a><a href="wilcoxon_signed_rank.html">Wilcoxon signed-rank</a><a href="kruskal_wallis.html">Kruskal–Wallis</a><a href="chi_square.html">χ²</a><a href="kolmogorov_smirnov.html">Kolmogorov–Smirnov</a><a href="kendall_w.html">Kendall&rsquo;s W</a><a href="spearman.html">Spearman</a>
+</div></div>
+<script>
+
+/* ---------- numerics (no libraries) ---------- */
+function lgamma(x){const c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgamma(1-x);x-=1;let a=c[0];const t=x+7.5;for(let i=1;i<9;i++)a+=c[i]/(x+i);return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);}
+function betacf(a,b,x){const FP=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;for(let m=1;m<=300;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<3e-14)break;}return h;}
+function ibeta(a,b,x){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function tcdf(t,df){const p=0.5*ibeta(df/2,0.5,df/(df+t*t));return t>0?1-p:p;}
+function t2p(t,df){return 2*(1-tcdf(Math.abs(t),df));}
+function tpdf(t,df){return Math.exp(lgamma((df+1)/2)-lgamma(df/2))/Math.sqrt(df*Math.PI)*Math.pow(1+t*t/df,-(df+1)/2);}
+function tinv2(p,df){let lo=0,hi=60;for(let i=0;i<80;i++){const m=(lo+hi)/2;if(t2p(m,df)>p)lo=m;else hi=m;}return (lo+hi)/2;}
+function fcdf(f,d1,d2){return f<=0?0:ibeta(d1/2,d2/2,d1*f/(d1*f+d2));}
+function fpdf(x,d1,d2){if(x<=0)return 0;const lb=lgamma(d1/2)+lgamma(d2/2)-lgamma((d1+d2)/2);return Math.exp(0.5*(d1*Math.log(d1*x)+d2*Math.log(d2)-(d1+d2)*Math.log(d1*x+d2))-Math.log(x)-lb);}
+function gammainc(a,x){if(x<=0)return 0;if(x<a+1){let ap=a,sum=1/a,del=sum;for(let n=1;n<600;n++){ap++;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*3e-14)break;}return sum*Math.exp(-x+a*Math.log(x)-lgamma(a));}let b=x+1-a,c=1e300,d=1/b,h=d;for(let i=1;i<600;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-300)d=1e-300;c=b+an/c;if(Math.abs(c)<1e-300)c=1e-300;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<3e-14)break;}return 1-Math.exp(-x+a*Math.log(x)-lgamma(a))*h;}
+function chi2cdf(x,k){return gammainc(k/2,x/2);}
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+function ncdf(z){return 0.5*(1+erf(z/Math.SQRT2));}
+function npdf(z){return Math.exp(-z*z/2)/Math.sqrt(2*Math.PI);}
+function ninv(p){if(p<=0)return -8;if(p>=1)return 8;let lo=-8,hi=8;for(let i=0;i<70;i++){const m=(lo+hi)/2;if(ncdf(m)<p)lo=m;else hi=m;}return (lo+hi)/2;}
+function mean(v){return v.reduce((s,x)=>s+x,0)/v.length}
+function variance(v){const m=mean(v);return v.reduce((s,x)=>s+(x-m)**2,0)/(v.length-1)}
+function sd(v){return Math.sqrt(variance(v))}
+function median(v){const s=v.slice().sort((a,b)=>a-b),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function ranks(v){const idx=v.map((x,i)=>[x,i]).sort((p,q)=>p[0]-q[0]);const r=new Array(v.length);let i=0;while(i<idx.length){let j=i;while(j+1<idx.length&&idx[j+1][0]===idx[i][0])j++;const avg=(i+j+2)/2;for(let k=i;k<=j;k++)r[idx[k][1]]=avg;i=j+1;}return r;}
+function fmtp(p){if(p<1e-5)return "< 0.00001";if(p<0.001)return p.toFixed(5);return p.toFixed(p<0.01?4:3);}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function randn(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+const $=id=>document.getElementById(id);
+const BLUE="#003DA5",ORANGE="#eb6834",AQUA="#1baf7a",GRAY="#9ca3af",GOLD="#ffba08",RED="#dc2f02";
+function bind(ids,fn){ids.forEach(id=>{const el=$(id);if(!el)return;const o=$(id+"-out");const up=()=>{if(o)o.textContent=el.value;fn();};el.addEventListener("input",up);});fn();}
+/* tiny SVG curve chart: series=[{f,color,label,dash}], shade=[{i,from,to,color}] */
+function curveChart(el,{w=800,h=210,xmin,xmax,series,shades=[],vlines=[],xlabel,ticks,ymaxOverride}){
+  const ml=10,mr=10,mt=12,mb=30,iw=w-ml-mr,ih=h-mt-mb;const N=260;const xs=[];for(let i=0;i<=N;i++)xs.push(xmin+(xmax-xmin)*i/N);
+  let ymax=0;const pts=series.map(s=>{const ys=xs.map(x=>{const y=s.f(x);return isFinite(y)?y:0;});ymax=Math.max(ymax,...ys);return ys;});
+  if(ymaxOverride)ymax=ymaxOverride;
+  const X=x=>ml+(x-xmin)/(xmax-xmin)*iw,Y=y=>mt+ih-Math.min(y,ymax*1.05)/(ymax*1.05)*ih;
+  let svg=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" font-family="inherit" font-size="11">`;
+  svg+=`<line x1="${ml}" y1="${mt+ih}" x2="${ml+iw}" y2="${mt+ih}" stroke="#d1d5db"/>`;
+  shades.forEach(sh=>{const {i,from,to,color}=sh;let d="";xs.forEach((x,k)=>{if(x>=from&&x<=to)d+=(d?"L":"M")+X(x).toFixed(1)+","+Y(pts[i][k]).toFixed(1)+" ";});if(d){d+=`L${X(Math.min(to,xmax)).toFixed(1)},${(mt+ih).toFixed(1)} L${X(Math.max(from,xmin)).toFixed(1)},${(mt+ih).toFixed(1)} Z`;svg+=`<path d="${d}" fill="${color}" opacity=".3"/>`;}});
+  series.forEach((s,i)=>{let d="";xs.forEach((x,k)=>{d+=(k?"L":"M")+X(x).toFixed(1)+","+Y(pts[i][k]).toFixed(1)+" ";});svg+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.width||2.2}" ${s.dash?'stroke-dasharray="5 4"':''}/>`;});
+  vlines.forEach(v=>{if(v.x>=xmin&&v.x<=xmax)svg+=`<line x1="${X(v.x)}" y1="${mt}" x2="${X(v.x)}" y2="${mt+ih}" stroke="${v.color||'#374151'}" stroke-dasharray="3 3"/><text x="${X(v.x)+4}" y="${mt+12+(v.dy||0)}" fill="${v.color||'#374151'}" font-weight="600">${v.label||''}</text>`;});
+  (ticks||[]).forEach(t=>{if(t>=xmin&&t<=xmax)svg+=`<text x="${X(t)}" y="${mt+ih+14}" text-anchor="middle" fill="#6b7280">${t}</text>`;});
+  if(xlabel)svg+=`<text x="${ml+iw/2}" y="${h-3}" text-anchor="middle" fill="#6b7280">${xlabel}</text>`;
+  series.forEach((s,i)=>{if(s.label)svg+=`<text x="${ml+iw-4}" y="${mt+12+i*14}" text-anchor="end" fill="${s.color}" font-weight="600">${s.label}</text>`;});
+  el.innerHTML=svg+"</svg>";
+}
+
+
+const WEX=[[42,38],[51,47],[39,40],[60,52],[45,41],[55,50],[48,44],[62,53],[41,42],[57,49],[44,40],[50,45],[46,43],[58,51]];
+function wBuild(){const n=+$("wn").value;const tb=$("wtab").querySelector("tbody");tb.innerHTML=WEX.slice(0,n).map((p,i)=>`<tr><td>${i+1}</td><td><input class="v" id="wb${i}" value="${p[0]}"></td><td><input class="v" id="wa${i}" value="${p[1]}"></td><td class="num" id="wd${i}"></td><td class="num" id="wabs${i}"></td><td class="num" id="wr${i}"></td><td id="ws${i}"></td></tr>`).join("");
+  for(let i=0;i<n;i++){$("wb"+i).addEventListener("input",wCalc);$("wa"+i).addEventListener("input",wCalc);}$("wdrag").value=WEX[0][1];$("wdrag-out").textContent=WEX[0][1];wCalc();}
+function wCalc(){const n=+$("wn").value;const d=[];for(let i=0;i<n;i++){const v=(+$("wa"+i).value)-(+$("wb"+i).value);d.push(v);$("wd"+i).textContent=v;$("wabs"+i).textContent=Math.abs(v);}
+  const idx=d.map((v,i)=>i).filter(i=>d[i]!==0);const r=ranks(idx.map(i=>Math.abs(d[i])));let Wp=0,Wm=0;
+  for(let i=0;i<n;i++){$("wr"+i).textContent="";$("ws"+i).textContent="dropped";}
+  idx.forEach((i,k)=>{$("wr"+i).textContent=r[k];$("ws"+i).textContent=d[i]>0?"+":"−";$("ws"+i).style.color=d[i]>0?"#2d7d46":"#dc2f02";if(d[i]>0)Wp+=r[k];else Wm+=r[k];});
+  const m=idx.length,W=Math.min(Wp,Wm),total=1<<m;let count=0;for(let mask=0;mask<total;mask++){let s=0;for(let k=0;k<m;k++)if(mask&(1<<k))s+=r[k];const T=Math.min(s,m*(m+1)/2-s);if(T<=W+1e-9)count++;}
+  const p=Math.min(1,count/total);const mu=m*(m+1)/4,sdv=Math.sqrt(m*(m+1)*(2*m+1)/24);const z=(Wp-mu)/sdv;const pz=Math.min(1,2*(1-ncdf(Math.abs(z))));
+  $("w-plus").textContent=Wp;$("w-minus").textContent=Wm;$("w-sum").textContent=m*(m+1)/2;$("w-w").textContent=W;$("w-N").textContent=total.toLocaleString();$("w-k").textContent=count;$("w-p").textContent=fmtp(p);$("w-floor").textContent=fmtp(2/total);
+  $("w-mu").textContent=mu.toFixed(1);$("w-sd").textContent=sdv.toFixed(2);$("w-z").textContent=z.toFixed(2);$("w-pz").textContent=fmtp(pz);$("w-r").textContent=(Math.abs(z)/Math.sqrt(m)).toFixed(2);$("w-md").textContent=median(d).toFixed(1);
+  const tt=mean(d)/(sd(d)/Math.sqrt(d.length));$("w-t").textContent=tt.toFixed(2);$("w-tp").textContent=fmtp(t2p(tt,d.length-1));
+  const v=$("w-v");if(p<0.05){v.textContent="reject H₀ — the changes are not centred on zero";v.className="warn";}else{v.textContent="fail to reject"+(2/total>0.05?" (floor above 0.05 — this n cannot reject)":"");v.className="";}
+  // chart: signed ranks
+  const w=800,h=140,ml=20,iw=w-40;let s=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" font-size="11"><line x1="${ml}" y1="75" x2="${ml+iw}" y2="75" stroke="#d1d5db"/>`;
+  const groups={};idx.forEach((i,k)=>{(groups[r[k]]=groups[r[k]]||[]).push(k);});
+  Object.keys(groups).forEach(rk=>{const ks=groups[rk],cnt=ks.length;const x0=ml+iw*(+rk-0.5)/m;ks.forEach((k,j)=>{const i=idx[k];const x=x0+(j-(cnt-1)/2)*20;const up=d[i]>0;s+=`<rect x="${x-9}" y="${up?75-40:75}" width="18" height="40" fill="${up?'#2d7d46':'#dc2f02'}" opacity=".75" rx="3"/><text x="${x}" y="${up?67:89}" text-anchor="middle" fill="#fff" font-weight="600" font-size="10">${d[i]>0?'+':''}${d[i]}</text>`;});s+=`<text x="${x0}" y="${h-4}" text-anchor="middle" fill="#374151">${rk}</text>`;});
+  s+=`<text x="${ml}" y="14" fill="#6b7280">rank of |d| →  (green = increase, red = decrease; W⁺ = sum of green ranks; tied ranks side by side)</text>`;$("wchart").innerHTML=s+"</svg>";}
+$("wn").addEventListener("input",()=>{$("wn-out").textContent=$("wn").value;wBuild();});$("wreset").addEventListener("click",wBuild);
+$("wdrag").addEventListener("input",()=>{$("wdrag-out").textContent=$("wdrag").value;$("wa0").value=$("wdrag").value;wCalc();});wBuild();
+/* enumeration n=5 */
+function enumUp(){const obs=+$("e-obs").value;$("e-obs-out").textContent=obs;const W=Math.min(obs,15-obs);let k=0;let h='<table><tr><th>pattern (ranks 1–5)</th><th class="num">W⁺</th><th class="num">W⁻</th></tr>';
+  for(let mask=0;mask<32;mask++){let s=0,pat="";for(let r=1;r<=5;r++){const plus=mask&(1<<(r-1));if(plus)s+=r;pat+=(plus?'+':'−')+r+' ';}const T=Math.min(s,15-s);const ext=T<=W;if(ext)k++;h+=`<tr style="${ext?'background:#fdeceb':''}"><td>${pat}</td><td class="num">${s}</td><td class="num">${15-s}</td></tr>`;}
+  $("enum").innerHTML=h+'</table>';$("e-k").textContent=k;$("e-p").textContent=fmtp(k/32);}
+$("e-obs").addEventListener("input",enumUp);enumUp();
+
+
+document.querySelectorAll(".qopt").forEach(b=>b.addEventListener("click",()=>{
+ const q=b.dataset.q;
+ b.parentElement.querySelectorAll(".qopt").forEach(o=>{o.classList.remove("right","wrong");if(o.dataset.ok==="1")o.classList.add("right")});
+ if(b.dataset.ok!=="1")b.classList.add("wrong");
+ document.getElementById("qwhy"+q).classList.add("show")}));
+
+</script>
+</body></html>

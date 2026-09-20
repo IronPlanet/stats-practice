@@ -79,7 +79,7 @@ padding:8px 12px;font-size:.92em;cursor:pointer;font-family:inherit}
 </style></head><body>
 <div class="hero"><div class="wrap" style="padding:0">
 <div class="crumb"><a href="../BUS322_A_Review_Hub.html">← Review Hub</a> · Week 3 · Wednesday</div>
-<h1>Non-Parametric Methods</h1><p>Wilcoxon&rsquo;s ranks, Pearson&rsquo;s counts, Kolmogorov&rsquo;s biggest gap, Kendall&rsquo;s agreement — tests that work when the data refuse to be a bell.</p></div></div>
+<h1>Non-Parametric Methods</h1><p>Wilcoxon&rsquo;s ranks, Pearson&rsquo;s counts, Kolmogorov&rsquo;s biggest gap, Kendall&rsquo;s agreement — the chooser for seven tests that work when the data refuse to be a bell, each with its own deep dive.</p></div></div>
 <div class="wrap">
 
 <h2>1 · Where it came from</h2>
@@ -99,7 +99,25 @@ agrees. Together they form the &ldquo;distribution-free&rdquo; toolkit: methods 
 categories, small samples and long tails — the data business actually produces.</p>
 </div>
 
-<h2>2 · The mathematics — one idea, six tests</h2>
+
+<h2 id="suite">2 · The suite — pick the test, then open its deep dive</h2>
+<p>Each row is one page at the depth of the distribution deep-dives: origin, full mathematics with a hand-worked example, a drag-it-around lab, an Excel recipe with the numbers you should see, assumptions, and a self-check.</p>
+<table>
+<tr><th>Your design</th><th>Parametric twin</th><th>Rank / count test</th><th>Deep dive</th></tr>
+<tr><td>Two <b>separate</b> groups — which tends to be bigger?</td><td>Two-sample t / Welch</td><td><b>Mann–Whitney U</b> (Wilcoxon rank-sum)</td><td><a class="sub" href="mann_whitney.html">🔬 Mann–Whitney U</a></td></tr>
+<tr><td>Same units <b>twice</b> — before/after, two conditions</td><td>Paired t</td><td><b>Wilcoxon signed-rank</b></td><td><a class="sub" href="wilcoxon_signed_rank.html">🔬 Wilcoxon signed-rank</a></td></tr>
+<tr><td><b>Three+</b> separate groups</td><td>One-way ANOVA</td><td><b>Kruskal–Wallis H</b> (+ pairwise follow-ups)</td><td><a class="sub" href="kruskal_wallis.html">🔬 Kruskal–Wallis</a></td></tr>
+<tr><td><b>Counts</b> in categories — one variable vs a pattern, or a two-way table</td><td>— (proportions z-test for 2 × 2)</td><td><b>χ² goodness of fit / independence</b> + Cramér&rsquo;s V</td><td><a class="sub" href="chi_square.html">🔬 χ² tests</a></td></tr>
+<tr><td>Does the <b>whole distribution</b> match a reference, or match another sample?</td><td>Shapiro–Wilk (normality only)</td><td><b>Kolmogorov–Smirnov D</b> (+ Lilliefors)</td><td><a class="sub" href="kolmogorov_smirnov.html">🔬 Kolmogorov–Smirnov</a></td></tr>
+<tr><td>Several <b>raters</b> rank the same items — do they agree?</td><td>ICC (for scores)</td><td><b>Kendall&rsquo;s W</b></td><td><a class="sub" href="kendall_w.html">🔬 Kendall&rsquo;s W</a></td></tr>
+<tr><td>Two variables on the same units — do they <b>move together</b>?</td><td>Pearson r</td><td><b>Spearman&rsquo;s ρ</b> (Kendall&rsquo;s τ)</td><td><a class="sub" href="spearman.html">🔬 Spearman&rsquo;s ρ</a></td></tr>
+<tr><td>Same units under <b>three+</b> conditions</td><td>Repeated-measures ANOVA</td><td>Friedman (= Kendall&rsquo;s W with rows/columns swapped)</td><td><a class="sub" href="kendall_w.html">see Kendall&rsquo;s W §5</a></td></tr>
+</table>
+<div class="sig"><b>The flow in one breath.</b> Counts → χ². Whole shape → KS. Ranks from several judges → Kendall&rsquo;s W. Two numeric variables → Spearman.
+Otherwise: how many groups? Paired → Wilcoxon signed-rank; two → Mann–Whitney; three+ → Kruskal–Wallis. And always: p tells you it&rsquo;s not luck; an effect size
+(Cliff&rsquo;s δ, r, ε², V, W, ρ) and a number in real units tell you whether it matters.</div>
+
+<h2>3 · The mathematics — one idea, seven tests (the summary; each deep dive has the full derivation)</h2>
 <div class="sig"><b>The idea:</b> replace each value by its <b>rank</b> (its position in the sorted pile), or by a
 <b>count</b> in a bucket. A wild value can move one rank to the end of the line and no further, so no single
 observation can hijack the answer. The price: the test says <em>which group tends to be bigger</em>, not
@@ -160,7 +178,7 @@ With many items even W = 0.2 is &ldquo;significant&rdquo; — significance says 
 enough to act on. Not to be confused with Kendall&rsquo;s τ (a pairwise rank correlation). Spearman&rsquo;s ρ is the two-rater
 special case, and the rank twin of Pearson&rsquo;s r.</div>
 
-<h2 id="lab-mw">3 · Lab A — the outlier that cannot win (t vs Mann–Whitney)</h2>
+<h2 id="lab-mw">4 · Lab A — the outlier that cannot win (t vs Mann–Whitney)</h2>
 <div class="panel">
 <p class="fitnote">Two groups of daily times (seconds). Group X has one entry you can drag off the charts.
 Watch what each test does with it.</p>
@@ -182,7 +200,7 @@ Watch what each test does with it.</p>
 &ldquo;no difference&rdquo; because one number is inflating X&rsquo;s mean and variance. Bounded influence vs unbounded.</div>
 </div>
 
-<h2 id="lab-w">4 · Lab B — Wilcoxon signed-rank on paired differences</h2>
+<h2 id="lab-w">5 · Lab B — Wilcoxon signed-rank on paired differences</h2>
 <div class="panel">
 <p class="fitnote">Paired before/after values for n units. Edit any cell. The exact p enumerates every sign pattern (2<sup>n</sup>).</p>
 <div class="controls">
@@ -204,7 +222,7 @@ Watch what each test does with it.</p>
 Now make one d huge: the t-test&rsquo;s p moves; W does not.</div>
 </div>
 
-<h2 id="lab-kw">5 · Lab C — Kruskal–Wallis across three groups</h2>
+<h2 id="lab-kw">6 · Lab C — Kruskal–Wallis across three groups</h2>
 <div class="panel">
 <div class="grid2">
 <div><label>Group 1<textarea class="v" id="k1">14, 16, 15, 19, 17, 21</textarea></label></div>
@@ -221,7 +239,7 @@ Now make one d huge: the t-test&rsquo;s p moves; W does not.</div>
 <div class="fitnote">Group 3 contains a 90. Change it to 30: H barely moves, the ANOVA p changes a lot. Then follow a significant H with pairwise Mann–Whitney tests at α/3.</div>
 </div>
 
-<h2 id="lab-kendall">6 · Lab D — Kendall&rsquo;s W: does the panel agree?</h2>
+<h2 id="lab-kendall">7 · Lab D — Kendall&rsquo;s W: does the panel agree?</h2>
 <div class="panel">
 <p class="fitnote">m raters rank n items (1 = best). Edit any rank; each row must be a permutation of 1…n.</p>
 <div class="controls">
@@ -238,7 +256,7 @@ Now make one d huge: the t-test&rsquo;s p moves; W does not.</div>
 </div>
 </div>
 
-<h2 id="lab-ks">7 · Lab E — Kolmogorov–Smirnov: the biggest gap between two curves</h2>
+<h2 id="lab-ks">8 · Lab E — Kolmogorov–Smirnov: the biggest gap between two curves</h2>
 <div class="panel">
 <div class="controls">
 <label>n = <b id="ksn-out">40</b><input type="range" id="ksn" min="10" max="200" value="40"></label>
@@ -253,7 +271,7 @@ Now make one d huge: the t-test&rsquo;s p moves; W does not.</div>
 <div class="fitnote">Staircase = the sample&rsquo;s cumulative fraction; smooth curve = a Normal with the same mean and SD. D is the tallest vertical gap (marked). Skewed data pull the staircase away in the middle.</div>
 </div>
 
-<h2>8 · Excel &amp; Python — run it in class</h2>
+<h2>9 · Excel &amp; Python — run it in class</h2>
 <table>
 <tr><th>test</th><th>Excel</th><th>Python (scipy.stats)</th></tr>
 <tr><td>Mann–Whitney U</td><td><code>=RANK.AVG(x, all, 1)</code> for every value → <code>=SUMIF(group,"X",rank)</code> = R₁ → U₁ = R₁ − n₁(n₁+1)/2 → z formula → <code>=2*(1-NORM.S.DIST(ABS(z),TRUE))</code></td><td><code>mannwhitneyu(x, y, alternative="two-sided")</code></td></tr>
@@ -265,9 +283,9 @@ Now make one d huge: the t-test&rsquo;s p moves; W does not.</div>
 <tr><td>Spearman ρ</td><td><code>=CORREL(RANK.AVG(x…), RANK.AVG(y…))</code></td><td><code>spearmanr(x, y)</code></td></tr>
 </table>
 <div class="tip"><b>Excel has no rank tests built in.</b> The recipes above are the tests — a rank column, a sum, a z. For exact small-sample p-values use Python (<code>method="exact"</code>) or a table. Don&rsquo;t round before you rank; ties change the p-value route.</div>
-<div class="subs"><a class="sub" href="mann_whitney.html">🔬 Mann–Whitney U from the ground up</a><a class="sub" href="which_test.html#chi">📋 χ² calculators (field guide §5)</a><a class="sub" href="normality_test_selection.html">Normality &amp; test selection</a><a class="sub" href="anova_manova.html">ANOVA &amp; MANOVA (the parametric twin of Kruskal–Wallis)</a></div>
+<div class="subs"><a class="sub" href="#suite">🔬 The seven deep dives (§2)</a><a class="sub" href="mann_whitney.html">Mann–Whitney U</a><a class="sub" href="wilcoxon_signed_rank.html">Wilcoxon signed-rank</a><a class="sub" href="kruskal_wallis.html">Kruskal–Wallis</a><a class="sub" href="chi_square.html">χ²</a><a class="sub" href="kolmogorov_smirnov.html">Kolmogorov–Smirnov</a><a class="sub" href="kendall_w.html">Kendall&rsquo;s W</a><a class="sub" href="spearman.html">Spearman</a><a class="sub" href="which_test.html#chi">📋 χ² calculators (field guide §5)</a><a class="sub" href="normality_test_selection.html">Normality &amp; test selection</a><a class="sub" href="anova_manova.html">ANOVA &amp; MANOVA (the parametric twin of Kruskal–Wallis)</a></div>
 
-<h2>9 · When to reach for it — and when not</h2>
+<h2>10 · When to reach for it — and when not</h2>
 <table>
 <tr><th>Go non-parametric when…</th><th>Stay parametric when…</th></tr>
 <tr><td>Small n and a skewed histogram or a Q–Q bow — the t-test&rsquo;s borrowed bell is a lie here</td><td>n ≳ 30 per group and no extreme outliers — the CLT makes the mean Normal and the t-test keeps its units</td></tr>
@@ -292,6 +310,9 @@ shift −6.1 s.&rdquo; Test · n · p · a bounded effect size · the shift in r
 <a href="which_test.html">📋 Which test? field guide</a>
 <a href="mann_whitney.html">🔬 Mann–Whitney deep dive</a>
 <a href="dist_chooser.html">🧭 Distribution chooser</a>
+</div>
+<div class="nav2" style="margin-top:10px"><span style="font-size:.8em;color:#8b949e;align-self:center">Non-parametric deep dives:</span>
+<a href="mann_whitney.html">Mann–Whitney</a><a href="wilcoxon_signed_rank.html">Wilcoxon signed-rank</a><a href="kruskal_wallis.html">Kruskal–Wallis</a><a href="chi_square.html">χ²</a><a href="kolmogorov_smirnov.html">Kolmogorov–Smirnov</a><a href="kendall_w.html">Kendall&rsquo;s W</a><a href="spearman.html">Spearman</a>
 </div></div>
 <script>
 

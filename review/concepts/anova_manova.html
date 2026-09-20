@@ -79,72 +79,195 @@ padding:8px 12px;font-size:.92em;cursor:pointer;font-family:inherit}
 </style></head><body>
 <div class="hero"><div class="wrap" style="padding:0">
 <div class="crumb"><a href="../BUS322_A_Review_Hub.html">← Review Hub</a> · Week 3 · Thursday</div>
-<h1>ANOVA &amp; MANOVA</h1><p>Fisher&rsquo;s wheat plots, Tukey&rsquo;s honest differences, Wilks&rsquo;s Λ — split the variation, find the F, then say which groups and how much.</p></div></div>
+<h1>ANOVA &amp; MANOVA</h1><p>Fisher&rsquo;s wheat plots, Tukey&rsquo;s honest differences, Wilks&rsquo;s Λ — split the variation, compute F, then say which groups differ and by how much. Every symbol is defined before it is used; one worked example runs through every step.</p></div></div>
 <div class="wrap">
 
 <h2>1 · Where it came from</h2>
 <div class="story">
-<p>Rothamsted, 1919. <b>Ronald Fisher</b> is hired to make sense of seventy years of wheat-yield records
-from the Broadbalk field — plots with different fertilisers, different years, different weather. Comparing
-plots two at a time would take hundreds of tests and each one has its own 5 % chance of crying wolf.
-Fisher&rsquo;s idea: don&rsquo;t compare means, <b>split the variation</b>. Total wobble in the yields =
-wobble <em>between</em> the treatment groups + wobble <em>within</em> them. If the treatments do nothing,
-the two pieces (per degree of freedom) are the same size and their ratio, <b>F</b>, is about 1. He named it
-the <em>analysis of variance</em>, put it in <em>Statistical Methods for Research Workers</em> (1925), and it
-became the workhorse of every field experiment, clinical trial and A/B/C test since.</p>
-<p>Two extensions finish the story. <b>John Tukey</b> (1949) answered &ldquo;F says <em>something</em> differs —
-but <em>which</em> groups?&rdquo; with the <b>Honestly Significant Difference</b>, a way to compare every pair
-while keeping the family-wise false-alarm rate at 5 %. And <b>Samuel Wilks</b> (1932) generalised the whole
-machine to several outcomes at once — <b>MANOVA</b>, with his <b>Λ</b> as the test statistic — for the case
-where a treatment moves revenue <em>and</em> margin together and neither shows it alone.</p>
+<p>Rothamsted Experimental Station, England, 1919. <b>Ronald Fisher</b> is hired to make sense of seventy years of wheat-yield
+records from the Broadbalk field — plots with different fertilisers, different years, different weather. Comparing the plots two at
+a time would take hundreds of separate tests, and each test carries its own 5 % chance of a false alarm. Fisher&rsquo;s idea was to
+stop comparing pairs of means and instead <b>split the variation</b>: the total variation in the yields is the sum of the variation
+<em>between</em> the treatment groups and the variation <em>within</em> them. If the treatments do nothing, those two pieces — each
+divided by its degrees of freedom — are about the same size, and their ratio, which he called <b>F</b>, is close to 1. He named the
+method the <em>analysis of variance</em> (ANOVA), published it in <em>Statistical Methods for Research Workers</em> (1925), and it
+became the standard tool for every field experiment, clinical trial and multi-group business test since.</p>
+<p>Two extensions complete the story. <b>John Tukey</b> (1949) answered the question &ldquo;F says <em>something</em> differs —
+but <em>which</em> groups?&rdquo; with the <b>Honestly Significant Difference</b> (HSD), a way to compare every pair of groups
+while holding the overall false-alarm rate at 5 %. <b>Samuel Wilks</b> (1932) generalised the whole method to several outcomes
+measured at once — <b>MANOVA</b>, with his statistic <b>Λ</b> (lambda) as the test statistic — for the case where a treatment moves
+revenue <em>and</em> margin together and neither shows it alone.</p>
 </div>
 
-<h2>2 · The mathematics</h2>
-<div class="eq">SS<sub>total</sub> &nbsp;=&nbsp; SS<sub>between</sub> &nbsp;+&nbsp; SS<sub>within</sub></div>
-<div class="eq small">
-SS<sub>between</sub> = Σ<sub>g</sub> n<sub>g</sub>(x̄<sub>g</sub> − x̄)<sup>2</sup> &nbsp;&nbsp;(df = k − 1) &nbsp;&nbsp;&nbsp;&nbsp;
-SS<sub>within</sub> = Σ<sub>g</sub> Σ<sub>i</sub> (x<sub>ig</sub> − x̄<sub>g</sub>)<sup>2</sup> &nbsp;&nbsp;(df = N − k)<br><br>
-F &nbsp;=&nbsp; <span class="frac"><span>MS<sub>between</sub></span><span>MS<sub>within</sub></span></span>
-&nbsp;=&nbsp; <span class="frac"><span>SS<sub>between</sub> / (k − 1)</span><span>SS<sub>within</sub> / (N − k)</span></span>
-&nbsp;&nbsp;&nbsp;&nbsp; referee: F(k − 1, N − k)
-&nbsp;&nbsp;&nbsp;&nbsp; η<sup>2</sup> = <span class="frac"><span>SS<sub>between</sub></span><span>SS<sub>total</sub></span></span>
-</div>
-<div class="vars"><b>H<sub>0</sub></b>: all k group means are equal · <b>H<sub>1</sub></b>: at least one differs ·
-<b>MS</b> = a variance (SS per degree of freedom) · F ≈ 1 when the groups are just samples of the same thing;
-F ≫ 1 when the group means are spread further apart than the within-group noise explains ·
-<b>η²</b> — the share of all variation the grouping accounts for: 0.01 small · 0.06 medium · 0.14 large
-(ω² is the less-biased version). With k = 2, ANOVA is exactly the pooled t-test: F = t².</div>
+<h2>2 · The mathematics, built from the beginning</h2>
+<p>This section builds one-way ANOVA in the order you would actually carry it out: name the quantities, state the hypotheses,
+check the assumptions, split the variation, compute F, read the p-value, report the effect size, then find <em>which</em> groups differ.
+Two-factor ANOVA and MANOVA follow, using the same building blocks. A small worked example runs through every step.</p>
 
-<h3>Assumptions — check before you trust F</h3>
+<h3>2.1 The setting and the notation</h3>
+<p>One-way ANOVA has one <b>factor</b> (a categorical variable such as service tier or buying rule) with <b>k</b> levels, called
+<b>groups</b>, and one numeric <b>outcome</b> (revenue, cost, wait time). Every symbol used below is defined here first.</p>
 <table>
-<tr><th>Assumption</th><th>Check</th><th>If violated</th></tr>
-<tr><td>Independence — one number per unit, groups not sharing units</td><td>Design</td><td>Nothing fixes it after the fact; aggregate to the independent unit</td></tr>
-<tr><td>Approximate normality <em>within each group</em></td><td>Shapiro–Wilk per group; histogram / Q–Q per group</td><td>Mild + n ≥ 30 per group: proceed. Severe or small n: <a href="nonparametric.html">Kruskal–Wallis</a></td></tr>
-<tr><td>Equal variances across groups (homogeneity)</td><td>Levene&rsquo;s test (robust; uses |x − median|); SD ratio &lt; 2</td><td>Welch&rsquo;s ANOVA (the k-group Welch t) — matters most when group sizes are unequal</td></tr>
+<tr><th>Symbol</th><th>Name</th><th>Meaning</th></tr>
+<tr><td><b>k</b></td><td>number of groups</td><td>the number of levels of the factor (k = 3 for three service tiers)</td></tr>
+<tr><td><b>g</b></td><td>group index</td><td>a label that runs over the groups: g = 1, 2, …, k</td></tr>
+<tr><td><b>n<sub>g</sub></b></td><td>group size</td><td>the number of observations in group g</td></tr>
+<tr><td><b>N</b></td><td>total sample size</td><td>N = n<sub>1</sub> + n<sub>2</sub> + … + n<sub>k</sub>, all observations across all groups</td></tr>
+<tr><td><b>i</b></td><td>observation index</td><td>a label that runs over the observations inside one group: i = 1, …, n<sub>g</sub></td></tr>
+<tr><td><b>x<sub>ig</sub></b></td><td>one observation</td><td>the outcome value of observation i in group g</td></tr>
+<tr><td><b>x̄<sub>g</sub></b></td><td>group mean</td><td>the average of the n<sub>g</sub> values in group g</td></tr>
+<tr><td><b>x̄</b></td><td>grand mean</td><td>the average of all N values, ignoring the groups</td></tr>
+<tr><td><b>Σ<sub>g</sub></b>, <b>Σ<sub>i</sub></b></td><td>summation</td><td>&ldquo;add up over every group&rdquo;, &ldquo;add up over every observation in the group&rdquo;</td></tr>
+</table>
+<div class="vars"><b>Worked example (used in every step).</b> Three groups of three observations each, so k = 3, n<sub>g</sub> = 3, N = 9.<br>
+Group 1: 4, 6, 8 &nbsp;→&nbsp; x̄<sub>1</sub> = 6 &nbsp;&nbsp;·&nbsp;&nbsp; Group 2: 5, 7, 9 &nbsp;→&nbsp; x̄<sub>2</sub> = 7 &nbsp;&nbsp;·&nbsp;&nbsp;
+Group 3: 8, 10, 12 &nbsp;→&nbsp; x̄<sub>3</sub> = 10 &nbsp;&nbsp;·&nbsp;&nbsp; grand mean x̄ = (6 + 7 + 10) / 3 = 7.667 (the groups are equal in size, so the mean of the group means is the grand mean).</div>
+
+<h3>2.2 Step 1 — the hypotheses</h3>
+<div class="eq small">H<sub>0</sub>: μ<sub>1</sub> = μ<sub>2</sub> = … = μ<sub>k</sub> &nbsp;&nbsp;&nbsp;&nbsp; H<sub>1</sub>: at least one group mean is different from the others</div>
+<div class="vars"><b>μ<sub>g</sub></b> (mu) is the <em>population</em> mean of group g — the true long-run average that x̄<sub>g</sub> estimates. The null
+hypothesis says all k population means are the same number. The alternative is deliberately vague: it does not say which mean differs,
+or by how much. That is why a significant result has to be followed by Step 7. Note that H<sub>1</sub> is not &ldquo;all the means
+differ&rdquo;; one group standing apart from the rest is enough.</div>
+
+<h3>2.3 Step 2 — the assumptions that make F valid</h3>
+<p>F is a ratio of two variance estimates; the reference distribution for that ratio is exact only when three conditions hold. Check them
+<em>before</em> reading a p-value, because the fixes change which test you run.</p>
+<table>
+<tr><th>Assumption</th><th>What it means</th><th>How to check</th><th>If it fails</th></tr>
+<tr><td>Independence</td><td>Each observation is a separate unit; no unit appears in two groups; observations inside a group do not share a hidden source (the same day, the same machine)</td><td>The design — nothing in the data can check it</td><td>Nothing fixes it afterwards; aggregate to the unit that is independent (for example, one average per server instead of one row per day) and test that</td></tr>
+<tr><td>Approximate normality within each group</td><td>Inside each group the values are roughly bell-shaped, so the group mean is a good summary</td><td>Shapiro–Wilk test per group; a histogram or Q–Q plot per group</td><td>Mild departure with n<sub>g</sub> ≥ 30: proceed. Severe skew or outliers with small groups: use <a href="nonparametric.html">Kruskal–Wallis</a>, the rank-based version</td></tr>
+<tr><td>Equal variances across groups (homogeneity of variance)</td><td>The spread inside each group is about the same, so one pooled &ldquo;within&rdquo; variance describes all of them</td><td>Levene&rsquo;s test (compares the groups&rsquo; |x − median| values; robust to non-normality); as a rough rule, the largest SD less than twice the smallest</td><td>Use Welch&rsquo;s ANOVA (the k-group version of Welch&rsquo;s t-test) for the overall test, and Games–Howell instead of Tukey for the pairs. The failure matters most when the group sizes are unequal or one group&rsquo;s variance is far larger than the rest</td></tr>
 </table>
 
-<h3>After a significant F — where is the difference?</h3>
-<div class="eq small">Tukey HSD: two means differ if &nbsp;|x̄<sub>a</sub> − x̄<sub>b</sub>| &gt; q<sub>α; k, N−k</sub> · √( MS<sub>within</sub> / n )
-&nbsp;&nbsp;&nbsp;&nbsp; (unequal n: √( MS<sub>within</sub>/2 · (1/n<sub>a</sub> + 1/n<sub>b</sub>) ) — Tukey–Kramer)</div>
-<div class="vars"><b>q</b> — the Studentized-range referee: the largest gap among k means, in SE units, that chance alone would produce.
-Why not k(k−1)/2 t-tests? Each has a 5 % false-alarm rate; with 3 groups the family-wise rate is 1 − 0.95³ = 14 %, with 6 groups (15 pairs) 54 %.
-Tukey holds the <em>family</em> at 5 %. Bonferroni (α / number of pairs) is the blunt alternative. <b>A significant ANOVA without a post-hoc is an unfinished analysis.</b></div>
+<h3>2.4 Step 3 — split the total variation into two pieces</h3>
+<p>The quantity being split is a <b>sum of squares</b> (SS): a sum of squared distances from a mean. Three sums of squares are needed.</p>
+<div class="eq small">
+SS<sub>total</sub> &nbsp;=&nbsp; Σ<sub>g</sub> Σ<sub>i</sub> (x<sub>ig</sub> − x̄)<sup>2</sup>
+&nbsp;&nbsp;&nbsp;&nbsp;— every observation&rsquo;s squared distance from the <em>grand</em> mean, added up<br><br>
+SS<sub>between</sub> &nbsp;=&nbsp; Σ<sub>g</sub> n<sub>g</sub> (x̄<sub>g</sub> − x̄)<sup>2</sup>
+&nbsp;&nbsp;&nbsp;&nbsp;— each <em>group mean&rsquo;s</em> squared distance from the grand mean, weighted by the group&rsquo;s size<br><br>
+SS<sub>within</sub> &nbsp;=&nbsp; Σ<sub>g</sub> Σ<sub>i</sub> (x<sub>ig</sub> − x̄<sub>g</sub>)<sup>2</sup>
+&nbsp;&nbsp;&nbsp;&nbsp;— every observation&rsquo;s squared distance from its <em>own group&rsquo;s</em> mean, added up
+</div>
+<div class="eq">SS<sub>total</sub> &nbsp;=&nbsp; SS<sub>between</sub> &nbsp;+&nbsp; SS<sub>within</sub></div>
+<div class="vars">This identity is exact, always — it is algebra, not an approximation. SS<sub>between</sub> is the part of the variation that the
+grouping <em>explains</em> (the groups have different means); SS<sub>within</sub> is the part it does <em>not</em> explain (values scatter around
+their own group mean for reasons the factor cannot account for), which is why it is also called the <b>error</b> or <b>residual</b> sum of squares.<br><br>
+<b>Worked example.</b> SS<sub>between</sub> = 3(6 − 7.667)² + 3(7 − 7.667)² + 3(10 − 7.667)² = 8.333 + 1.333 + 16.333 = <b>26.0</b>.<br>
+SS<sub>within</sub>: group 1 gives (4 − 6)² + (6 − 6)² + (8 − 6)² = 8; groups 2 and 3 also give 8 each; total <b>24.0</b>.<br>
+SS<sub>total</sub> = 26.0 + 24.0 = <b>50.0</b> (check by direct calculation: Σ(x<sub>ig</sub> − 7.667)² = 50.0).</div>
 
-<h3>Two factors at once — and the interaction</h3>
-<div class="eq small">SS<sub>total</sub> = SS<sub>A</sub> + SS<sub>B</sub> + SS<sub>A×B</sub> + SS<sub>within</sub>
-&nbsp;&nbsp;&nbsp;&nbsp; three F-tests: main effect of A, main effect of B, and the interaction</div>
-<div class="vars">An <b>interaction</b> means the effect of A depends on the level of B — on an interaction plot the lines are not parallel.
-When it is significant, the main effects are no longer the story; report the effect of A <em>at each level</em> of B.</div>
+<h3>2.5 Step 4 — degrees of freedom and mean squares</h3>
+<p>A sum of squares grows with the number of terms in it, so each one is divided by its <b>degrees of freedom</b> (df) — the number of
+values that were free to vary once the means used in the sum are fixed. The result is a <b>mean square</b> (MS), which is a variance.</p>
+<table>
+<tr><th>Source</th><th>Sum of squares</th><th>Degrees of freedom</th><th>Mean square</th><th>Why that df</th></tr>
+<tr><td>Between groups</td><td>SS<sub>between</sub></td><td><b>df<sub>between</sub> = k − 1</b></td><td>MS<sub>between</sub> = SS<sub>between</sub> / (k − 1)</td><td>k group means, one constraint (they average to the grand mean)</td></tr>
+<tr><td>Within groups (error)</td><td>SS<sub>within</sub></td><td><b>df<sub>within</sub> = N − k</b></td><td>MS<sub>within</sub> = SS<sub>within</sub> / (N − k)</td><td>N observations, k constraints (each group&rsquo;s values average to its own mean)</td></tr>
+<tr><td>Total</td><td>SS<sub>total</sub></td><td>df<sub>total</sub> = N − 1</td><td>(not used)</td><td>N observations, one constraint (the grand mean); and (k − 1) + (N − k) = N − 1</td></tr>
+</table>
+<div class="vars"><b>MS<sub>within</sub></b> is the pooled variance of the groups — the same quantity the pooled two-sample t-test uses — and it estimates
+the variance of the outcome when the factor has no effect. <b>MS<sub>between</sub></b> estimates that same variance <em>plus</em> a term that
+grows with how far apart the population means are. Under H<sub>0</sub> the extra term is zero and the two mean squares estimate the same number.<br><br>
+<b>Worked example.</b> df<sub>between</sub> = 3 − 1 = 2; df<sub>within</sub> = 9 − 3 = 6. MS<sub>between</sub> = 26.0 / 2 = <b>13.0</b>;
+MS<sub>within</sub> = 24.0 / 6 = <b>4.0</b>.</div>
 
-<h3>Several outcomes at once — MANOVA and Wilks&rsquo; Λ</h3>
+<h3>2.6 Step 5 — the F statistic and its p-value</h3>
+<div class="eq">F &nbsp;=&nbsp; <span class="frac"><span>MS<sub>between</sub></span><span>MS<sub>within</sub></span></span>
+&nbsp;=&nbsp; <span class="frac"><span>SS<sub>between</sub> / (k − 1)</span><span>SS<sub>within</sub> / (N − k)</span></span>
+&nbsp;&nbsp;&nbsp;&nbsp; compared with the F distribution with (k − 1, N − k) degrees of freedom</div>
+<div class="vars"><b>F</b> is the ratio of the two variances. When H<sub>0</sub> is true, F is close to 1 (both mean squares estimate the same
+variance, so their ratio scatters around 1). When the group means are far apart, MS<sub>between</sub> is inflated and F is much larger than 1.
+F can never be negative, and the test is always one-sided to the right: only large F counts against H<sub>0</sub>.<br><br>
+<b>The p-value</b> is the probability, if H<sub>0</sub> were true, of an F at least this large: p = P(F<sub>k−1, N−k</sub> ≥ F<sub>observed</sub>).
+In Excel: <code>=F.DIST.RT(F, k−1, N−k)</code>. Decision rule: p &lt; α (usually 0.05) → reject H<sub>0</sub> and conclude that at least one
+group mean differs. The two df values are always reported with F, in the form F(k − 1, N − k).<br><br>
+<b>Worked example.</b> F = 13.0 / 4.0 = <b>3.25</b> on (2, 6) df; p = F.DIST.RT(3.25, 2, 6) = <b>0.111</b>. Fail to reject H<sub>0</sub> at α = 0.05:
+with only three values per group, these means are not far enough apart, relative to the scatter inside the groups, to rule out chance.<br><br>
+Special case: with k = 2, one-way ANOVA is exactly the pooled two-sample t-test, and F = t².</div>
+
+<h3>2.7 Step 6 — effect size: how much of the variation the grouping explains</h3>
+<div class="eq">η<sup>2</sup> &nbsp;=&nbsp; <span class="frac"><span>SS<sub>between</sub></span><span>SS<sub>total</sub></span></span></div>
+<div class="vars"><b>η²</b> (eta squared) is the fraction of the total sum of squares that sits between the groups — the share of the outcome&rsquo;s
+variation that knowing the group accounts for. It runs from 0 (the groups explain nothing) to 1 (every value equals its group mean).
+Conventional labels: 0.01 small · 0.06 medium · 0.14 large. In a two-factor model the same ratio is computed for each term (Step 8).
+<b>ω²</b> (omega squared) is a corrected version that is less optimistic in small samples; report either, but say which.<br><br>
+<b>Worked example.</b> η² = 26.0 / 50.0 = <b>0.52</b>. The grouping accounts for half of the variation — a large effect — even though the
+p-value was 0.111. Significance and size are different questions: with nine observations the test lacks power, but the pattern in the
+means is large. Report both numbers, always.</div>
+
+<h3>2.8 Step 7 — after a significant F: which groups differ?</h3>
+<p>F answers only &ldquo;are they all the same?&rdquo;. To say which pairs differ, every pair of groups has to be compared. The number of pairs is</p>
+<div class="eq small">m &nbsp;=&nbsp; k(k − 1) / 2 &nbsp;&nbsp;&nbsp;&nbsp;(k = 3 → 3 pairs; k = 4 → 6; k = 6 → 15)</div>
+<div class="vars"><b>Why not m ordinary t-tests?</b> Each t-test run at α = 0.05 has a 5 % chance of a false alarm. Run m of them and the chance that
+<em>at least one</em> is a false alarm — the <b>family-wise error rate</b> — is 1 − (1 − α)<sup>m</sup>: 14 % for three pairs, 26 % for six,
+54 % for fifteen. Two repairs exist. <b>Bonferroni</b> divides α by m and uses the smaller threshold for every pair (simple, but it discards power).
+<b>Tukey&rsquo;s HSD</b> holds the family at 5 % with more power, by asking a sharper question: how large a gap between the largest and
+smallest of k sample means would chance alone produce?</div>
+<div class="eq small">Tukey HSD: groups a and b differ if &nbsp; |x̄<sub>a</sub> − x̄<sub>b</sub>| &nbsp;&gt;&nbsp; q<sub>α; k, N−k</sub> · √( MS<sub>within</sub> / n )
+<br>&nbsp;&nbsp;&nbsp;&nbsp;(unequal group sizes — the Tukey–Kramer form: &nbsp; q<sub>α; k, N−k</sub> · √( (MS<sub>within</sub> / 2) · (1/n<sub>a</sub> + 1/n<sub>b</sub>) ))</div>
+<div class="vars"><b>q<sub>α; k, N−k</sub></b> is the critical value of the <b>Studentized range</b> distribution: the largest spread among k sample means,
+measured in standard-error units, that would occur by chance with probability α when H<sub>0</sub> is true. It depends on k (more groups → larger
+expected spread) and on df<sub>within</sub> = N − k. <b>√(MS<sub>within</sub> / n)</b> is the standard error of one group mean, using the pooled
+variance from the ANOVA table. Their product is the <b>critical gap</b> (the HSD): any pair whose observed gap exceeds it is declared different,
+and the whole set of m comparisons together keeps a 5 % family-wise error rate.<br><br>
+<b>Worked example.</b> q<sub>0.05; 3, 6</sub> = 4.34 (from a Studentized-range table; Python: <code>studentized_range.ppf(0.95, 3, 6)</code>).
+Critical gap = 4.34 × √(4.0 / 3) = <b>5.01</b>. The largest observed gap is x̄<sub>3</sub> − x̄<sub>1</sub> = 10 − 6 = 4.0, which is below 5.01,
+so no pair is declared different — consistent with the non-significant F.<br><br>
+<b>When the variances are unequal</b> (Step 2, Levene fails), Tukey&rsquo;s critical gap is wrong, because MS<sub>within</sub> pools variances
+that are not equal: one very noisy group inflates the pooled variance and hides real gaps between the quiet groups. Use <b>Games–Howell</b>,
+which applies Tukey&rsquo;s q with each pair&rsquo;s own separate-variance standard error (the Welch idea), or Welch t-tests with a Bonferroni α.
+<b>A significant ANOVA without a post-hoc comparison is an unfinished analysis.</b></div>
+
+<h3>2.9 Step 8 — two factors at once: two-way ANOVA and the interaction</h3>
+<p>Now there are two categorical factors — call them <b>A</b> with <b>a</b> levels and <b>B</b> with <b>b</b> levels — and every combination of a
+level of A with a level of B is a <b>cell</b>. With the same number of observations n in every cell the design is <em>balanced</em> and the
+arithmetic is clean. The total variation now splits four ways.</p>
+<div class="eq small">SS<sub>total</sub> &nbsp;=&nbsp; SS<sub>A</sub> &nbsp;+&nbsp; SS<sub>B</sub> &nbsp;+&nbsp; SS<sub>A×B</sub> &nbsp;+&nbsp; SS<sub>within</sub></div>
+<table>
+<tr><th>Term</th><th>What it measures</th><th>df</th><th>F-test</th></tr>
+<tr><td>SS<sub>A</sub> — main effect of A</td><td>how far the a level-means of A (averaged over all levels of B) sit from the grand mean</td><td>a − 1</td><td>MS<sub>A</sub> / MS<sub>within</sub></td></tr>
+<tr><td>SS<sub>B</sub> — main effect of B</td><td>the same for the b level-means of B</td><td>b − 1</td><td>MS<sub>B</sub> / MS<sub>within</sub></td></tr>
+<tr><td>SS<sub>A×B</sub> — interaction</td><td>how far each cell mean sits from where the two main effects alone would put it</td><td>(a − 1)(b − 1)</td><td>MS<sub>A×B</sub> / MS<sub>within</sub></td></tr>
+<tr><td>SS<sub>within</sub> — error</td><td>scatter of the observations around their own cell mean</td><td>ab(n − 1)</td><td>—</td></tr>
+</table>
+<div class="vars"><b>A main effect</b> is the effect of one factor <em>averaged over</em> the levels of the other. <b>The interaction</b> is the part of the
+cell means that the two main effects added together cannot reproduce: it is non-zero when the effect of A is different at different levels of B.
+On an <b>interaction plot</b> (levels of A on the horizontal axis, one line per level of B, cell means as the points) parallel lines mean no
+interaction; lines with different slopes mean interaction; lines that cross mean the <em>direction</em> of A&rsquo;s effect reverses.<br><br>
+<b>Reading order.</b> Test the interaction first. If it is significant, the main effects are no longer the story — an average effect of A that
+mixes a positive effect under B<sub>1</sub> with a negative one under B<sub>2</sub> describes no real situation — and the report gives the effect
+of A <em>at each level of B</em>. If the interaction is not significant, the two main effects can be read on their own. Each term gets its own
+η² = SS<sub>term</sub> / SS<sub>total</sub>; software also reports partial η² = SS<sub>term</sub> / (SS<sub>term</sub> + SS<sub>within</sub>),
+which is larger because the other terms are set aside — say which one you are quoting.</div>
+
+<h3>2.10 Step 9 — several outcomes at once: MANOVA and Wilks&rsquo; Λ</h3>
+<p>Everything so far has one numeric outcome. When there are <b>p</b> outcomes measured on the same units (revenue <em>and</em> margin; cost
+<em>and</em> wait time), each group has a <em>vector</em> of p means instead of a single mean, and the question becomes whether the groups differ
+on the combination. Two things replace their one-outcome versions.</p>
+<table>
+<tr><th>One outcome (ANOVA)</th><th>p outcomes (MANOVA)</th><th>Meaning</th></tr>
+<tr><td>SS<sub>within</sub> (a number)</td><td><b>W</b> — the within-group matrix (p × p)</td><td>on its diagonal, SS<sub>within</sub> for each outcome; off the diagonal, the within-group <em>cross-products</em> Σ(x − x̄<sub>g</sub>)(y − ȳ<sub>g</sub>), which carry how the outcomes move together inside groups</td></tr>
+<tr><td>SS<sub>between</sub> (a number)</td><td><b>B</b> — the between-group matrix (p × p)</td><td>the same construction for the group means around the grand means</td></tr>
+<tr><td>SS<sub>total</sub> = SS<sub>between</sub> + SS<sub>within</sub></td><td><b>T</b> = <b>B</b> + <b>W</b></td><td>the identity still holds, matrix by matrix</td></tr>
+</table>
 <div class="eq">Λ &nbsp;=&nbsp; <span class="frac"><span>|W|</span><span>|B + W|</span></span>
-&nbsp;&nbsp;&nbsp;&nbsp; = &nbsp;the share of multivariate variation <em>not</em> explained by the grouping &nbsp;&nbsp;(0 … 1; small Λ → reject)</div>
-<div class="vars"><b>W</b>, <b>B</b> — the within- and between-group sums-of-squares-and-cross-products <em>matrices</em> (the multivariate SS<sub>within</sub>
-and SS<sub>between</sub>). Λ is the many-outcome cousin of 1 − η². Software converts Λ to an F and a p (also reports Pillai&rsquo;s trace, the
-robust choice). <b>Why not one ANOVA per outcome?</b> (1) m outcomes = m tests = inflated false alarms. (2) Correlated outcomes carry
-shared information — two groups can look alike on revenue and alike on margin yet differ clearly on the <em>combination</em> (one earns
-more at lower margin). MANOVA sees the joint pattern. Follow a significant Λ with the univariate ANOVAs (and Tukey) to say which outcomes
-carry it; if none is significant alone, the story is the joint pattern — report it that way. Two groups × p outcomes = Hotelling&rsquo;s T².</div>
+&nbsp;&nbsp;&nbsp;&nbsp; 0 ≤ Λ ≤ 1 &nbsp;&nbsp;·&nbsp;&nbsp; small Λ → reject H<sub>0</sub></div>
+<div class="vars"><b>|W|</b> and <b>|B + W|</b> are the <b>determinants</b> of the two matrices — a determinant of a sums-of-squares matrix is a
+<em>generalised variance</em>, a single number that measures the volume of scatter in all p dimensions at once. So <b>Wilks&rsquo; Λ</b> is the share
+of the total multivariate variation that is <em>not</em> explained by the grouping. With one outcome the matrices are 1 × 1, the determinants are
+the plain sums of squares, and Λ = SS<sub>within</sub> / SS<sub>total</sub> = 1 − η². That is the way to read it: Λ close to 1 means the groups
+explain almost nothing; Λ close to 0 means they explain almost everything.<br><br>
+<b>H<sub>0</sub></b>: the k groups have the same vector of population means (all p means equal across groups at once). <b>H<sub>1</sub></b>: at least
+one group&rsquo;s mean vector differs. Software converts Λ into an F statistic with a p-value (an exact conversion for p ≤ 2 or k ≤ 3,
+an approximation otherwise) and also prints <b>Pillai&rsquo;s trace</b>, the most robust of the alternatives when the assumptions are shaky.
+With exactly two groups the test is <b>Hotelling&rsquo;s T²</b>, the p-outcome version of the two-sample t-test.<br><br>
+<b>Why not one ANOVA per outcome?</b> Two reasons. (1) p outcomes means p tests, and the family-wise error rate rises just as in Step 7.
+(2) Correlated outcomes carry <em>joint</em> information: two groups can be alike on revenue alone and alike on margin alone, yet clearly
+different on the combination — one earns more revenue at a lower margin — and only a test that uses the cross-products in W and B can see it.
+<b>Follow-up.</b> After a significant Λ, run the univariate ANOVAs (and Tukey) to say which outcomes carry the difference; if none is significant
+on its own, the finding <em>is</em> the joint pattern, and the report says so.</div>
 
 <h2 id="lab-anova">3 · Lab A — three groups, one F: the ANOVA table live</h2>
 <div class="panel">
@@ -166,11 +289,11 @@ carry it; if none is significant alone, the story is the joint pattern — repor
 <div class="livebox">
 <span class="lab">η² = </span><b id="t-eta">—</b> <span class="lab">· Levene p = </span><b id="t-lev">—</b>
 <span class="lab">· Kruskal–Wallis p (for contrast) = </span><b id="t-kw">—</b><br>
-<span class="lab">Tukey HSD (q</span><sub>0.05; 3, df</sub><span class="lab"> = </span><b id="t-q">—</b><span class="lab">, critical gap = </span><b id="t-hsd">—</b><span class="lab">): </span><br>
+<span class="lab">Tukey HSD (q</span><sub>0.05; k = 3, df<sub>within</sub></sub><span class="lab"> = </span><b id="t-q">—</b><span class="lab">, critical gap = </span><b id="t-hsd">—</b><span class="lab">): </span><br>
 <span id="t-pairs"></span><br>
 <span class="lab">verdict: </span><b id="t-v">—</b>
 </div>
-<div class="fitnote">Read the Tukey line: only pairs whose gap clears the critical gap &ldquo;differ&rdquo;. Pull the SD up to 12 and the F evaporates; pull n to 40 and every pair separates. Bring the three means together and watch F fall toward 1 — that&rsquo;s H<sub>0</sub>.</div>
+<div class="fitnote">Read the Tukey line: only pairs whose gap clears the critical gap &ldquo;differ&rdquo;. Raise the within-group SD to 12 and F falls below the critical value; raise n to 40 and every pair separates. Bring the three means together and F falls toward 1 — that is what H<sub>0</sub> looks like.</div>
 </div>
 
 <h2 id="lab-fwe">4 · Lab B — why not lots of t-tests? The family-wise error</h2>
@@ -189,7 +312,7 @@ carry it; if none is significant alone, the story is the joint pattern — repor
 
 <h2 id="lab-ix">5 · Lab C — the interaction plot (two factors)</h2>
 <div class="panel">
-<p class="fitnote">Factor A (two levels, the x-axis) × Factor B (two lines). Drag the four cell means.</p>
+<p class="fitnote">Factor A has two levels (A1, A2) on the horizontal axis; Factor B has two levels (B1, B2), one line each. Each slider is one cell mean — for example A2·B1 is the mean of the observations at level A2 of factor A and level B1 of factor B. Drag the four cell means.</p>
 <div class="controls">
 <label>A1·B1 = <b id="c11-out">50</b><input type="range" id="c11" min="30" max="70" value="50"></label>
 <label>A2·B1 = <b id="c21-out">60</b><input type="range" id="c21" min="30" max="70" value="60"></label>
@@ -225,7 +348,7 @@ carry it; if none is significant alone, the story is the joint pattern — repor
 <span class="lab">· p = </span><b id="m-pm">—</b>
 <span class="lab">· read: </span><b id="m-v">—</b>
 </div>
-<div class="fitnote">Shift <em>across</em> by 0.4 with correlation 0.9, then hit ↻ a few times: the two univariate p-values wander (often neither is significant) while the joint test rejects
+<div class="fitnote">Shift <em>across</em> by 0.4 with correlation 0.9, then press ↻ several times: the two univariate p-values wander (often neither is significant) while the joint test rejects
 overwhelmingly — the groups sit off the shared trend. That is the &ldquo;more revenue at lower margin&rdquo; pattern. Shift <em>along</em> instead and all three tests agree.</div>
 </div>
 
@@ -235,7 +358,8 @@ overwhelmingly — the groups sit off the shared trend. That is the &ldquo;more 
 <tr><td>One-way ANOVA</td><td>Data → Data Analysis → <b>Anova: Single Factor</b> (groups in columns) — gives the full table. By formula: SS<sub>within</sub> = <code>=DEVSQ(A)+DEVSQ(B)+DEVSQ(C)</code>, SS<sub>total</sub> = <code>=DEVSQ(all)</code>, SS<sub>between</sub> = difference; p = <code>=F.DIST.RT(F, k-1, N-k)</code></td><td><code>scipy.stats.f_oneway(a,b,c)</code> or <code>statsmodels.formula.api.ols("y ~ C(group)", df).fit()</code> → <code>anova_lm(model)</code></td></tr>
 <tr><td>Assumption checks</td><td>per group: <code>=SKEW()</code>, <code>=KURT()</code>, Q–Q plot; variances: <code>=VAR.S()</code> ratio (no Levene built in)</td><td><code>shapiro(a)</code> per group · <code>levene(a,b,c)</code></td></tr>
 <tr><td>Tukey HSD</td><td>not built in — compute the critical gap by hand: HSD = q · √(MS<sub>within</sub>/n) with q from a Studentized-range table (k = 3, df = 30: 3.49)</td><td><code>statsmodels.stats.multicomp.pairwise_tukeyhsd(y, group)</code></td></tr>
-<tr><td>Welch ANOVA (unequal variances)</td><td>—</td><td><code>pingouin.welch_anova(dv, between, data)</code></td></tr>
+<tr><td>Welch ANOVA (unequal variances)</td><td>—</td><td><code>statsmodels.stats.oneway.anova_oneway([a,b,c], use_var="unequal")</code> or <code>pingouin.welch_anova(dv, between, data)</code></td></tr>
+<tr><td>Games–Howell (pairs, unequal variances)</td><td>—</td><td><code>pingouin.pairwise_gameshowell(dv, between, data)</code></td></tr>
 <tr><td>Two-way ANOVA</td><td>Data Analysis → <b>Anova: Two-Factor With Replication</b></td><td><code>ols("y ~ C(A)*C(B)", df)</code> → <code>anova_lm(model, typ=2)</code></td></tr>
 <tr><td>MANOVA</td><td>not available</td><td><code>from statsmodels.multivariate.manova import MANOVA</code><br><code>MANOVA.from_formula("y1 + y2 ~ C(group)", df).mv_test()</code> → Wilks&rsquo; lambda, Pillai&rsquo;s trace, F, p</td></tr>
 <tr><td>Effect size</td><td>η² = SS<sub>between</sub>/SS<sub>total</sub> from the table</td><td><code>anova_lm</code> table → <code>sum_sq</code> ratio; <code>pingouin.anova(..., effsize="np2")</code></td></tr>
