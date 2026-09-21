@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>BUS 322 — Power &amp; Sample Size</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--lynn:#003DA5;--lynnd:#002a73;--lynnl:#e8f0fa;--accent:#ffba08;
+--g50:#f8f9fb;--g200:#e1e4e8;--g800:#24292f;--good:#2d7d46;--text:#1a1f27;}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+color:var(--text);background:var(--g50);margin:0;line-height:1.6}
+.wrap{max-width:840px;margin:0 auto;padding:0 16px 64px}
+.hero{background:linear-gradient(135deg,var(--lynn),var(--lynnd));color:#fff;
+padding:30px 26px;border-radius:0 0 14px 14px;margin-bottom:8px}
+.hero h1{margin:0 0 4px;font-size:1.6em}
+.hero .crumb{font-size:.85em}.hero .crumb a{color:var(--accent);text-decoration:none}
+.hero p{margin:6px 0 0;color:rgba(255,255,255,.88);font-size:.95em;max-width:44rem}
+h2{color:var(--lynnd);font-size:1.25em;margin:34px 0 10px;border-bottom:2px solid var(--lynnl);padding-bottom:4px}
+.story{background:#fff;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;
+padding:14px 18px;margin:10px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.story p{margin:8px 0}
+.eq{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:18px;
+margin:12px 0;text-align:center;font-size:1.25em;overflow-x:auto}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center}
+.eq .frac span{display:block;padding:0 6px}
+.eq .frac span:first-child{border-bottom:1.5px solid var(--text)}
+.eq sup,.eq sub{font-size:.68em}
+.vars{background:var(--lynnl);border-radius:10px;padding:12px 18px;margin:10px 0;font-size:.94em}
+.vars b{color:var(--lynnd)}
+.sig{background:#fff;border:1px dashed var(--good);border-radius:10px;padding:10px 16px;
+margin:10px 0;font-size:.95em}
+.sig b{color:var(--good)}
+.panel{background:#fff;border:1px solid var(--g200);border-radius:12px;padding:16px;margin:12px 0}
+canvas{width:100%;height:auto;display:block}
+.controls{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0;font-size:.9em}
+.controls label{display:flex;flex-direction:column;gap:2px;min-width:150px;flex:1}
+.controls input[type=range]{accent-color:var(--lynn)}
+.livebox{background:var(--g800);color:#7ee787;font-family:ui-monospace,Consolas,monospace;
+border-radius:8px;padding:10px 14px;margin-top:8px;font-size:.95em;overflow-x:auto}
+.livebox .lab{color:#8b949e}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:.92em;background:#fff}
+th{background:var(--lynnl);color:var(--lynnd);text-align:left;padding:7px 10px;border:1px solid var(--g200)}
+td{padding:7px 10px;border:1px solid var(--g200)}
+td code,li code,p code{background:var(--lynnl);padding:1px 6px;border-radius:5px;
+font-family:ui-monospace,Consolas,monospace;font-size:.92em}
+.ans{color:var(--good);font-weight:700;font-family:ui-monospace,Consolas,monospace}
+.tip{background:var(--lynnl);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:.92em}
+.nav2{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.nav2 a{color:var(--lynn);text-decoration:none;font-weight:600;font-size:.9em;
+border:1px solid var(--g200);background:#fff;border-radius:9px;padding:7px 13px}
+.nav2 a:hover{border-color:var(--lynn)}
+.fitnote{font-size:.9em;color:#5a6270;margin-top:6px}
+
+.qcard{border-top:1px solid var(--g200);padding:12px 4px}
+.qcard:first-child{border-top:none}
+.qs{margin:4px 0 8px}
+.qopts{display:grid;gap:6px}
+.qopt{text-align:left;background:var(--g50);border:1px solid var(--g200);border-radius:8px;
+padding:8px 12px;font-size:.92em;cursor:pointer;font-family:inherit}
+.qopt:hover{border-color:var(--lynn)}
+.qopt.right{background:#e7f3ea;border-color:var(--good);font-weight:600}
+.qopt.wrong{background:#fdeceb;border-color:#dc2f02}
+.qwhy{display:none;background:var(--lynnl);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:.88em}
+.qwhy.show{display:block}
+
+.snapbtn{background:var(--lynn);color:#fff;border:none;border-radius:10px;
+padding:10px 18px;font-size:.95em;font-weight:700;cursor:pointer;font-family:inherit}
+.snapbtn:hover{background:var(--lynnd)}
+</style></head><body>
+<div class="hero"><div class="wrap" style="padding:0">
+<div class="crumb"><a href="../BUS322_A_Review_Hub.html">← Review Hub</a> · Test a claim</div>
+<h1>Power &amp; Sample Size</h1><p>Why a study misses a real effect, how many observations it would take not to, and why computing power afterwards proves nothing.</p></div></div>
+<div class="wrap">
+
+<h2>1 &middot; Where it came from</h2>
+<div class="story">
+<p><b>Jerzy Neyman</b> and <b>Egon Pearson</b> spent the late 1920s arguing with
+R. A. Fisher about what a statistical test is <em>for</em>. Fisher's p-value measured evidence
+against a null. Neyman and Pearson asked the harder question: a test can be wrong in two
+directions, so how do you design one that is wrong as rarely as possible in the direction you
+care about? Their 1933 paper named the second error and the quantity that controls it.</p>
+<p>Forty years later <b>Jacob Cohen</b> found that the psychology literature had quietly ignored
+it. Surveying published studies, he showed that a typical experiment had roughly a coin-flip
+chance of detecting the effect it was looking for &mdash; and that authors were reporting
+&ldquo;no significant difference&rdquo; as though it meant &ldquo;no difference&rdquo;. His 1962
+survey and the standardised effect size that carries his name are the reason power is now part
+of designing a study rather than an afterthought.</p>
+</div>
+
+<h2>2 &middot; The mathematics</h2>
+<div class="eq">&alpha; = P(reject H&#8320; | H&#8320; true)
+&nbsp;&nbsp;&nbsp;&nbsp;
+&beta; = P(fail to reject H&#8320; | H&#8321; true)
+&nbsp;&nbsp;&nbsp;&nbsp;
+power = 1 &minus; &beta;</div>
+<div class="vars">&alpha; is the false-alarm rate and you choose it. &beta; is the miss rate and
+you <em>do not</em> &mdash; it falls out of the effect size, the sample size and &alpha;
+together. Power is the probability that a real effect of a stated size actually shows up as
+significant.</div>
+
+<div class="eq">d = <span class="frac"><span>x&#772;<sub>1</sub> &minus; x&#772;<sub>2</sub></span><span>s<sub>pooled</sub></span></span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+s<sub>pooled</sub> = &radic;<span style="text-decoration:overline">&nbsp;<span class="frac"><span>(n<sub>1</sub>&minus;1)s<sub>1</sub><sup>2</sup> + (n<sub>2</sub>&minus;1)s<sub>2</sub><sup>2</sup></span><span>n<sub>1</sub> + n<sub>2</sub> &minus; 2</span></span>&nbsp;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+d<sub>z</sub> = <span class="frac"><span>d&#772;</span><span>s<sub>d</sub></span></span></div>
+<div class="vars"><b>Cohen's d</b> expresses a difference in standard deviations, so it is
+comparable across studies and across units. For <em>paired</em> designs use <b>d<sub>z</sub></b>
+&mdash; the mean difference over the SD <em>of the differences</em>, which is a different and
+usually much larger number. Cohen's 0.2 / 0.5 / 0.8 labels are conventions he later regretted
+publishing; a &ldquo;small&rdquo; effect on a large book of business can be worth more than a
+&ldquo;large&rdquo; one on a small book.</div>
+
+<div class="eq">n per group &asymp;
+<span class="frac"><span>2(z<sub>1&minus;&alpha;/2</sub> + z<sub>power</sub>)<sup>2</sup></span><span>d<sup>2</sup></span></span></div>
+<div class="sig"><b>Read the d<sup>2</sup> in the denominator.</b> Sample size scales with
+<em>one over the square of the effect</em>. Halving the effect you want to detect roughly
+<b>quadruples</b> the sample. Detecting d = 0.86 at 80% power needs about
+22 per group; detecting half of it needs about 86. This
+single fact decides more study designs than any other in the course.</div>
+
+<h2>3 &middot; Watch &alpha; and &beta; trade off</h2>
+<p>Two curves: the test statistic when there is no effect, and when the effect is real. The
+critical value sits where &alpha; says it does. Everything of the right-hand curve that falls
+left of that line is a miss.</p>
+<div class="panel">
+<div class="controls">
+<label>effect size d = <b id="pd">0.80</b>
+<input type="range" id="psd" min="0.05" max="2" step="0.05" value="0.8"></label>
+<label>n per group = <b id="pn">12</b>
+<input type="range" id="psn" min="3" max="200" step="1" value="12"></label>
+<label>&alpha; = <b id="pa">0.05</b>
+<input type="range" id="psa" min="0.01" max="0.20" step="0.01" value="0.05"></label>
+</div>
+<canvas id="pcan" width="800" height="270"></canvas>
+<div class="livebox"><span class="lab">power = </span><b id="ppw">&mdash;</b>
+<span class="lab"> &nbsp;&middot;&nbsp; &beta; (miss rate) = </span><b id="pbe">&mdash;</b>
+<span class="lab"> &nbsp;&middot;&nbsp; n for 80% power = </span><b id="pn80">&mdash;</b>
+<span class="lab"> &nbsp;&middot;&nbsp; </span><b id="pver">&mdash;</b></div>
+<div class="fitnote">Three things worth doing. Drop n and watch the right-hand curve slide left
+until most of it is a miss. Raise &alpha; and watch power rise &mdash; you buy detection by
+accepting more false alarms. And set d small with n small: power falls toward &alpha; itself,
+which is the state most under-powered studies are actually in.</div>
+</div>
+
+<h2>4 &middot; Excel lab &mdash; a real comparison</h2>
+<p>Twelve climate-controlled storage units and twelve standard ones, monthly revenue per unit.
+Climate in <code>A2:A13</code>, standard in <code>B2:B13</code>.</p>
+<table>
+<tr><th>What you want</th><th>Formula</th><th>You should see</th></tr>
+<tr><td>Mean, climate</td><td><code>=AVERAGE(A2:A13)</code></td><td class="ans">141.333</td></tr>
+<tr><td>Mean, standard</td><td><code>=AVERAGE(B2:B13)</code></td><td class="ans">135.333</td></tr>
+<tr><td>SD, climate</td><td><code>=STDEV.S(A2:A13)</code></td><td class="ans">7.620</td></tr>
+<tr><td>SD, standard</td><td><code>=STDEV.S(B2:B13)</code></td><td class="ans">6.358</td></tr>
+<tr><td>Pooled SD</td><td><code>=SQRT((11*VAR.S(A2:A13)+11*VAR.S(B2:B13))/22)</code></td><td class="ans">7.017</td></tr>
+<tr><td>Cohen's d</td><td><code>=(AVERAGE(A2:A13)-AVERAGE(B2:B13))/pooled</code></td><td class="ans">0.855</td></tr>
+<tr><td>t statistic</td><td><code>=T.TEST(A2:A13,B2:B13,2,2)</code> gives p directly</td><td class="ans">t = 2.094</td></tr>
+<tr><td>p-value</td><td><code>=T.TEST(A2:A13,B2:B13,2,2)</code></td><td class="ans">0.0480</td></tr>
+<tr><td>Power at n = 12</td><td><code>=NORM.S.DIST(d*SQRT(12/2)-NORM.S.INV(0.975),TRUE)</code></td><td class="ans">55.3%</td></tr>
+<tr><td>n per group for 80% power</td><td><code>=2*(NORM.S.INV(0.975)+NORM.S.INV(0.8))^2/d^2</code></td><td class="ans">21.5 &rarr; 22</td></tr>
+</table>
+<div class="sig"><b>This result is significant and the study was still under-powered.</b>
+p = 0.0480 clears 0.05, so the difference is real enough to report. But the design had only
+<span class="ans">55%</span> power against the effect that turned up &mdash;
+close to a coin flip. Run this same study again with twelve fresh units per group and it would
+fail to reach significance <b>about 45 times in 100</b>. Nothing is wrong
+with the finding; what is wrong is the design's reliability, and the p-value says nothing about
+it. Detecting d = 0.86 at 80% power needs 22 per group, not 12.</div>
+<div class="sig"><b>Look at the MDE and you can see the luck.</b> At n = 12 the smallest effect
+this design could reliably detect is d = <span class="ans">1.14</span>, and the effect
+present was only d = 0.86 &mdash; <em>smaller than the design's own detection
+threshold</em>. It reached significance anyway because sampling noise happened to fall the
+helpful way. That is not a criticism of the analyst; it is the reason power is computed before
+collecting data rather than after.</div>
+<div class="sig"><b>Now make the effect realistic.</b> Suppose the true difference had been a
+modest d = 0.30. The same twelve-per-group design would have had
+<span class="ans">11.4%</span> power &mdash; missing a real difference about
+89 times out of 100, barely better than the 5% false-alarm
+rate itself. Detecting d = 0.30 at 80% power needs
+<span class="ans">175</span> per group. A design is never good or bad on its
+own, only relative to the effect you are hunting.</div>
+
+<h2>5 &middot; Minimum detectable effect &mdash; the question to ask first</h2>
+<p>Usually n is fixed before you arrive: this is the data that exists. Then the useful question
+reverses. Instead of &ldquo;how many do I need?&rdquo;, ask <em>&ldquo;what is the smallest
+effect this design could reliably find?&rdquo;</em></p>
+<div class="eq">MDE = (z<sub>1&minus;&alpha;/2</sub> + z<sub>power</sub>) &middot;
+&radic;<span style="text-decoration:overline">&nbsp;2/n&nbsp;</span></div>
+<table>
+<tr><th>n per group</th><th>Smallest d detectable at 80% power</th><th>Meaning</th></tr>
+<tr><td>12</td><td class="ans">1.144</td><td>only a large effect will show up</td></tr>
+<tr><td>50</td><td class="ans">0.560</td><td>a medium effect becomes findable</td></tr>
+<tr><td>175</td><td class="ans">0.300</td><td>a small effect becomes findable</td></tr>
+</table>
+<div class="sig"><b>Compare the MDE to what the business cares about.</b> If the smallest change
+worth acting on is a 4% lift and your design can only detect a 15% lift, the study cannot answer
+the question &mdash; and you know that <em>before</em> collecting anything. That conversation is
+cheap in advance and impossible afterwards.</div>
+
+<h2>6 &middot; Design beats sample size: pairing</h2>
+<p>The same twelve observations, arranged two ways. An effect of d = 0.90, &alpha; = 0.05:</p>
+<table>
+<tr><th>Design</th><th>n</th><th>Power</th><th>Verdict</th></tr>
+<tr><td>Independent groups</td><td>12 per group</td><td class="ans">60%</td><td>would miss the effect most of the time</td></tr>
+<tr><td>Paired / repeated measures</td><td>12 pairs</td><td class="ans">88%</td><td>would almost always find it</td></tr>
+<tr><td>Independent, matched to that power</td><td class="ans">&asymp;25 per group</td><td>88%</td><td>what it costs to buy the same power without pairing</td></tr>
+</table>
+<div class="sig"><b>Pairing removes between-unit variation from the denominator.</b> Measuring the
+same stores before and after, rather than different stores, deletes the store-to-store spread
+that was drowning the signal. It is the cheapest power increase available, and it is a design
+decision &mdash; unavailable once the data is collected.</div>
+
+<h2>7 &middot; Three ways power gets misused</h2>
+<div class="sig"><b>1. &ldquo;Not significant&rdquo; reported as &ldquo;no difference&rdquo;.</b>
+A non-significant result from an under-powered test is not evidence of absence &mdash; it is
+absence of evidence. The honest sentence names the power: &ldquo;this design had
+11% power against a d = 0.30 effect, so a null result does not rule one
+out.&rdquo;</div>
+<div class="sig"><b>2. Retrospective power.</b> Computing power <em>from the effect you observed</em>
+is circular: it is a one-to-one function of the p-value you already have, so it adds no
+information. It cannot rescue a null result and it cannot justify a design after the fact. The
+effect size must be specified <em>before</em> the data is seen &mdash; from prior studies, a
+pilot, or the smallest difference that would change the decision.</div>
+<div class="sig"><b>3. Type III error &mdash; the right answer to the wrong question.</b> A test
+can be perfectly executed, adequately powered and correctly interpreted, and still fail, because
+it answered a question the decision did not ask. Proving climate control raises revenue per unit
+does not tell you whether it pays for its own installation cost. There is no statistical fix
+&mdash; only asking the question first.</div>
+<table>
+<tr><th>Error</th><th>What happened</th><th>Controlled by</th></tr>
+<tr><td>Type I</td><td>found an effect that is not there</td><td>&alpha; &mdash; you choose it</td></tr>
+<tr><td>Type II</td><td>missed an effect that is there</td><td>power &mdash; n, d and &alpha; together</td></tr>
+<tr><td>Type III</td><td>answered the wrong question correctly</td><td>nothing statistical; framing only</td></tr>
+</table>
+
+<h2>8 &middot; Assumptions</h2>
+<table>
+<tr><th>This page assumes</th><th>If it fails</th></tr>
+<tr><td>Two groups, roughly equal n, roughly normal</td><td>use the design's own power formula &mdash; ANOVA, regression and proportions each have one</td></tr>
+<tr><td>The effect size was chosen in advance</td><td>the calculation is retrospective and tells you nothing</td></tr>
+<tr><td>s<sub>pooled</sub> estimates the real SD</td><td>a pilot SD from a small sample is itself noisy; plan with a range, not a point</td></tr>
+<tr><td>One test</td><td>with several comparisons, &alpha; is adjusted downward, which lowers power &mdash; plan for the adjusted &alpha;</td></tr>
+</table>
+<h2>&#9989; Self-check &mdash; no internet needed</h2><div class="panel"><div class="qcard"><p class="qs"><b>Q1.</b> A study with 12 per group finds p = 0.34 and concludes &ldquo;climate control makes no difference to revenue&rdquo;. The design had 11% power against the effect size management cares about. What is the correct conclusion?</p><div class="qopts"><button class="qopt" data-q="0" data-ok="1">A) The study could not have detected that effect reliably &mdash; it is uninformative, not negative</button><button class="qopt" data-q="0" data-ok="0">B) There is no difference between the two unit types</button><button class="qopt" data-q="0" data-ok="0">C) The difference is real but too small to matter</button><button class="qopt" data-q="0" data-ok="0">D) The sample was large enough, so the null is supported</button></div><div class="qwhy" id="qwhy0">With 11% power the test misses a real effect roughly nine times in ten. A null result from such a design tells you almost nothing &mdash; absence of evidence, not evidence of absence. The honest report states the power alongside the p-value.</div></div><div class="qcard"><p class="qs"><b>Q2.</b> You can detect an effect of d = 0.80 with about 25 per group. Roughly what is needed for d = 0.40?</p><div class="qopts"><button class="qopt" data-q="1" data-ok="1">A) About 100 per group</button><button class="qopt" data-q="1" data-ok="0">B) About 50 per group</button><button class="qopt" data-q="1" data-ok="0">C) About 25 per group, since power depends on d not n</button><button class="qopt" data-q="1" data-ok="0">D) About 35 per group</button></div><div class="qwhy" id="qwhy1">n scales with 1/d&sup2;, so halving the effect roughly quadruples the sample: 25 &times; 4 &asymp; 100 (the formula gives 98). Doubling to 50 is the intuitive answer and it is wrong &mdash; that linear instinct is what wrecks study budgets.</div></div><div class="qcard"><p class="qs"><b>Q3.</b> After a non-significant result, an analyst computes power using the effect size that was observed and reports 19%. What does this add?</p><div class="qopts"><button class="qopt" data-q="2" data-ok="1">A) Nothing &mdash; observed power is a restatement of the p-value</button><button class="qopt" data-q="2" data-ok="0">B) It proves the study was under-powered</button><button class="qopt" data-q="2" data-ok="0">C) It gives the sample size needed for a follow-up</button><button class="qopt" data-q="2" data-ok="0">D) It shows the true effect is small</button></div><div class="qwhy" id="qwhy2">Retrospective power is a one-to-one function of the p-value already in hand, so it carries no independent information and cannot justify a design after the fact. A useful power calculation names the effect size worth detecting <em>before</em> the data is seen.</div></div><div class="qcard"><p class="qs"><b>Q4.</b> A test proves climate-controlled units earn significantly more per month. The decision was whether to spend $180,000 converting the building. What kind of error is possible here even if the statistics are flawless?</p><div class="qopts"><button class="qopt" data-q="3" data-ok="1">A) Type III &mdash; a correct answer to a question the decision did not ask</button><button class="qopt" data-q="3" data-ok="0">B) Type I &mdash; a false positive</button><button class="qopt" data-q="3" data-ok="0">C) Type II &mdash; a missed effect</button><button class="qopt" data-q="3" data-ok="0">D) None &mdash; a significant result settles the decision</button></div><div class="qwhy" id="qwhy3">The test answered &ldquo;do they earn more?&rdquo; The decision needed &ldquo;do they earn enough more to repay $180,000, and over what period?&rdquo; No sample size or &alpha; protects against this; only framing the question before testing does.</div></div></div><p class="fitnote">These questions are new (pending Prof. review for the class bank).</p><h2>&#9888; Held back from this page</h2><div class="tip"><p><b>Deliberately left out &mdash; BUS 322 has no calculus prerequisite.</b> Each item below belongs to this topic and can be added later if the course ever assumes the mathematics.</p><ul><li><b>The noncentral t distribution.</b> Exact power for a t-test uses it; this page uses the normal approximation, which is what <code>NORM.S.DIST</code> gives a student and is close at the sample sizes in this course. Expect the exact value to be a little lower at very small n.</li><li><b>Deriving the sample-size formula.</b> The n &asymp; 2(z<sub>&alpha;</sub>+z<sub>power</sub>)&sup2;/d&sup2; expression is obtained by setting the two critical points equal and solving; it is given here as a formula and demonstrated in the lab.</li><li><b>Power for other designs.</b> ANOVA (via Cohen's f and the noncentral F), regression (via f&nbsp;&sup2;), and proportions each need their own formula. The principles transfer; the arithmetic does not.</li><li><b>Sequential and adaptive designs.</b> Looking at the data as it arrives and stopping early inflates &alpha; in ways this page's fixed-n framework does not cover.</li></ul><p class="fitnote">Prof. note: flagged by Claude, 2026-09-20. Nothing here is needed to answer the Excel lab or the self-check above.</p></div>
+<div class="nav2">
+<a href="../BUS322_A_Review_Hub.html">&#128506; Review Hub</a>
+<a href="stats_tree.html">&#127795; Stats Tree</a>
+<a href="hypothesis_testing.html">Hypothesis Testing</a>
+<a href="sampling_estimation.html">Sampling &amp; Estimation</a>
+<a href="which_test.html">&#129517; Which test?</a>
+</div></div>
+<script>
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+return s*y}
+function nCdf(x,m,s){return 0.5*(1+erf((x-m)/(s*Math.SQRT2)))}
+function nPdf(x,m,s){return Math.exp(-0.5*((x-m)/s)**2)/(s*Math.sqrt(2*Math.PI))}
+function lgamma(z){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,
+-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let x=z,y=z,
+tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015;
+for(let j=0;j<6;j++){ser+=c[j]/++y}return -tmp+Math.log(2.5066282746310005*ser/x)}
+function poisPmf(k,l){return Math.exp(-l+k*Math.log(l)-lgamma(k+1))}
+function poisCdf(k,l){let s=0;for(let i=0;i<=k;i++)s+=poisPmf(i,l);return s}
+function binomPmf(k,n,p){if(k<0||k>n)return 0;
+return Math.exp(lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p))}
+function binomCdf(k,n,p){let s=0;for(let i=0;i<=k;i++)s+=binomPmf(i,n,p);return s}
+function drawAxes(ctx,W,H,pad){ctx.strokeStyle="#8b949e";ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(pad,8);ctx.lineTo(pad,H-pad);ctx.lineTo(W-8,H-pad);ctx.stroke()}
+
+function ncdf(x){return 0.5*(1+erf(x/Math.SQRT2))}
+function zq(p){const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,
+138.3577518672690,-30.66479806614716,2.506628277459239],
+b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,
+4.374664141464968,2.938163982698783],
+d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+if(p<0.02425){const q=Math.sqrt(-2*Math.log(p));
+ return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+if(p>0.97575){const q=Math.sqrt(-2*Math.log(1-p));
+ return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+const q=p-0.5,r=q*q;
+return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+function drawP(){
+ const d=+document.getElementById("psd").value,n=+document.getElementById("psn").value,
+       al=+document.getElementById("psa").value;
+ document.getElementById("pd").textContent=d.toFixed(2);
+ document.getElementById("pn").textContent=n;
+ document.getElementById("pa").textContent=al.toFixed(2);
+ const zc=zq(1-al/2),lam=d*Math.sqrt(n/2);
+ const pw=ncdf(lam-zc)+ncdf(-lam-zc);
+ document.getElementById("ppw").textContent=(pw*100).toFixed(1)+"%";
+ document.getElementById("pbe").textContent=((1-pw)*100).toFixed(1)+"%";
+ const need=2*Math.pow(zq(1-al/2)+zq(0.8),2)/(d*d);
+ document.getElementById("pn80").textContent=Math.ceil(need);
+ document.getElementById("pver").textContent=
+   pw>=0.8?"adequately powered":pw>=0.5?"under-powered":"badly under-powered";
+ const c=document.getElementById("pcan"),ctx=c.getContext("2d");
+ const W=c.width,H=c.height,pl=40,pb=34,pt=26,pr=20;
+ ctx.clearRect(0,0,W,H);
+ const lo=-4.2,hi=Math.max(7,lam+4.2);
+ const X=v=>pl+(v-lo)/(hi-lo)*(W-pl-pr);
+ const pk=0.3989;
+ const Y=v=>H-pb-(v/pk)*(H-pb-pt);
+ function curve(mu,fill,stroke,from,to){
+  ctx.beginPath();ctx.moveTo(X(from),H-pb);
+  for(let px=X(from);px<=X(to);px+=1.5){
+   const xv=lo+(px-pl)/(W-pl-pr)*(hi-lo);
+   ctx.lineTo(px,Y(Math.exp(-0.5*(xv-mu)*(xv-mu))*pk))}
+  ctx.lineTo(X(to),H-pb);ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill()}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}}
+ curve(lam,"rgba(45,125,70,.16)",null,zc,hi);
+ curve(lam,"rgba(150,150,150,.22)",null,lo,zc);
+ curve(0,"rgba(220,47,2,.30)",null,zc,hi);
+ curve(0,null,"#dc2f02",lo,hi);
+ curve(lam,null,"#2d7d46",lo,hi);
+ ctx.strokeStyle="#24292f";ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
+ ctx.beginPath();ctx.moveTo(X(zc),pt-6);ctx.lineTo(X(zc),H-pb);ctx.stroke();ctx.setLineDash([]);
+ ctx.strokeStyle="#8b949e";ctx.lineWidth=1;ctx.beginPath();
+ ctx.moveTo(pl,H-pb);ctx.lineTo(W-pr,H-pb);ctx.stroke();
+ ctx.fillStyle="#24292f";ctx.font="bold 12px system-ui";ctx.textAlign="center";
+ ctx.fillText("critical value",X(zc),pt-10);
+ ctx.fillStyle="#dc2f02";ctx.textAlign="right";
+ ctx.fillText("no effect (H\u2080)",X(0)-6,pt+6);
+ ctx.fillStyle="#2d7d46";ctx.textAlign="left";
+ ctx.fillText("real effect (H\u2081)",X(lam)+6,pt+6);
+ ctx.fillStyle="#5a6270";ctx.font="11px system-ui";ctx.textAlign="center";
+ ctx.fillText("\u03b1 = false alarm",X(zc)+34,H-pb-8);
+ ctx.fillText("\u03b2 = miss",X(Math.min(lam,zc)-0.9),H-pb-8);
+}
+["psd","psn","psa"].forEach(i=>document.getElementById(i).addEventListener("input",drawP));
+drawP();
+
+document.querySelectorAll(".qopt[data-q]").forEach(b=>b.addEventListener("click",()=>{
+ const q=b.dataset.q;
+ if(q===undefined)return;
+ b.parentElement.querySelectorAll(".qopt").forEach(o=>{
+  o.classList.remove("right","wrong");
+  if(o.dataset.ok==="1")o.classList.add("right")});
+ if(b.dataset.ok!=="1")b.classList.add("wrong");
+ document.getElementById("qwhy"+q).classList.add("show")}));
+</script>
+</body></html>
