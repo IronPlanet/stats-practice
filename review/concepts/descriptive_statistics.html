@@ -246,8 +246,9 @@ function drawD(){
 }
 document.getElementById("dsl").addEventListener("input",drawD);drawD();
 
-document.querySelectorAll(".qopt").forEach(b=>b.addEventListener("click",()=>{
+document.querySelectorAll(".qopt[data-q]").forEach(b=>b.addEventListener("click",()=>{
  const q=b.dataset.q;
+ if(q===undefined)return;
  b.parentElement.querySelectorAll(".qopt").forEach(o=>{
   o.classList.remove("right","wrong");
   if(o.dataset.ok==="1")o.classList.add("right")});
