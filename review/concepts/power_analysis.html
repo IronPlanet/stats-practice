@@ -290,10 +290,11 @@ function drawP(){
  document.getElementById("pbe").textContent=((1-pw)*100).toFixed(1)+"%";
  const need=2*Math.pow(zq(1-al/2)+zq(0.8),2)/(d*d);
  document.getElementById("pn80").textContent=Math.ceil(need);
+ const shown=+(pw*100).toFixed(1);
  document.getElementById("pver").textContent=
-   pw>=0.8?"adequately powered":pw>=0.5?"under-powered":"badly under-powered";
+   shown>=80?"adequately powered":shown>=50?"under-powered":"badly under-powered";
  const c=document.getElementById("pcan"),ctx=c.getContext("2d");
- const W=c.width,H=c.height,pl=40,pb=34,pt=26,pr=20;
+ const W=c.width,H=c.height,pl=40,pb=40,pt=52,pr=20;
  ctx.clearRect(0,0,W,H);
  const lo=-4.2,hi=Math.max(7,lam+4.2);
  const X=v=>pl+(v-lo)/(hi-lo)*(W-pl-pr);
@@ -307,24 +308,26 @@ function drawP(){
   ctx.lineTo(X(to),H-pb);ctx.closePath();
   if(fill){ctx.fillStyle=fill;ctx.fill()}
   if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}}
- curve(lam,"rgba(45,125,70,.16)",null,zc,hi);
- curve(lam,"rgba(150,150,150,.22)",null,lo,zc);
- curve(0,"rgba(220,47,2,.30)",null,zc,hi);
+ curve(lam,"rgba(45,125,70,.18)",null,zc,hi);
+ curve(lam,"rgba(140,140,150,.26)",null,lo,zc);
  curve(0,null,"#dc2f02",lo,hi);
  curve(lam,null,"#2d7d46",lo,hi);
+ curve(0,"rgba(220,47,2,.55)","#a11",zc,hi);
  ctx.strokeStyle="#24292f";ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
  ctx.beginPath();ctx.moveTo(X(zc),pt-6);ctx.lineTo(X(zc),H-pb);ctx.stroke();ctx.setLineDash([]);
  ctx.strokeStyle="#8b949e";ctx.lineWidth=1;ctx.beginPath();
  ctx.moveTo(pl,H-pb);ctx.lineTo(W-pr,H-pb);ctx.stroke();
  ctx.fillStyle="#24292f";ctx.font="bold 12px system-ui";ctx.textAlign="center";
- ctx.fillText("critical value",X(zc),pt-10);
- ctx.fillStyle="#dc2f02";ctx.textAlign="right";
- ctx.fillText("no effect (H\u2080)",X(0)-6,pt+6);
- ctx.fillStyle="#2d7d46";ctx.textAlign="left";
- ctx.fillText("real effect (H\u2081)",X(lam)+6,pt+6);
- ctx.fillStyle="#5a6270";ctx.font="11px system-ui";ctx.textAlign="center";
- ctx.fillText("\u03b1 = false alarm",X(zc)+34,H-pb-8);
- ctx.fillText("\u03b2 = miss",X(Math.min(lam,zc)-0.9),H-pb-8);
+ ctx.fillText("critical value",X(zc),16);
+ const h0x=X(0),h1x=X(lam),tight=Math.abs(h1x-h0x)<150;
+ ctx.fillStyle="#dc2f02";ctx.textAlign="center";
+ ctx.fillText("no effect (H\u2080)",h0x,36);
+ ctx.fillStyle="#2d7d46";
+ ctx.fillText("real effect (H\u2081)",h1x,tight?50:36);
+ ctx.font="11px system-ui";ctx.fillStyle="#8a3a12";
+ if((W-pr)-X(zc)>84){ctx.textAlign="left";ctx.fillText("\u03b1 = false alarm",X(zc)+6,H-pb-6)}
+ ctx.fillStyle="#5a6270";
+ if(X(zc)-Math.max(pl,X(lam)-3)>60){ctx.textAlign="right";ctx.fillText("\u03b2 = miss",X(zc)-6,H-pb-6)}
 }
 ["psd","psn","psa"].forEach(i=>document.getElementById(i).addEventListener("input",drawP));
 drawP();
