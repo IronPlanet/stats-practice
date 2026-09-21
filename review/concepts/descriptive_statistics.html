@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>BUS 322 — Descriptive Statistics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--lynn:#003DA5;--lynnd:#002a73;--lynnl:#e8f0fa;--accent:#ffba08;
+--g50:#f8f9fb;--g200:#e1e4e8;--g800:#24292f;--good:#2d7d46;--text:#1a1f27;}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+color:var(--text);background:var(--g50);margin:0;line-height:1.6}
+.wrap{max-width:840px;margin:0 auto;padding:0 16px 64px}
+.hero{background:linear-gradient(135deg,var(--lynn),var(--lynnd));color:#fff;
+padding:30px 26px;border-radius:0 0 14px 14px;margin-bottom:8px}
+.hero h1{margin:0 0 4px;font-size:1.6em}
+.hero .crumb{font-size:.85em}.hero .crumb a{color:var(--accent);text-decoration:none}
+.hero p{margin:6px 0 0;color:rgba(255,255,255,.88);font-size:.95em;max-width:44rem}
+h2{color:var(--lynnd);font-size:1.25em;margin:34px 0 10px;border-bottom:2px solid var(--lynnl);padding-bottom:4px}
+.story{background:#fff;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;
+padding:14px 18px;margin:10px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.story p{margin:8px 0}
+.eq{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:18px;
+margin:12px 0;text-align:center;font-size:1.25em;overflow-x:auto}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center}
+.eq .frac span{display:block;padding:0 6px}
+.eq .frac span:first-child{border-bottom:1.5px solid var(--text)}
+.eq sup,.eq sub{font-size:.68em}
+.vars{background:var(--lynnl);border-radius:10px;padding:12px 18px;margin:10px 0;font-size:.94em}
+.vars b{color:var(--lynnd)}
+.sig{background:#fff;border:1px dashed var(--good);border-radius:10px;padding:10px 16px;
+margin:10px 0;font-size:.95em}
+.sig b{color:var(--good)}
+.panel{background:#fff;border:1px solid var(--g200);border-radius:12px;padding:16px;margin:12px 0}
+canvas{width:100%;height:auto;display:block}
+.controls{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0;font-size:.9em}
+.controls label{display:flex;flex-direction:column;gap:2px;min-width:150px;flex:1}
+.controls input[type=range]{accent-color:var(--lynn)}
+.livebox{background:var(--g800);color:#7ee787;font-family:ui-monospace,Consolas,monospace;
+border-radius:8px;padding:10px 14px;margin-top:8px;font-size:.95em;overflow-x:auto}
+.livebox .lab{color:#8b949e}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:.92em;background:#fff}
+th{background:var(--lynnl);color:var(--lynnd);text-align:left;padding:7px 10px;border:1px solid var(--g200)}
+td{padding:7px 10px;border:1px solid var(--g200)}
+td code,li code,p code{background:var(--lynnl);padding:1px 6px;border-radius:5px;
+font-family:ui-monospace,Consolas,monospace;font-size:.92em}
+.ans{color:var(--good);font-weight:700;font-family:ui-monospace,Consolas,monospace}
+.tip{background:var(--lynnl);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:.92em}
+.nav2{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.nav2 a{color:var(--lynn);text-decoration:none;font-weight:600;font-size:.9em;
+border:1px solid var(--g200);background:#fff;border-radius:9px;padding:7px 13px}
+.nav2 a:hover{border-color:var(--lynn)}
+.fitnote{font-size:.9em;color:#5a6270;margin-top:6px}
+
+.qcard{border-top:1px solid var(--g200);padding:12px 4px}
+.qcard:first-child{border-top:none}
+.qs{margin:4px 0 8px}
+.qopts{display:grid;gap:6px}
+.qopt{text-align:left;background:var(--g50);border:1px solid var(--g200);border-radius:8px;
+padding:8px 12px;font-size:.92em;cursor:pointer;font-family:inherit}
+.qopt:hover{border-color:var(--lynn)}
+.qopt.right{background:#e7f3ea;border-color:var(--good);font-weight:600}
+.qopt.wrong{background:#fdeceb;border-color:#dc2f02}
+.qwhy{display:none;background:var(--lynnl);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:.88em}
+.qwhy.show{display:block}
+</style></head><body>
+<div class="hero"><div class="wrap" style="padding:0">
+<div class="crumb"><a href="../BUS322_A_Review_Hub.html">← Review Hub</a> · Describe it</div>
+<h1>Descriptive Statistics</h1><p>Mean against median, spread that survives a tail, and the shape diagnostics that tell you when a single summary is lying.</p></div></div>
+<div class="wrap">
+
+<h2>1 &middot; Where it came from</h2>
+<div class="story">
+<p>The arithmetic mean arrived from astronomy. Eighteenth-century observers took the same
+measurement many times, got different numbers every time, and averaged them because errors
+were believed to cancel. That logic is sound &mdash; <em>when the errors are symmetric</em>.
+It quietly fails the moment a distribution has a long tail, which is most business data.</p>
+<p>The median is the older idea, and the more stubborn one. <b>Francis Galton</b> popularised
+it in the 1880s precisely because it ignores how far away an extreme value sits &mdash; only
+that it is on one side. <b>Karl Pearson</b> added the coefficient of variation in 1896 so that
+spread could be compared across variables measured in different units, and the words
+&ldquo;skewness&rdquo; and &ldquo;kurtosis&rdquo; are his too.</p>
+<p>The useful question is never &ldquo;what is the average?&rdquo; It is
+<em>&ldquo;which summary survives this data's shape?&rdquo;</em></p>
+</div>
+
+<h2>2 &middot; The mathematics</h2>
+<div class="eq">x&#772; = <span class="frac"><span>1</span><span>n</span></span>
+&sum;<sub>i=1</sub><sup>n</sup> x<sub>i</sub>
+&nbsp;&nbsp;&nbsp;&nbsp;
+s<sup>2</sup> = <span class="frac"><span>&sum;(x<sub>i</sub> &minus; x&#772;)<sup>2</sup></span><span>n &minus; 1</span></span>
+&nbsp;&nbsp;&nbsp;&nbsp; s = &radic;<span style="text-decoration:overline">s<sup>2</sup></span></div>
+<div class="vars"><b>Why n &minus; 1?</b> The deviations are measured from x&#772;, which was itself
+estimated from the same data. One degree of freedom is already spent, so dividing by n
+understates the spread. This is the difference between Excel's <code>STDEV.S</code> and
+<code>STDEV.P</code> &mdash; use <code>.S</code> unless you genuinely hold every member of the
+population.</div>
+
+<div class="eq">CV = <span class="frac"><span>s</span><span>x&#772;</span></span>
+&nbsp;&nbsp;&nbsp;&nbsp; IQR = Q<sub>3</sub> &minus; Q<sub>1</sub></div>
+<div class="vars"><b>CV</b> is unitless, so it compares spread across variables on different
+scales &mdash; minutes against dollars against headcount. <b>IQR</b> is the width of the middle
+50% and, unlike s, is unaffected by anything beyond the quartiles.</div>
+
+<div class="eq">g<sub>1</sub> = <span class="frac"><span>n</span><span>(n&minus;1)(n&minus;2)</span></span>
+&sum;&#8202;(<span class="frac"><span>x<sub>i</sub> &minus; x&#772;</span><span>s</span></span>)<sup>3</sup>
+&nbsp;&nbsp;&nbsp;&nbsp;
+g<sub>2</sub> = <span class="frac"><span>n(n+1)</span><span>(n&minus;1)(n&minus;2)(n&minus;3)</span></span>
+&sum;&#8202;(<span class="frac"><span>x<sub>i</sub> &minus; x&#772;</span><span>s</span></span>)<sup>4</sup>
+&minus; <span class="frac"><span>3(n&minus;1)<sup>2</sup></span><span>(n&minus;2)(n&minus;3)</span></span></div>
+<div class="vars"><b>g<sub>1</sub> (skewness)</b> &mdash; asymmetry. Positive means a right tail.
+<b>g<sub>2</sub> (excess kurtosis)</b> &mdash; tailedness, already centred so a normal curve
+scores 0. These are exactly Excel's <code>SKEW</code> and <code>KURT</code>; other software
+sometimes reports the population versions, which differ at small n.</div>
+<div class="sig"><b>Read g<sub>2</sub> backwards and it becomes useful.</b> A <em>negative</em>
+excess kurtosis is not a &ldquo;light tail&rdquo; in practice &mdash; it is usually a flat or
+two-humped shape. A uniform distribution scores &minus;1.2. If a business column comes back near
+&minus;1, suspect you have stacked two different populations in one column, and that neither the
+mean nor the median of the pooled column describes anything real.</div>
+
+<h2>3 &middot; Drag the outlier</h2>
+<p>Eleven deliveries plus one that went wrong. Move the twelfth and watch which summaries hold
+still. The dataset starts at the real figures: 42, 47, 51, 53, 56, 58, 61, 64, 68, 73, 79, 128 minutes.</p>
+<div class="panel">
+<div class="controls">
+<label>the 12th delivery = <b id="dv">128</b> min
+<input type="range" id="dsl" min="60" max="300" step="1" value="128"></label>
+</div>
+<canvas id="dcan" width="800" height="210"></canvas>
+<div class="livebox"><span class="lab">mean = </span><b id="dmean">65.00</b>
+<span class="lab"> &nbsp;&middot;&nbsp; median = </span><b id="dmed">59.50</b>
+<span class="lab"> &nbsp;&middot;&nbsp; s = </span><b id="dsd">22.52</b>
+<span class="lab"> &nbsp;&middot;&nbsp; CV = </span><b id="dcv">0.346</b>
+<span class="lab"> &nbsp;&middot;&nbsp; upper fence = </span><b id="dfen">94.38</b>
+<span class="lab"> &nbsp;&middot;&nbsp; </span><b id="dver">beyond the fence</b></div>
+<div class="fitnote">The mean chases the point; the median does not move at all until the point
+crosses the middle of the data. The gap between them <em>is</em> the skew.</div>
+</div>
+
+<h2>4 &middot; Excel lab &mdash; type these and check the answers</h2>
+<p>Put the twelve values in <code>A2:A13</code>. Every figure below was computed with Excel's
+own definitions, so your sheet should match to the decimal shown.</p>
+<table>
+<tr><th>What you want</th><th>Formula</th><th>You should see</th></tr>
+<tr><td>Mean</td><td><code>=AVERAGE(A2:A13)</code></td><td class="ans">65.00</td></tr>
+<tr><td>Median</td><td><code>=MEDIAN(A2:A13)</code></td><td class="ans">59.50</td></tr>
+<tr><td>Sample SD</td><td><code>=STDEV.S(A2:A13)</code></td><td class="ans">22.52</td></tr>
+<tr><td>Sample variance</td><td><code>=VAR.S(A2:A13)</code></td><td class="ans">507.09</td></tr>
+<tr><td>Coefficient of variation</td><td><code>=STDEV.S(A2:A13)/AVERAGE(A2:A13)</code></td><td class="ans">0.346</td></tr>
+<tr><td>Q1</td><td><code>=QUARTILE.INC(A2:A13,1)</code></td><td class="ans">52.50</td></tr>
+<tr><td>Q3</td><td><code>=QUARTILE.INC(A2:A13,3)</code></td><td class="ans">69.25</td></tr>
+<tr><td>IQR</td><td><code>=QUARTILE.INC(A2:A13,3)-QUARTILE.INC(A2:A13,1)</code></td><td class="ans">16.75</td></tr>
+<tr><td>Upper Tukey fence</td><td><code>=QUARTILE.INC(A2:A13,3)+1.5*(...IQR...)</code></td><td class="ans">94.38</td></tr>
+<tr><td>Lower Tukey fence</td><td><code>=QUARTILE.INC(A2:A13,1)-1.5*(...IQR...)</code></td><td class="ans">27.38</td></tr>
+<tr><td>Skewness</td><td><code>=SKEW(A2:A13)</code></td><td class="ans">2.195</td></tr>
+<tr><td>Excess kurtosis</td><td><code>=KURT(A2:A13)</code></td><td class="ans">5.924</td></tr>
+</table>
+<div class="sig"><b>Now delete the 128 and recompute.</b> Mean 65.00 &rarr;
+<span class="ans">59.27</span>, median 59.50 &rarr;
+<span class="ans">58.00</span>, s 22.52 &rarr; <span class="ans">11.17</span>,
+CV 0.346 &rarr; <span class="ans">0.188</span>. One observation in twelve moved the
+mean by 5.7 minutes and the median by 1.5. That is the
+whole argument for reporting both.</div>
+
+<h2>5 &middot; Assumptions, and when these break</h2>
+<table>
+<tr><th>Summary</th><th>Quietly assumes</th><th>Breaks when</th></tr>
+<tr><td>Mean</td><td>roughly symmetric, no extreme tail</td><td>skewed or heavy-tailed data &mdash; report the median beside it</td></tr>
+<tr><td>s and CV</td><td>a single population</td><td>the column stacks sub-groups; compute within groups instead</td></tr>
+<tr><td>CV</td><td>a ratio scale with x&#772; well away from 0</td><td>the mean nears zero (CV explodes) or the data can go negative (CV is meaningless)</td></tr>
+<tr><td>1.5&times;IQR fence</td><td>unimodal, one population</td><td>mixtures &mdash; it then flags an entire legitimate sub-group as outliers</td></tr>
+<tr><td>Kurtosis</td><td>enough data to estimate a 4th moment</td><td>small n &mdash; g<sub>2</sub> is wildly unstable below about n = 30, and undefined below n = 4</td></tr>
+</table>
+<div class="sig"><b>The fence is a convention, not a test.</b> It has no significance level and no
+null hypothesis. It says &ldquo;look at this point&rdquo;, never &ldquo;delete this point.&rdquo;
+A flagged value gets investigated and, if it is real, kept &mdash; with a sensitivity analysis
+showing the conclusion both ways.</div>
+<div class="sig"><b>Censoring and ceiling effects.</b> When an instrument, form or policy cannot
+record past a boundary, values pile up on it. The variance there is artificially near zero and
+the mean is a lower bound, not an estimate. Repeated identical values at the top or bottom of a
+column are the fingerprint &mdash; and no summary statistic will warn you.</div>
+<h2>&#9989; Self-check &mdash; no internet needed</h2><div class="panel"><div class="qcard"><p class="qs"><b>Q1.</b> A delivery-time column has mean 64.2 and median 58.0. What do you conclude before running anything else?</p><div class="qopts"><button class="qopt" data-q="0" data-ok="1">A) The data is right-skewed &mdash; a tail of slow deliveries is pulling the mean up</button><button class="qopt" data-q="0" data-ok="0">B) The data is left-skewed</button><button class="qopt" data-q="0" data-ok="0">C) There is a data-entry error, since mean and median should agree</button><button class="qopt" data-q="0" data-ok="0">D) Nothing &mdash; the two statistics measure unrelated things</button></div><div class="qwhy" id="qwhy0">Mean above median is the signature of a right tail. Neither number is wrong; they answer different questions, and the gap between them is the skew. No test is needed to see it.</div></div><div class="qcard"><p class="qs"><b>Q2.</b> A column of customer satisfaction scores returns an excess kurtosis of &minus;1.06. The most likely explanation is:</p><div class="qopts"><button class="qopt" data-q="1" data-ok="1">A) Two different customer populations are stacked in one column</button><button class="qopt" data-q="1" data-ok="0">B) The data is normally distributed</button><button class="qopt" data-q="1" data-ok="0">C) There are extreme outliers in both tails</button><button class="qopt" data-q="1" data-ok="0">D) The sample is too small to compute kurtosis</button></div><div class="qwhy" id="qwhy1">Excess kurtosis near &minus;1 signals a flat or two-humped shape (a uniform scores &minus;1.2). Heavy tails would drive g&#8322; positive, and a normal scores 0. Split the column by a plausible grouping variable and summarise within groups.</div></div><div class="qcard"><p class="qs"><b>Q3.</b> Which comparison is the coefficient of variation appropriate for?</p><div class="qopts"><button class="qopt" data-q="2" data-ok="1">A) Spread in delivery minutes against spread in order value, in dollars</button><button class="qopt" data-q="2" data-ok="0">B) Spread in profit margins, where some divisions ran losses</button><button class="qopt" data-q="2" data-ok="0">C) Spread in temperature change, which averages near zero</button><button class="qopt" data-q="2" data-ok="0">D) Any two columns, since CV is unitless</button></div><div class="qwhy" id="qwhy2">CV = s/x&#772; needs a ratio scale with the mean well away from zero. Negative values make the ratio meaningless (B), and a mean near zero makes it explode (C). Unitless does not mean universal.</div></div><div class="qcard"><p class="qs"><b>Q4.</b> A value falls beyond the 1.5&times;IQR upper fence. The correct next step is:</p><div class="qopts"><button class="qopt" data-q="3" data-ok="1">A) Investigate it, and if it is real keep it and report the conclusion with and without it</button><button class="qopt" data-q="3" data-ok="0">B) Delete it, since it is a statistical outlier</button><button class="qopt" data-q="3" data-ok="0">C) Replace it with the median so it stops distorting the mean</button><button class="qopt" data-q="3" data-ok="0">D) Report a p-value for it</button></div><div class="qwhy" id="qwhy3">The fence is a convention with no significance level, so there is no p-value to report and nothing has been proven false. It flags a point for a human to look at. Deleting or overwriting real data because it is inconvenient is the failure mode the rule exists to prevent.</div></div></div><p class="fitnote">These questions are new (pending Prof. review for the class bank).</p>
+<div class="nav2">
+<a href="../BUS322_A_Review_Hub.html">&#128506; Review Hub</a>
+<a href="descriptive_statistics.html">Descriptive</a>
+<a href="sampling_estimation.html">Sampling &amp; Estimation</a>
+<a href="regression.html">Regression</a>
+<a href="regression_diagnostics.html">Diagnostics</a>
+<a href="eda.html">EDA</a><a href="hypothesis_testing.html">Hypothesis Testing</a>
+</div></div>
+<script>
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+return s*y}
+function nCdf(x,m,s){return 0.5*(1+erf((x-m)/(s*Math.SQRT2)))}
+function nPdf(x,m,s){return Math.exp(-0.5*((x-m)/s)**2)/(s*Math.sqrt(2*Math.PI))}
+function lgamma(z){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,
+-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let x=z,y=z,
+tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015;
+for(let j=0;j<6;j++){ser+=c[j]/++y}return -tmp+Math.log(2.5066282746310005*ser/x)}
+function poisPmf(k,l){return Math.exp(-l+k*Math.log(l)-lgamma(k+1))}
+function poisCdf(k,l){let s=0;for(let i=0;i<=k;i++)s+=poisPmf(i,l);return s}
+function binomPmf(k,n,p){if(k<0||k>n)return 0;
+return Math.exp(lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p))}
+function binomCdf(k,n,p){let s=0;for(let i=0;i<=k;i++)s+=binomPmf(i,n,p);return s}
+function drawAxes(ctx,W,H,pad){ctx.strokeStyle="#8b949e";ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(pad,8);ctx.lineTo(pad,H-pad);ctx.lineTo(W-8,H-pad);ctx.stroke()}
+
+const D=[42,47,51,53,56,58,61,64,68,73,79,128];
+function qinc(a,p){const s=[...a].sort((x,y)=>x-y),h=(s.length-1)*p,
+ lo=Math.floor(h),hi=Math.ceil(h);return s[lo]+(h-lo)*(s[hi]-s[lo])}
+function med(a){const s=[...a].sort((x,y)=>x-y),n=s.length;
+ return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function drawD(){
+ const v=+document.getElementById("dsl").value;
+ const a=D.slice(0,11).concat([v]);
+ const m=a.reduce((p,c)=>p+c,0)/a.length;
+ const sd=Math.sqrt(a.reduce((p,c)=>p+(c-m)**2,0)/(a.length-1));
+ const md=med(a),q1=qinc(a,.25),q3=qinc(a,.75),fen=q3+1.5*(q3-q1);
+ document.getElementById("dv").textContent=v;
+ document.getElementById("dmean").textContent=m.toFixed(2);
+ document.getElementById("dmed").textContent=md.toFixed(2);
+ document.getElementById("dsd").textContent=sd.toFixed(2);
+ document.getElementById("dcv").textContent=(sd/m).toFixed(3);
+ document.getElementById("dfen").textContent=fen.toFixed(2);
+ document.getElementById("dver").textContent=v>fen?"beyond the fence":"inside the fence";
+ const c=document.getElementById("dcan"),ctx=c.getContext("2d");
+ const W=c.width,H=c.height,pad=44,lo=30,hi=310;
+ ctx.clearRect(0,0,W,H);
+ const X=x=>pad+(x-lo)/(hi-lo)*(W-pad-20);
+ ctx.strokeStyle="#8b949e";ctx.lineWidth=1;ctx.beginPath();
+ ctx.moveTo(pad,H-34);ctx.lineTo(W-20,H-34);ctx.stroke();
+ ctx.fillStyle="#5a6270";ctx.font="12px system-ui";ctx.textAlign="center";
+ for(let t=50;t<=300;t+=50){ctx.fillText(t,X(t),H-16);
+  ctx.beginPath();ctx.moveTo(X(t),H-34);ctx.lineTo(X(t),H-29);ctx.stroke()}
+ ctx.fillStyle="rgba(0,61,165,.12)";
+ ctx.fillRect(X(q1),40,X(q3)-X(q1),H-86);
+ a.forEach((x,i)=>{ctx.beginPath();ctx.arc(X(x),H-58,6,0,7);
+  ctx.fillStyle=i===11?"#dc2f02":"#003DA5";ctx.fill()});
+ function rule(x,col,lab,dy){ctx.strokeStyle=col;ctx.lineWidth=2;
+  ctx.setLineDash(col==="#2d7d46"?[5,4]:[]);ctx.beginPath();
+  ctx.moveTo(X(x),28);ctx.lineTo(X(x),H-34);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=col;ctx.textAlign="left";ctx.font="bold 12px system-ui";
+  ctx.fillText(lab,X(x)+5,dy)}
+ rule(m,"#dc2f02","mean "+m.toFixed(1),40);
+ rule(md,"#003DA5","median "+md.toFixed(1),58);
+ rule(fen,"#2d7d46","fence "+fen.toFixed(1),76);
+}
+document.getElementById("dsl").addEventListener("input",drawD);drawD();
+
+document.querySelectorAll(".qopt").forEach(b=>b.addEventListener("click",()=>{
+ const q=b.dataset.q;
+ b.parentElement.querySelectorAll(".qopt").forEach(o=>{
+  o.classList.remove("right","wrong");
+  if(o.dataset.ok==="1")o.classList.add("right")});
+ if(b.dataset.ok!=="1")b.classList.add("wrong");
+ document.getElementById("qwhy"+q).classList.add("show")}));
+</script>
+</body></html>

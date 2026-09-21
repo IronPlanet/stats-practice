@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>BUS 322 — Regression</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--lynn:#003DA5;--lynnd:#002a73;--lynnl:#e8f0fa;--accent:#ffba08;
+--g50:#f8f9fb;--g200:#e1e4e8;--g800:#24292f;--good:#2d7d46;--text:#1a1f27;}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+color:var(--text);background:var(--g50);margin:0;line-height:1.6}
+.wrap{max-width:840px;margin:0 auto;padding:0 16px 64px}
+.hero{background:linear-gradient(135deg,var(--lynn),var(--lynnd));color:#fff;
+padding:30px 26px;border-radius:0 0 14px 14px;margin-bottom:8px}
+.hero h1{margin:0 0 4px;font-size:1.6em}
+.hero .crumb{font-size:.85em}.hero .crumb a{color:var(--accent);text-decoration:none}
+.hero p{margin:6px 0 0;color:rgba(255,255,255,.88);font-size:.95em;max-width:44rem}
+h2{color:var(--lynnd);font-size:1.25em;margin:34px 0 10px;border-bottom:2px solid var(--lynnl);padding-bottom:4px}
+.story{background:#fff;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;
+padding:14px 18px;margin:10px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.story p{margin:8px 0}
+.eq{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:18px;
+margin:12px 0;text-align:center;font-size:1.25em;overflow-x:auto}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center}
+.eq .frac span{display:block;padding:0 6px}
+.eq .frac span:first-child{border-bottom:1.5px solid var(--text)}
+.eq sup,.eq sub{font-size:.68em}
+.vars{background:var(--lynnl);border-radius:10px;padding:12px 18px;margin:10px 0;font-size:.94em}
+.vars b{color:var(--lynnd)}
+.sig{background:#fff;border:1px dashed var(--good);border-radius:10px;padding:10px 16px;
+margin:10px 0;font-size:.95em}
+.sig b{color:var(--good)}
+.panel{background:#fff;border:1px solid var(--g200);border-radius:12px;padding:16px;margin:12px 0}
+canvas{width:100%;height:auto;display:block}
+.controls{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0;font-size:.9em}
+.controls label{display:flex;flex-direction:column;gap:2px;min-width:150px;flex:1}
+.controls input[type=range]{accent-color:var(--lynn)}
+.livebox{background:var(--g800);color:#7ee787;font-family:ui-monospace,Consolas,monospace;
+border-radius:8px;padding:10px 14px;margin-top:8px;font-size:.95em;overflow-x:auto}
+.livebox .lab{color:#8b949e}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:.92em;background:#fff}
+th{background:var(--lynnl);color:var(--lynnd);text-align:left;padding:7px 10px;border:1px solid var(--g200)}
+td{padding:7px 10px;border:1px solid var(--g200)}
+td code,li code,p code{background:var(--lynnl);padding:1px 6px;border-radius:5px;
+font-family:ui-monospace,Consolas,monospace;font-size:.92em}
+.ans{color:var(--good);font-weight:700;font-family:ui-monospace,Consolas,monospace}
+.tip{background:var(--lynnl);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:.92em}
+.nav2{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.nav2 a{color:var(--lynn);text-decoration:none;font-weight:600;font-size:.9em;
+border:1px solid var(--g200);background:#fff;border-radius:9px;padding:7px 13px}
+.nav2 a:hover{border-color:var(--lynn)}
+.fitnote{font-size:.9em;color:#5a6270;margin-top:6px}
+
+.qcard{border-top:1px solid var(--g200);padding:12px 4px}
+.qcard:first-child{border-top:none}
+.qs{margin:4px 0 8px}
+.qopts{display:grid;gap:6px}
+.qopt{text-align:left;background:var(--g50);border:1px solid var(--g200);border-radius:8px;
+padding:8px 12px;font-size:.92em;cursor:pointer;font-family:inherit}
+.qopt:hover{border-color:var(--lynn)}
+.qopt.right{background:#e7f3ea;border-color:var(--good);font-weight:600}
+.qopt.wrong{background:#fdeceb;border-color:#dc2f02}
+.qwhy{display:none;background:var(--lynnl);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:.88em}
+.qwhy.show{display:block}
+</style></head><body>
+<div class="hero"><div class="wrap" style="padding:0">
+<div class="crumb"><a href="../BUS322_A_Review_Hub.html">← Review Hub</a> · Explain and predict</div>
+<h1>Regression</h1><p>Fitting a line, reading a slope in real units, and what changes the moment a second predictor joins the model.</p></div></div>
+<div class="wrap">
+
+<h2>1 &middot; Where it came from</h2>
+<div class="story">
+<p>The method came first, the name came later, and the name is an accident.
+<b>Legendre</b> published least squares in 1805 and <b>Gauss</b> claimed he had been using it
+since 1795; both were fitting orbits, not business data.</p>
+<p>The word &ldquo;regression&rdquo; is <b>Francis Galton</b>'s, from the 1880s. Measuring
+heights of parents and children, he found tall parents had tall children &mdash; but slightly
+<em>less</em> tall, closer to the average. He called it &ldquo;regression toward
+mediocrity&rdquo;. He thought he had found a law of heredity. He had actually found a
+mathematical inevitability of imperfect correlation, which shows up any time you measure
+something twice with noise. Sales teams rediscover it every quarter when the top performer
+slips and the bottom one improves, and every quarter someone credits the coaching.</p>
+</div>
+
+<h2>2 &middot; The mathematics</h2>
+<div class="eq">y&#770; = b<sub>0</sub> + b<sub>1</sub>x
+&nbsp;&nbsp;&nbsp;&nbsp;
+b<sub>1</sub> = <span class="frac"><span>&sum;(x<sub>i</sub>&minus;x&#772;)(y<sub>i</sub>&minus;y&#772;)</span><span>&sum;(x<sub>i</sub>&minus;x&#772;)<sup>2</sup></span></span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+b<sub>0</sub> = y&#772; &minus; b<sub>1</sub>x&#772;</div>
+<div class="vars">The line is chosen to make the sum of <em>squared vertical</em> distances as
+small as possible. Squared, so that misses above and below cannot cancel and a big miss counts
+far more than a small one. Vertical, because we are predicting y from x &mdash; swapping the
+roles gives a different line.</div>
+<div class="sig"><b>The line always passes through (x&#772;,&nbsp;y&#772;).</b> That falls
+straight out of the b<sub>0</sub> formula, and it is a useful sanity check on any fit you are
+handed.</div>
+
+<div class="eq">SST = SSR + SSE
+&nbsp;&nbsp;&nbsp;&nbsp;
+R<sup>2</sup> = <span class="frac"><span>SSR</span><span>SST</span></span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+R&#772;<sup>2</sup> = 1 &minus; (1&minus;R<sup>2</sup>)<span class="frac"><span>n&minus;1</span><span>n&minus;p</span></span></div>
+<div class="vars"><b>SST</b> &mdash; total variation in y about its mean, the thing you are trying
+to explain. <b>SSR</b> &mdash; the part the line explains. <b>SSE</b> &mdash; what is left over.
+<b>R&#772;<sup>2</sup></b> (adjusted) charges you for each predictor, so unlike R<sup>2</sup> it can
+<em>fall</em> when you add a useless variable. That asymmetry is what makes it the honest one to
+quote when comparing models of different sizes.</div>
+
+<div class="eq">s<sub>e</sub> = &radic;<span style="text-decoration:overline">&nbsp;SSE / (n &minus; p)&nbsp;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+F = <span class="frac"><span>SSR / k</span><span>SSE / (n&minus;p)</span></span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+t<sub>j</sub> = <span class="frac"><span>b<sub>j</sub></span><span>SE(b<sub>j</sub>)</span></span></div>
+<div class="vars"><b>s<sub>e</sub></b>, the standard error of the estimate, is typical prediction
+error <em>in the units of y</em> &mdash; dollars, minutes, units. It is the number a manager
+actually needs, and it is the one nobody quotes. <b>F</b> asks whether the predictors <em>as a
+set</em> beat an empty model; <b>t<sub>j</sub></b> asks about one predictor with the others held
+fixed. They can disagree, and that disagreement is informative.</div>
+
+<h2>3 &middot; Find the least-squares line yourself</h2>
+<p>Twelve machines: weekly usage hours against monthly maintenance cost. Move the slope and
+intercept and try to beat the machine. The readout shows your SSE against the minimum.</p>
+<div class="panel">
+<div class="controls">
+<label>intercept b&#8320; = <b id="rb0">5.0</b>
+<input type="range" id="rs0" min="-10" max="30" step="0.5" value="5"></label>
+<label>slope b&#8321; = <b id="rb1">1.00</b>
+<input type="range" id="rs1" min="0" max="2.5" step="0.01" value="1"></label>
+</div>
+<canvas id="rcan" width="800" height="330"></canvas>
+<div class="livebox"><span class="lab">your SSE = </span><b id="rsse">&mdash;</b>
+<span class="lab"> &nbsp;&middot;&nbsp; best possible = </span><b id="rbest">146.49</b>
+<span class="lab"> &nbsp;&middot;&nbsp; your R&sup2; = </span><b id="rr2">&mdash;</b>
+<span class="lab"> &nbsp;&middot;&nbsp; </span><b id="rverd">&mdash;</b></div>
+<div class="fitnote">Press the button to snap to the least-squares solution
+(b&#8320; = 10.778, b&#8321; = 0.949). Notice how flat the SSE surface is
+near the bottom &mdash; many nearby lines fit almost as well, which is exactly why individual
+coefficients have standard errors.</div>
+<p><button class="qopt" id="rsnap" style="max-width:260px">Snap to the least-squares line</button></p>
+</div>
+
+<h2>4 &middot; Excel lab &mdash; simple regression</h2>
+<p>Hours in <code>A2:A13</code>, maintenance cost in <code>B2:B13</code>.</p>
+<table>
+<tr><th>What you want</th><th>Formula</th><th>You should see</th></tr>
+<tr><td>Slope b&#8321;</td><td><code>=SLOPE(B2:B13,A2:A13)</code></td><td class="ans">0.9489</td></tr>
+<tr><td>Intercept b&#8320;</td><td><code>=INTERCEPT(B2:B13,A2:A13)</code></td><td class="ans">10.7777</td></tr>
+<tr><td>Correlation r</td><td><code>=CORREL(A2:A13,B2:B13)</code></td><td class="ans">0.9304</td></tr>
+<tr><td>R&sup2;</td><td><code>=RSQ(B2:B13,A2:A13)</code></td><td class="ans">0.8656</td></tr>
+<tr><td>Standard error of estimate</td><td><code>=STEYX(B2:B13,A2:A13)</code></td><td class="ans">3.8274</td></tr>
+<tr><td>SE of the slope</td><td><code>=INDEX(LINEST(B2:B13,A2:A13,TRUE,TRUE),2,1)</code></td><td class="ans">0.1182</td></tr>
+<tr><td>t for the slope</td><td><code>=SLOPE(...)/SE_slope</code></td><td class="ans">8.024</td></tr>
+<tr><td>p for the slope</td><td><code>=T.DIST.2T(ABS(t),10)</code></td><td class="ans">1.15e-05</td></tr>
+<tr><td>Overall F</td><td><code>=INDEX(LINEST(B2:B13,A2:A13,TRUE,TRUE),4,1)</code></td><td class="ans">64.390</td></tr>
+<tr><td>Prediction at 25 hours</td><td><code>=FORECAST.LINEAR(25,B2:B13,A2:A13)</code></td><td class="ans">34.50</td></tr>
+</table>
+<div class="sig"><b>Say the slope out loud in real units.</b> b&#8321; = 0.949 means
+<em>each additional weekly usage hour is associated with about $0.95 more monthly
+maintenance cost</em>. Not &ldquo;causes&rdquo;. Not &ldquo;0.949 units&rdquo;. A
+coefficient a manager cannot repeat back in their own words has not been reported.</div>
+<div class="sig"><b>And be careful with b&#8320;.</b> Here the intercept is
+10.78 &mdash; the predicted cost of a machine used zero hours a week. The data runs
+from 10 to 40 hours, so x = 0 is outside it entirely. The number is a
+mathematical anchor for the line, not a business quantity.</div>
+<div class="tip">r&sup2; = 0.8656 and R&sup2; = 0.8656 &mdash; identical, as they
+must be with one predictor. That equality stops holding the moment you add a second.</div>
+
+<h2>5 &middot; Adding a predictor &mdash; what changes</h2>
+<p>Now add machine age in years. Same twelve rows, one more column.</p>
+<table>
+<tr><th></th><th>Simple: hours only</th><th>Multiple: hours + age</th></tr>
+<tr><td>b for hours</td><td class="ans">0.9489</td><td class="ans">1.0547</td></tr>
+<tr><td>b for age</td><td>&mdash;</td><td class="ans">-0.3964</td></tr>
+<tr><td>R&sup2;</td><td class="ans">0.8656</td><td class="ans">0.8666</td></tr>
+<tr><td>Adjusted R&sup2;</td><td class="ans">0.8521</td><td class="ans">0.8369</td></tr>
+<tr><td>s<sub>e</sub></td><td class="ans">3.8274</td><td class="ans">4.0192</td></tr>
+<tr><td>p for hours</td><td class="ans">1.15e-05</td><td class="ans">0.0345</td></tr>
+<tr><td>p for age</td><td>&mdash;</td><td class="ans">0.7998</td></tr>
+</table>
+<div class="sig"><b>Age earns nothing, and the table says so three ways.</b> Its
+p-value is 0.80 &mdash; no evidence of an effect once hours is in the model. R&sup2;
+rose from 0.8656 to 0.8666, a gain of 0.0010, which is the
+best R&sup2; can ever do: <em>it cannot fall when you add a variable, however useless.</em> And
+adjusted R&sup2; <b>fell</b>, from 0.8521 to 0.8369. That fall is the honest
+verdict. s<sub>e</sub> rose too, from 3.827 to 4.019 &mdash; the model
+predicts <em>worse</em> in dollars after the addition.</div>
+<div class="sig"><b>But look what happened to hours anyway.</b> It moved from
+0.949 to 1.055 &mdash; an 11% shift caused by adding a variable that
+contributes nothing. Nothing about the machines changed; the <em>question</em> changed. The
+simple model asks &ldquo;how does cost differ between machines used more hours?&rdquo; The
+multiple model asks &ldquo;&hellip; used more hours <em>but the same age</em>?&rdquo; That is
+<em>ceteris paribus</em>, and it is why a coefficient can never be quoted without naming every
+other variable in the model.</div>
+<div class="sig"><b>Comparing predictors needs standardised coefficients.</b> Raw b values live
+on different scales &mdash; one per hour, one per year &mdash; so they cannot be ranked.
+Multiply each by s<sub>x</sub>/s<sub>y</sub>: hours gives &beta; = 1.034, age gives
+&beta; = -0.109. Both now read in standard deviations, and the comparison confirms what
+the p-values said &mdash; hours carries the model and age is noise around zero.</div>
+<div class="tip"><b>The rule this demonstrates.</b> Never judge whether a predictor belongs by
+watching R&sup2;. It is structurally incapable of arguing against a variable. Use adjusted
+R&sup2;, s<sub>e</sub>, or the predictor's own p-value &mdash; all three agree here, and all
+three disagree with R&sup2;.</div>
+
+<h2>6 &middot; Categorical predictors</h2>
+<div class="vars">A category enters as a <b>0/1 dummy</b>. Its coefficient is the mean shift
+relative to a <b>reference group</b> &mdash; the category coded 0 &mdash; holding everything else
+constant. &ldquo;Region B: +$412&rdquo; is meaningless until you say <em>relative to which
+region</em>. With k categories you create k&minus;1 dummies; including all k makes the columns
+add up to the intercept and the model will not estimate.</div>
+<div class="sig"><b>Naming the reference group is not a formality.</b> Every categorical
+coefficient in the report is a comparison against it. A table of dummy coefficients with no
+stated baseline cannot be interpreted by the reader, and usually was not interpreted by the
+author either.</div>
+
+<h2>7 &middot; Assumptions</h2>
+<table>
+<tr><th>Assumption</th><th>What it buys</th><th>If it fails</th></tr>
+<tr><td>Linear in the parameters</td><td>the line is the right shape</td><td>curved residual pattern &mdash; transform x, or fit a curve</td></tr>
+<tr><td>Independent observations</td><td>honest standard errors</td><td>repeated measures on the same unit &mdash; SEs too small, everything looks significant</td></tr>
+<tr><td>Constant error variance</td><td>honest standard errors</td><td>fan-shaped residuals &mdash; use robust standard errors</td></tr>
+<tr><td>Roughly normal residuals</td><td>valid t and F at small n</td><td>matters most below n &asymp; 30; large samples are forgiving</td></tr>
+<tr><td>No perfect collinearity</td><td>coefficients exist at all</td><td>the model will not estimate, or coefficients swing wildly</td></tr>
+</table>
+<div class="fitnote">All five are checked on the <a href="regression_diagnostics.html">Regression
+Diagnostics</a> page, which is where the residuals get their own tools.</div>
+<h2>&#9989; Self-check &mdash; no internet needed</h2><div class="panel"><div class="qcard"><p class="qs"><b>Q1.</b> Adding a second predictor lifts R&sup2; from 0.8656 to 0.8666, but adjusted R&sup2; falls from 0.8521 to 0.8369 and the new predictor's p-value is 0.80. Should it stay in the model?</p><div class="qopts"><button class="qopt" data-q="0" data-ok="1">A) No &mdash; R&sup2; cannot fall when a variable is added, so its rise is not evidence of anything</button><button class="qopt" data-q="0" data-ok="0">B) Yes &mdash; R&sup2; went up, which means the model improved</button><button class="qopt" data-q="0" data-ok="0">C) Yes &mdash; p-values are unreliable with only twelve observations</button><button class="qopt" data-q="0" data-ok="0">D) Cannot tell without seeing the F statistic</button></div><div class="qwhy" id="qwhy0">R&sup2; is structurally incapable of arguing against a predictor: adding any column, even random noise, can only raise it or leave it unchanged. Adjusted R&sup2; charges for the extra parameter and fell, s&#8337; rose, and p = 0.80. Three honest measures agree; only the one that cannot disagree said otherwise.</div></div><div class="qcard"><p class="qs"><b>Q2.</b> A model reports R&sup2; = 0.91 and s&#8337; = $4.80 on an outcome averaging $32. Which sentence is most useful to a manager?</p><div class="qopts"><button class="qopt" data-q="1" data-ok="1">A) &ldquo;Typical prediction error is about $4.80&rdquo;</button><button class="qopt" data-q="1" data-ok="0">B) &ldquo;The model explains 91% of the variation&rdquo;</button><button class="qopt" data-q="1" data-ok="0">C) &ldquo;The model is statistically significant&rdquo;</button><button class="qopt" data-q="1" data-ok="0">D) &ldquo;R&sup2; is high, so the model is validated&rdquo;</button></div><div class="qwhy" id="qwhy1">R&sup2; is a share of variance &mdash; unitless, and easy to inflate. s&#8337; is in dollars, and answers the question the manager actually has: how far off will this be? A high R&sup2; also never validates a model; that is what residual diagnostics are for.</div></div><div class="qcard"><p class="qs"><b>Q3.</b> A model has dummies for Region B, C and D, with coefficients +412, +180 and &minus;95. What is missing?</p><div class="qopts"><button class="qopt" data-q="2" data-ok="1">A) Which region is the reference group</button><button class="qopt" data-q="2" data-ok="0">B) A dummy for the fourth region</button><button class="qopt" data-q="2" data-ok="0">C) The standardised coefficients</button><button class="qopt" data-q="2" data-ok="0">D) Nothing &mdash; the coefficients are interpretable as they stand</button></div><div class="qwhy" id="qwhy2">Each coefficient is a difference from the omitted category. Without naming it, &ldquo;+412&rdquo; has no meaning. Adding the fourth dummy is the opposite of the fix &mdash; it makes the model unestimable.</div></div><div class="qcard"><p class="qs"><b>Q4.</b> A model reports b = 1.05 for usage hours and b = &minus;0.40 for machine age in years. A colleague concludes hours matters more because 1.05 &gt; 0.40. What is wrong with that reasoning?</p><div class="qopts"><button class="qopt" data-q="3" data-ok="1">A) The two are on different scales, so the raw coefficients cannot be ranked</button><button class="qopt" data-q="3" data-ok="0">B) Nothing &mdash; the larger coefficient does indicate the stronger predictor</button><button class="qopt" data-q="3" data-ok="0">C) The negative sign means age should be dropped before comparing</button><button class="qopt" data-q="3" data-ok="0">D) Coefficients can only be compared if both are statistically significant</button></div><div class="qwhy" id="qwhy3">One is dollars per hour, the other dollars per year &mdash; changing age to months would multiply its coefficient by twelve without changing anything real. Multiply each by s&#8339;/s&#8342; to put both in standard deviations. Magnitude and significance are also separate questions: a p-value ranks evidence that an effect is non-zero, not how big it is.</div></div></div><p class="fitnote">These questions are new (pending Prof. review for the class bank).</p><h2>&#9888; Held back from this page</h2><div class="tip"><p><b>Deliberately left out &mdash; BUS 322 has no calculus prerequisite.</b> Each item below belongs to this topic and can be added later if the course ever assumes the mathematics.</p><ul><li><b>Deriving least squares.</b> The normal equations are obtained by differentiating the sum of squared errors with respect to b&#8320; and b&#8321; and setting both to zero. The page gives the resulting formulas and shows the minimum interactively instead.</li><li><b>Matrix form.</b> b = (X&#8242;X)&#8315;&sup1;X&#8242;y, and standard errors from the diagonal of s&sup2;(X&#8242;X)&#8315;&sup1;. Needed to compute multiple regression by hand; Excel's <code>LINEST</code> does it for the student here.</li><li><b>The Gauss&ndash;Markov theorem.</b> Why least squares is the best linear unbiased estimator under the listed assumptions. Stated as a fact on this page, not proved.</li><li><b>Prediction and confidence intervals for a fitted value.</b> These need the leverage term from the hat matrix. Point predictions only for now.</li></ul><p class="fitnote">Prof. note: flagged by Claude, 2026-09-20. Nothing here is needed to answer the Excel lab or the self-check above.</p></div>
+<div class="nav2">
+<a href="../BUS322_A_Review_Hub.html">&#128506; Review Hub</a>
+<a href="descriptive_statistics.html">Descriptive</a>
+<a href="sampling_estimation.html">Sampling &amp; Estimation</a>
+<a href="regression.html">Regression</a>
+<a href="regression_diagnostics.html">Diagnostics</a>
+<a href="eda.html">EDA</a><a href="hypothesis_testing.html">Hypothesis Testing</a>
+</div></div>
+<script>
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+return s*y}
+function nCdf(x,m,s){return 0.5*(1+erf((x-m)/(s*Math.SQRT2)))}
+function nPdf(x,m,s){return Math.exp(-0.5*((x-m)/s)**2)/(s*Math.sqrt(2*Math.PI))}
+function lgamma(z){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,
+-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let x=z,y=z,
+tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015;
+for(let j=0;j<6;j++){ser+=c[j]/++y}return -tmp+Math.log(2.5066282746310005*ser/x)}
+function poisPmf(k,l){return Math.exp(-l+k*Math.log(l)-lgamma(k+1))}
+function poisCdf(k,l){let s=0;for(let i=0;i<=k;i++)s+=poisPmf(i,l);return s}
+function binomPmf(k,n,p){if(k<0||k>n)return 0;
+return Math.exp(lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p))}
+function binomCdf(k,n,p){let s=0;for(let i=0;i<=k;i++)s+=binomPmf(i,n,p);return s}
+function drawAxes(ctx,W,H,pad){ctx.strokeStyle="#8b949e";ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(pad,8);ctx.lineTo(pad,H-pad);ctx.lineTo(W-8,H-pad);ctx.stroke()}
+const RX=[13, 10, 20, 28, 32, 17, 24, 31, 40, 38, 22, 15];const RY=[17.0, 22.0, 30.0, 37.0, 47.0, 30.5, 32.5, 39.0, 51.5, 40.0, 33.0, 25.0];const BEST=146.4886255170;const B0=10.7776805600;const B1=0.9488545975;
+const SST=RY.reduce((a,b)=>a+b,0)/RY.length;
+const TOT=RY.reduce((a,b)=>a+(b-SST)**2,0);
+function drawR(){
+ const b0=+document.getElementById("rs0").value,b1=+document.getElementById("rs1").value;
+ document.getElementById("rb0").textContent=b0.toFixed(1);
+ document.getElementById("rb1").textContent=b1.toFixed(2);
+ let sse=0;for(let i=0;i<RX.length;i++){const e=RY[i]-(b0+b1*RX[i]);sse+=e*e}
+ document.getElementById("rsse").textContent=sse.toFixed(2);
+ document.getElementById("rr2").textContent=Math.max(0,1-sse/TOT).toFixed(4);
+ const gap=sse-BEST;
+ document.getElementById("rverd").textContent=
+  gap<0.5?"that is the least-squares line":gap<15?"close":"keep going";
+ const c=document.getElementById("rcan"),ctx=c.getContext("2d");
+ const W=c.width,H=c.height,pl=60,pb=44,pt=18,pr=20;
+ ctx.clearRect(0,0,W,H);
+ const xl=0,xh=45,yl=0,yh=60;
+ const X=v=>pl+(v-xl)/(xh-xl)*(W-pl-pr);
+ const Y=v=>H-pb-(v-yl)/(yh-yl)*(H-pb-pt);
+ ctx.strokeStyle="#e1e4e8";ctx.lineWidth=1;
+ for(let g=0;g<=60;g+=10){ctx.beginPath();ctx.moveTo(pl,Y(g));ctx.lineTo(W-pr,Y(g));ctx.stroke()}
+ ctx.strokeStyle="#8b949e";ctx.beginPath();
+ ctx.moveTo(pl,pt);ctx.lineTo(pl,H-pb);ctx.lineTo(W-pr,H-pb);ctx.stroke();
+ ctx.fillStyle="#5a6270";ctx.font="11px system-ui";ctx.textAlign="center";
+ for(let t=0;t<=45;t+=5)ctx.fillText(t,X(t),H-pb+15);
+ ctx.textAlign="right";
+ for(let g=0;g<=60;g+=10)ctx.fillText("$"+g,pl-6,Y(g)+4);
+ ctx.textAlign="center";ctx.font="12px system-ui";
+ ctx.fillText("weekly usage hours",(pl+W-pr)/2,H-8);
+ ctx.save();ctx.translate(16,(pt+H-pb)/2);ctx.rotate(-Math.PI/2);
+ ctx.fillText("monthly maintenance",0,0);ctx.restore();
+ for(let i=0;i<RX.length;i++){
+  const yh2=b0+b1*RX[i];
+  ctx.strokeStyle="rgba(220,47,2,.55)";ctx.lineWidth=1.5;ctx.beginPath();
+  ctx.moveTo(X(RX[i]),Y(RY[i]));ctx.lineTo(X(RX[i]),Y(yh2));ctx.stroke()}
+ ctx.strokeStyle="#003DA5";ctx.lineWidth=2.5;ctx.beginPath();
+ ctx.moveTo(X(xl),Y(b0+b1*xl));ctx.lineTo(X(xh),Y(b0+b1*xh));ctx.stroke();
+ for(let i=0;i<RX.length;i++){ctx.beginPath();
+  ctx.arc(X(RX[i]),Y(RY[i]),5,0,7);ctx.fillStyle="#24292f";ctx.fill()}
+}
+document.getElementById("rs0").addEventListener("input",drawR);
+document.getElementById("rs1").addEventListener("input",drawR);
+document.getElementById("rsnap").addEventListener("click",()=>{
+ document.getElementById("rs0").value=Math.round(B0*2)/2;
+ document.getElementById("rs1").value=Math.round(B1*100)/100;drawR()});
+drawR();
+
+document.querySelectorAll(".qopt").forEach(b=>b.addEventListener("click",()=>{
+ const q=b.dataset.q;
+ b.parentElement.querySelectorAll(".qopt").forEach(o=>{
+  o.classList.remove("right","wrong");
+  if(o.dataset.ok==="1")o.classList.add("right")});
+ if(b.dataset.ok!=="1")b.classList.add("wrong");
+ document.getElementById("qwhy"+q).classList.add("show")}));
+</script>
+</body></html>
