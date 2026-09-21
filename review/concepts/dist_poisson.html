@@ -150,6 +150,26 @@ and eye-check the histogram.</div>
 <tr><td>Events are independent at a steady average rate</td><td>Events clump (one complaint triggers ten more) — variance will exceed the mean</td></tr>
 <tr><td>Mean ≈ variance in your sample</td><td>The rate drifts within the window (lunch rush ≠ 3 p.m. lull) — model windows separately</td></tr>
 </table>
+
+<h2>7 · Where it comes from — the Poisson limit theorem</h2>
+<div class="story"><p>The Poisson is not a separate invention. It is what the binomial
+<em>becomes</em> when the trials get numerous and each one gets rare, with the average holding
+still. Formally: as n grows and p shrinks with np = &lambda; fixed, the binomial converges to
+the Poisson.</p></div>
+<div class="eq">Binomial(n, p) &nbsp;&#10230;&nbsp; Poisson(&lambda;)
+&nbsp;&nbsp; as &nbsp; n &#8594; &#8734;, &nbsp; p &#8594; 0, &nbsp; np = &lambda;</div>
+<p>Watch it happen. Each row below has the same mean, np = 3. The last column is the gap from
+the Poisson answer, P(X = 2) = <b>0.224042</b>:</p>
+<table>
+<tr><th>Binomial</th><th>P(X = 2)</th><th>gap from Poisson</th></tr>
+<tr><td>n = 10, p = 0.300</td><td class="ans">0.233474</td><td>0.0094</td></tr><tr><td>n = 100, p = 0.030</td><td class="ans">0.225153</td><td>0.0011</td></tr><tr><td>n = 1000, p = 0.003</td><td class="ans">0.224154</td><td>0.0001</td></tr></table>
+<div class="sig"><b>The practical test is whether a fixed n exists at all.</b> Defects out of
+420 units inspected has an n — use the binomial. Customer arrivals in a ten-minute window has
+no n: there is no list of people who <em>could</em> have arrived and didn't. No n means no
+binomial, and the Poisson is the model built for exactly that case.</div>
+<div class="tip">This is also why the two agree on real data so often. If someone hands you a
+binomial with large n and small p, the Poisson will fit almost as well — and is easier to work
+with, since it needs one parameter instead of two.</div>
 <h2>✅ Self-check — no internet needed</h2><div class="panel"><div class="qcard"><p class="qs"><b>Q1.</b> Support tickets arrive at about 6 per hour, independently, no fixed cap. The model is Poisson because:</p><div class="qopts"><button class="qopt" data-q="0" data-ok="0">A. There's a fixed number of customers</button><button class="qopt" data-q="0" data-ok="1">B. It's an open-ended count per interval at a steady rate</button><button class="qopt" data-q="0" data-ok="0">C. Tickets are continuous</button><button class="qopt" data-q="0" data-ok="0">D. Tickets are normally distributed</button></div><div class="qwhy" id="qwhy0">Poisson's signature: counting events in a window with no natural n, steady rate, independence. A fixed customer list would push you toward binomial</div></div><div class="qcard"><p class="qs"><b>Q2.</b> Which situation BREAKS Poisson's assumptions?</p><div class="qopts"><button class="qopt" data-q="1" data-ok="0">A. Website crashes at a steady low rate</button><button class="qopt" data-q="1" data-ok="1">B. Complaints that arrive in bursts because one viral post triggers hundreds</button><button class="qopt" data-q="1" data-ok="0">C. Machine failures scattered randomly</button><button class="qopt" data-q="1" data-ok="0">D. Walk-ins during a quiet afternoon</button></div><div class="qwhy" id="qwhy1">Poisson needs independent events at a steady rate. Contagion/clustering (viral bursts) violates independence — real counts will be far lumpier than Poisson predicts</div></div><div class="qcard"><p class="qs"><b>Q3.</b> HOW do you use a Poisson model of 2 breakdowns/month for maintenance planning?</p><div class="qopts"><button class="qopt" data-q="2" data-ok="1">A. Compute P(0), P(1), P(many) breakdowns next month from just the rate</button><button class="qopt" data-q="2" data-ok="0">B. Find the average repair cost</button><button class="qopt" data-q="2" data-ok="0">C. Compare two technicians' means</button><button class="qopt" data-q="2" data-ok="0">D. Predict time of day of failures</button></div><div class="qwhy" id="qwhy2">One number — the rate λ — generates the whole probability menu for next month's count. Costs, comparisons, and clock times are different tools' jobs</div></div></div>
 <div class="nav2">
 <a href="dist_chooser.html">🧭 Which distribution? (the chooser)</a>

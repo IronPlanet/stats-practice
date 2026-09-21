@@ -151,6 +151,34 @@ near np(1−p). Then overlay fitted bars. If real variance is much bigger than n
 <tr><td>Trials are independent</td><td>Outcomes influence each other (referrals, contagion, shared causes)</td></tr>
 <tr><td colspan="2">n large &amp; p small? λ = np and the Poisson does the same job with easier arithmetic.</td></tr>
 </table>
+
+<h2>7 · The four assumptions, and which ones you can actually check</h2>
+<p>Every binomial claim rests on four conditions. Three leave a fingerprint in the data. The
+fourth usually does not, and it is the one that fails.</p>
+<table>
+<tr><th>Assumption</th><th>How to check it in the data</th><th>What failure looks like</th></tr>
+<tr><td><b>Fixed n</b> — a known number of trials</td>
+    <td><code>=VAR.S(batch_sizes)</code> should be exactly 0</td>
+    <td>batch sizes vary — you have counts per unequal exposure, so model a <em>rate</em>, not a count</td></tr>
+<tr><td><b>Two outcomes</b> — each trial succeeds or fails</td>
+    <td>read the definition; count the distinct outcomes recorded</td>
+    <td>a third category was collapsed into one of the two, usually silently</td></tr>
+<tr><td><b>Constant p</b> across trials and groups</td>
+    <td>&chi;&sup2; test of homogeneity across lines, shifts or operators</td>
+    <td>one group's rate differs — pooling them models an average that describes nobody</td></tr>
+<tr><td><b>Independence</b> between trials</td>
+    <td class="ans">generally not checkable from the data</td>
+    <td>clustering — see below</td></tr>
+</table>
+<div class="sig"><b>The variance ratio is your one indirect handle on independence.</b> A binomial
+forces Var = np(1&minus;p). Compute the observed variance of the counts and divide by np(1&minus;p).
+Near 1 is consistent with independence. Much above 1 means the successes arrive in clumps —
+one bad batch, one mis-set machine, one operator — and the true uncertainty is larger than the
+binomial admits. Much below 1 is rarer and usually means the data was smoothed or capped.</div>
+<div class="sig"><b>Why independence is the one that bites.</b> The other three announce
+themselves. Independence fails quietly, and its failure does not widen your interval — it
+narrows it, wrongly. You end up more confident than the data earns. When trials share a cause,
+say so in words; no test will say it for you.</div>
 <h2>✅ Self-check — no internet needed</h2><div class="panel"><div class="qcard"><p class="qs"><b>Q1.</b> You send 200 quotes and each independently has about the same chance of being accepted. To model HOW MANY get accepted, you choose the binomial because:</p><div class="qopts"><button class="qopt" data-q="0" data-ok="0">A. The data is continuous</button><button class="qopt" data-q="0" data-ok="1">B. Fixed number of trials, two outcomes each, same chance every time</button><button class="qopt" data-q="0" data-ok="0">C. Acceptances arrive over time</button><button class="qopt" data-q="0" data-ok="0">D. It's the default</button></div><div class="qwhy" id="qwhy0">The binomial signature is fixed n + yes/no + constant p + independence. Continuous data wants normal; events-over-time wants Poisson</div></div><div class="qcard"><p class="qs"><b>Q2.</b> Which situation BREAKS the binomial's assumptions?</p><div class="qopts"><button class="qopt" data-q="1" data-ok="0">A. 50 coin flips</button><button class="qopt" data-q="1" data-ok="0">B. 40 booked patients, each shows or doesn't</button><button class="qopt" data-q="1" data-ok="1">C. Calling 30 leads where each rejection makes you pitch the next lead worse</button><button class="qopt" data-q="1" data-ok="0">D. 500 emails with equal click chance</button></div><div class="qwhy" id="qwhy1">Trials must be INDEPENDENT with the SAME p. If one outcome changes the next trial's chances (fatigue, contagion, learning), the binomial's math quietly stops describing your process</div></div><div class="qcard"><p class="qs"><b>Q3.</b> HOW does a manager actually use a binomial model of 500 emails with a 4% click rate?</p><div class="qopts"><button class="qopt" data-q="2" data-ok="1">A. Predict the expected clicks (about 20) and how surprising 35 would be</button><button class="qopt" data-q="2" data-ok="0">B. Compute the average click time</button><button class="qopt" data-q="2" data-ok="0">C. Rank customers</button><button class="qopt" data-q="2" data-ok="0">D. Fit a trend line</button></div><div class="qwhy" id="qwhy2">The binomial answers count questions: expected successes and how unusual a given count is. Timing questions belong to exponential; trends to regression</div></div></div>
 <div class="nav2">
 <a href="dist_chooser.html">🧭 Which distribution? (the chooser)</a>

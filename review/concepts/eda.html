@@ -138,6 +138,33 @@ missingness · <code>=MIN / =MAX</code> for impossible values ·
 <tr><td>Which values are flagged and WHY they&rsquo;re there</td><td>Honest visualization (Wednesday) — charts that don&rsquo;t hide the flags</td></tr>
 <tr><td>What the distribution roughly looks like</td><td>Choosing models — the <a href="dist_chooser.html">chooser</a> needs the histogram&rsquo;s shape</td></tr>
 </table>
+
+<h2>6 · Is this subset representative?</h2>
+<div class="story"><p>&ldquo;Representative&rdquo; is not a property a sample has. It is a
+property a sample has <em>for a particular question</em>. The same subset can be perfectly
+adequate for one number and badly misleading for the next one you compute from it.</p></div>
+<div class="sig"><b>A worked case.</b> Four stores, one pooled dataset. Estimating the overall
+<em>average</em> from any single store lands close every time — the means are similar, and a
+mean is a stable thing. Estimating a <em>tail</em> probability from one store instead ranged
+from <span class="ans">0.075</span> to <span class="ans">0.255</span> against a true value of
+<span class="ans">0.148</span>. Same subsets, same data, one question answered well and the
+other off by a factor of three.</div>
+<div class="sig"><b>Why tails break first.</b> A mean draws on every observation, so one store's
+worth of data estimates it steadily. A tail probability depends on the handful of points out at
+the edge — and a subset may hold two of them, or none. Rare events are rare <em>within the
+subset too</em>, which is precisely when you have least to go on. The more extreme the question,
+the larger the sample it needs.</div>
+<table>
+<tr><th>Question about the data</th><th>How forgiving of a subset</th></tr>
+<tr><td>Average, median, typical value</td><td>forgiving — most subsets do fine</td></tr>
+<tr><td>Spread, variance</td><td>moderate — needs a reasonable span of the range</td></tr>
+<tr><td>Proportion above a threshold</td><td>fragile — depends on where the threshold sits</td></tr>
+<tr><td>Tail probability, worst case, maximum</td><td class="ans">hostile — needs the full dataset</td></tr>
+</table>
+<div class="sig"><b>The EDA habit this produces.</b> Before computing anything from a subset,
+say out loud which question you are asking and whether that question lives in the middle of the
+distribution or out at its edge. Middle questions survive sampling. Edge questions do not, and
+no amount of care in the arithmetic repairs it.</div>
 <h2>✅ Self-check — no internet needed</h2><div class="panel"><div class="qcard"><p class="qs"><b>Q1.</b> Your merged customer file shows mean spend $228 but median spend $206. The FIRST professional move is:</p><div class="qopts"><button class="qopt" data-q="0" data-ok="1">A. Find and investigate the values dragging the mean before reporting either number</button><button class="qopt" data-q="0" data-ok="0">B. Report the mean — it uses all the data</button><button class="qopt" data-q="0" data-ok="0">C. Delete the biggest values</button><button class="qopt" data-q="0" data-ok="0">D. Report both and let the reader decide</button></div><div class="qwhy" id="qwhy0">A mean-median gap signals skew or outliers; the investigation (error? promotion? discovery?) comes before any reporting decision.</div></div><div class="qcard"><p class="qs"><b>Q2.</b> 30% of the 'region' column is blank, all from one source system. This missingness is:</p><div class="qopts"><button class="qopt" data-q="1" data-ok="1">A. Systematic — and any regional analysis must handle it explicitly</button><button class="qopt" data-q="1" data-ok="0">B. Random — safe to ignore</button><button class="qopt" data-q="1" data-ok="0">C. Fixable by filling with the most common region</button><button class="qopt" data-q="1" data-ok="0">D. Proof the column is useless</button></div><div class="qwhy" id="qwhy1">Missingness tied to a source is systematic; silent ignoring or invented fills bias every regional conclusion.</div></div><div class="qcard"><p class="qs"><b>Q3.</b> Tukey's outlier fences flag a value at Q3 + 1.5·IQR. The fence's job is to:</p><div class="qopts"><button class="qopt" data-q="2" data-ok="1">A. Flag points for investigation</button><button class="qopt" data-q="2" data-ok="0">B. Automatically delete bad data</button><button class="qopt" data-q="2" data-ok="0">C. Prove the data isn't normal</button><button class="qopt" data-q="2" data-ok="0">D. Set the axis limits for charts</button></div><div class="qwhy" id="qwhy2">Fences are tripwires, not executioners — flagged points get investigated (error, rare event, or discovery), never silently dropped.</div></div></div><p class="fitnote">These questions are new (pending Prof. review for the class bank).</p>
 <div class="nav2">
 <a href="../BUS322_A_Review_Hub.html">🗺 Review Hub</a>
